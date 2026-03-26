@@ -15,6 +15,11 @@ define( 'XPRESSUI_PRO_VERSION', '1.0.2' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '0.88.2' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 
+// Register PRO detection filters immediately — before other plugins finish loading.
+// This ensures xpressui_is_pro_extension_active() returns true regardless of plugin load order.
+add_filter( 'xpressui_bridge_is_pro_extension_active', '__return_true' );
+add_filter( 'xpressui_bridge_has_valid_pro_license', '__return_true' );
+
 register_activation_hook( __FILE__, 'xpressui_pro_check_dependencies' );
 
 function xpressui_pro_check_dependencies(): void {
@@ -36,6 +41,11 @@ function xpressui_pro_dependency_notice(): void {
 	}
 }
 
-if ( defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
-	require_once XPRESSUI_PRO_DIR . 'includes/pro-runtime.php';
+// Load runtime integrations after all plugins are loaded so XPRESSUI_BRIDGE_VERSION is defined.
+add_action( 'plugins_loaded', 'xpressui_pro_load_runtime' );
+
+function xpressui_pro_load_runtime(): void {
+	if ( defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
+		require_once XPRESSUI_PRO_DIR . 'includes/pro-runtime.php';
+	}
 }
