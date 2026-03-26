@@ -12,7 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'XPRESSUI_PRO_VERSION', '1.0.4' );
-define( 'XPRESSUI_PRO_RUNTIME_VERSION', '0.88.2' );
+define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.0' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 
 // Register PRO detection filters immediately — before other plugins finish loading.
