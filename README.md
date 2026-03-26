@@ -30,8 +30,6 @@ Everything else (submissions inbox, REST endpoint, shortcode, file uploads, noti
 | `select-image` | Image-based choice field |
 | `select-multiple` | Multi-select with tag display |
 | `section-select` | Section-level branching selector |
-| `subforms` | Embedded repeatable sub-forms |
-| `subfields` | Inline repeatable field groups |
 
 ---
 
