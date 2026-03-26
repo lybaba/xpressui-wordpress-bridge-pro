@@ -44,7 +44,7 @@ if (!isset($__ctx) || !is_array($__ctx)) {
         <div data-quiz-open-wrapper="<?php echo xui_jinja_escape(xui_jinja_attr(xui_jinja_context_get($__ctx, 'field'), 'name')); ?>">
           <textarea
             class="template-textarea"
-            placeholder="<?php echo xui_jinja_escape(xui_jinja_or(xui_jinja_attr(xui_jinja_context_get($__ctx, 'field'), 'placeholder'), __(\"Write your answer\", 'xpressui-bridge'))); ?>"
+            placeholder="<?php echo xui_jinja_escape(xui_jinja_or(xui_jinja_attr(xui_jinja_context_get($__ctx, 'field'), 'placeholder'), __("Write your answer", 'xpressui-bridge'))); ?>"
 <?php if (xui_jinja_truthy(xui_jinja_attr(xui_jinja_context_get($__ctx, 'field'), 'required'))): ?>required aria-required="true"<?php endif; ?>            data-quiz-open-answer="<?php echo xui_jinja_escape(xui_jinja_attr(xui_jinja_context_get($__ctx, 'field'), 'name')); ?>"
           ></textarea>
         </div>
