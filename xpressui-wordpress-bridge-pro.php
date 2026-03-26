@@ -3,7 +3,7 @@
  * Plugin Name: XPressUI WordPress Bridge PRO
  * Plugin URI:  https://github.com/lybaba/xpressui-wordpress-bridge-pro
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
- * Version:     1.0.1
+ * Version:     1.0.2
  * Author:      Babaly LY
  * License:     GPL-2.0-or-later
  * Text Domain: xpressui-bridge-pro
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_VERSION', '1.0.1' );
+define( 'XPRESSUI_PRO_VERSION', '1.0.2' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '0.88.2' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 
