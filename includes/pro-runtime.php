@@ -1,6 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+add_filter( 'xpressui_bridge_is_pro_extension_active', '__return_true' );
+add_filter( 'xpressui_bridge_has_valid_pro_license', '__return_true' );
+
 add_filter( 'xpressui_runtime_url', 'xpressui_pro_override_runtime_url', 10, 2 );
 
 function xpressui_pro_override_runtime_url( string $url, string $slug ): string {
