@@ -59,14 +59,19 @@ function xpressui_pro_render_workflow_action_styles(): void {
 	display:inline-flex;
 	align-items:center;
 	gap:6px;
-	padding:4px 10px;
+	max-width:100%;
+	padding:3px 9px;
 	border-radius:999px;
 	background:linear-gradient(135deg,#183ea8 0%,#2966ff 100%);
 	color:#fff !important;
+	font-size:12px;
 	font-weight:700;
+	line-height:1.2;
 	text-decoration:none;
 	box-shadow:0 6px 14px rgba(41,102,255,.18);
 	transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+	white-space:nowrap;
+	vertical-align:middle;
 }
 .xpressui-pro-action-link:hover,
 .xpressui-pro-action-link:focus{
@@ -83,14 +88,17 @@ function xpressui_pro_render_workflow_action_styles(): void {
 	align-items:center;
 	justify-content:center;
 	border-radius:999px;
-	padding:2px 7px;
+	padding:1px 6px;
 	background:rgba(255,255,255,.16);
 	border:1px solid rgba(255,255,255,.28);
 	color:#fff;
-	font-size:10px;
+	font-size:9px;
 	font-weight:800;
 	letter-spacing:.08em;
 	line-height:1.2;
+}
+.wp-list-table .column-actions .xpressui-pro-action-link{
+	margin:0 0 4px;
 }
 </style>';
 }
@@ -316,6 +324,33 @@ function xpressui_pro_render_customize_page(): void {
 	$ov_sections        = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
 	$ov_fields          = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
 
+	$summary_stats = [
+		'section_count'        => 0,
+		'field_count'          => 0,
+		'choice_count'         => 0,
+		'navigation_count'     => count( $ov_navigation ),
+		'has_project_settings' => $ov_project_name !== '' || $proj_settings['notifyEmail'] !== '' || $proj_settings['redirectUrl'] !== '',
+		'has_submit_feedback'  => $ov_success_message !== '' || $ov_error_message !== '',
+	];
+
+	foreach ( $ov_sections as $section_value ) {
+		if ( (string) $section_value !== '' ) {
+			$summary_stats['section_count']++;
+		}
+	}
+	foreach ( $ov_fields as $field_overlay ) {
+		if ( ! is_array( $field_overlay ) || empty( $field_overlay ) ) {
+			continue;
+		}
+		$summary_stats['field_count']++;
+		$field_choices = isset( $field_overlay['choices'] ) && is_array( $field_overlay['choices'] ) ? $field_overlay['choices'] : [];
+		foreach ( $field_choices as $choice_label ) {
+			if ( (string) $choice_label !== '' ) {
+				$summary_stats['choice_count']++;
+			}
+		}
+	}
+
 	// Read pack defaults for navigation labels from rendered_form (source of truth for PHP-rendered buttons).
 	$rf_nav_labels = isset( $template_context['rendered_form']['navigation_labels'] ) && is_array( $template_context['rendered_form']['navigation_labels'] )
 		? $template_context['rendered_form']['navigation_labels']
@@ -356,6 +391,28 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-inline-notice.is-warning{border-left-color:#dba617;background:#fffbf0}
 .xpressui-inline-notice ul{margin:8px 0 0 18px;padding:0}
 .xpressui-inline-notice li{margin:0 0 4px;font-size:13px;color:#1d2327}
+.xpressui-pro-summary{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.xpressui-pro-summary-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #dfe8f2;color:#122033;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.xpressui-pro-summary-chip strong{font-size:13px}
+.xpressui-pro-summary-chip span{font-size:11px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
+.xpressui-pro-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
+.xpressui-pro-toolbar button{border:1px solid #c5d4ee;background:#fff;color:#183ea8;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.xpressui-pro-toolbar button:hover{background:#f5f9ff}
+.xpressui-card-meta{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
+.xpressui-card-badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:999px;background:#eef4ff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.xpressui-card-badge.is-customized{background:#e9f7ef;color:#0a7a32}
+.xpressui-field-block{padding:12px 14px;border:1px solid #e5edf8;border-radius:10px;background:#fff}
+.xpressui-field-block.is-customized{border-color:#b8ccff;background:linear-gradient(180deg,#f9fbff 0%,#f3f7ff 100%)}
+.xpressui-field-block-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+.xpressui-field-block-title{font-size:13px;font-weight:700;color:#122033}
+.xpressui-field-block-type{font-size:11px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
+.xpressui-field-block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 12px}
+.xpressui-field-control label{display:block;font-size:12px;color:#5b6b82;margin-bottom:4px;font-weight:600}
+.xpressui-field-control.is-full{grid-column:1 / -1}
+.xpressui-choice-group{margin-top:10px;padding-left:12px;border-left:3px solid #d8e3f7}
+.xpressui-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.xpressui-choice-label{min-width:120px;color:#5b6b82;font-size:12px;font-weight:600}
+.xpressui-muted{color:#5b6b82;font-size:12px}
 </style>';
 	echo '<div class="xpressui-pro-header">';
 	echo '<div class="xpressui-pro-header-left">';
@@ -367,6 +424,19 @@ function xpressui_pro_render_customize_page(): void {
 	echo '<span class="xpressui-pro-badge">✦ &nbsp;XPressUI Pro</span>';
 	echo '<a href="' . esc_url( $back_url ) . '" class="xpressui-pro-back">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a>';
 	echo '</div>';
+	echo '</div>';
+
+	echo '<div class="xpressui-pro-summary">';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['section_count'] ) . '</strong><span>' . esc_html__( 'Sections customized', 'xpressui-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['field_count'] ) . '</strong><span>' . esc_html__( 'Fields overridden', 'xpressui-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choice labels changed', 'xpressui-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['navigation_count'] ) . '</strong><span>' . esc_html__( 'Navigation labels', 'xpressui-bridge-pro' ) . '</span></div>';
+	if ( $summary_stats['has_project_settings'] ) {
+		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</strong><span>' . esc_html__( 'Project settings', 'xpressui-bridge-pro' ) . '</span></div>';
+	}
+	if ( $summary_stats['has_submit_feedback'] ) {
+		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</strong><span>' . esc_html__( 'Submit feedback', 'xpressui-bridge-pro' ) . '</span></div>';
+	}
 	echo '</div>';
 
 	if ( ! empty( $notice_messages ) ) {
@@ -390,6 +460,12 @@ function xpressui_pro_render_customize_page(): void {
 
 	echo '<form method="post" action="">';
 	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
+
+	echo '<div class="xpressui-pro-toolbar">';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="all">' . esc_html__( 'Open all sections', 'xpressui-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="customized">' . esc_html__( 'Open customized only', 'xpressui-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="none">' . esc_html__( 'Collapse all', 'xpressui-bridge-pro' ) . '</button>';
+	echo '</div>';
 
 	// Sticky save bar.
 	echo '<div class="xpressui-sticky-actions">';
@@ -466,8 +542,13 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
-	echo '<details class="xpressui-admin-card"' . $nav_open . '>';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '">';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	if ( ! empty( $ov_navigation ) ) {
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
+	}
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $nav_fields ) ) . ' ' . esc_html__( 'Buttons', 'xpressui-bridge-pro' ) . '</span>';
+	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	$nav_fields = [
@@ -516,8 +597,24 @@ function xpressui_pro_render_customize_page(): void {
 		}
 		$card_open = $section_has_custom ? ' open' : '';
 
-		echo '<details class="xpressui-admin-card"' . $card_open . '>';
-		echo '<summary class="xpressui-card-summary"><h2>' . esc_html( $section_label ) . '</h2></summary>';
+		$customized_field_count = 0;
+		foreach ( $fields as $field_for_count ) {
+			$field_name_for_count = (string) ( $field_for_count['name'] ?? '' );
+			if ( $field_name_for_count !== '' && isset( $ov_fields[ $field_name_for_count ] ) && ! empty( $ov_fields[ $field_name_for_count ] ) ) {
+				$customized_field_count++;
+			}
+		}
+
+		echo '<details class="xpressui-admin-card"' . $card_open . ' data-xpressui-card-type="section" data-xpressui-customized="' . ( $section_has_custom ? '1' : '0' ) . '">';
+		echo '<summary class="xpressui-card-summary"><h2>' . esc_html( $section_label ) . '</h2><span class="xpressui-card-meta">';
+		if ( $section_has_custom ) {
+			echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
+		}
+		echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $fields ) ) . ' ' . esc_html__( 'Fields', 'xpressui-bridge-pro' ) . '</span>';
+		if ( $customized_field_count > 0 ) {
+			echo '<span class="xpressui-card-badge">' . esc_html( (string) $customized_field_count ) . ' ' . esc_html__( 'Overrides', 'xpressui-bridge-pro' ) . '</span>';
+		}
+		echo '</span></summary>';
 		echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 		// Section label row.
@@ -548,15 +645,23 @@ function xpressui_pro_render_customize_page(): void {
 			$ov_ph     = (string) ( $fo['placeholder'] ?? '' );
 			$ov_desc   = (string) ( $fo['desc'] ?? '' );
 			$ov_errmsg = (string) ( $fo['error_message'] ?? '' );
+			$field_has_custom = ! empty( $fo );
 
 			$field_prefix = 'xpressui_overlay_fields[' . esc_attr( $fname ) . ']';
-			$header       = esc_html( $flabel ) . ' <span class="xpressui-muted">(' . esc_html( $ftype ) . ')</span>';
+			$header       = '<div class="xpressui-field-block' . ( $field_has_custom ? ' is-customized' : '' ) . '">';
+			$header      .= '<div class="xpressui-field-block-header">';
+			$header      .= '<div><div class="xpressui-field-block-title">' . esc_html( $flabel ) . '</div><div class="xpressui-field-block-type">' . esc_html( $ftype ) . '</div></div>';
+			if ( $field_has_custom ) {
+				$header .= '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
+			}
+			$header .= '</div>';
+			$header .= '<div class="xpressui-field-block-grid">';
 
 			$html = '';
 
 			// Label.
-			$html .= '<div style="margin-bottom:6px">';
-			$html .= '<label style="display:block;font-size:12px;color:#666;margin-bottom:2px">' . esc_html__( 'Label', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<div class="xpressui-field-control">';
+			$html .= '<label>' . esc_html__( 'Label', 'xpressui-bridge-pro' ) . '</label>';
 			$html .= '<input type="text" name="' . $field_prefix . '[label]" class="regular-text" value="' . esc_attr( $ov_label ) . '" placeholder="' . esc_attr( $flabel ) . '" />';
 			$html .= '</div>';
 
@@ -566,8 +671,8 @@ function xpressui_pro_render_customize_page(): void {
 				'1' => __( 'Required', 'xpressui-bridge-pro' ),
 				'0' => __( 'Optional', 'xpressui-bridge-pro' ),
 			];
-			$html .= '<div style="margin-bottom:6px">';
-			$html .= '<label style="display:block;font-size:12px;color:#666;margin-bottom:2px">' . esc_html__( 'Required', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<div class="xpressui-field-control">';
+			$html .= '<label>' . esc_html__( 'Required', 'xpressui-bridge-pro' ) . '</label>';
 			$html .= '<select name="' . $field_prefix . '[required]">';
 			foreach ( $req_options as $opt_val => $opt_label ) {
 				$html .= '<option value="' . esc_attr( (string) $opt_val ) . '"' . selected( $ov_req, (string) $opt_val, false ) . '>' . esc_html( $opt_label ) . '</option>';
@@ -578,29 +683,29 @@ function xpressui_pro_render_customize_page(): void {
 			// Placeholder (text-like fields).
 			$text_types = [ 'text', 'email', 'tel', 'url', 'number', 'price', 'integer', 'age', 'tax', 'date', 'time', 'datetime', 'search', 'slug', 'textarea', 'rich-editor' ];
 			if ( in_array( $ftype, $text_types, true ) ) {
-				$html .= '<div style="margin-bottom:6px">';
-				$html .= '<label style="display:block;font-size:12px;color:#666;margin-bottom:2px">' . esc_html__( 'Placeholder', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<div class="xpressui-field-control">';
+				$html .= '<label>' . esc_html__( 'Placeholder', 'xpressui-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[placeholder]" class="regular-text" value="' . esc_attr( $ov_ph ) . '" placeholder="' . esc_attr( (string) ( $field['placeholder'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 			}
 
 			// Description.
-			$html .= '<div style="margin-bottom:6px">';
-			$html .= '<label style="display:block;font-size:12px;color:#666;margin-bottom:2px">' . esc_html__( 'Help text', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<div class="xpressui-field-control is-full">';
+			$html .= '<label>' . esc_html__( 'Help text', 'xpressui-bridge-pro' ) . '</label>';
 			$html .= '<textarea name="' . $field_prefix . '[desc]" class="large-text" rows="2">' . esc_textarea( $ov_desc ) . '</textarea>';
 			$html .= '</div>';
 
 			// Error message.
 			$pack_errmsg = (string) ( $field['error_message'] ?? '' );
-			$html .= '<div style="margin-bottom:6px">';
-			$html .= '<label style="display:block;font-size:12px;color:#666;margin-bottom:2px">' . esc_html__( 'Error message', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<div class="xpressui-field-control is-full">';
+			$html .= '<label>' . esc_html__( 'Error message', 'xpressui-bridge-pro' ) . '</label>';
 			$html .= '<input type="text" name="' . $field_prefix . '[error_message]" class="large-text" value="' . esc_attr( $ov_errmsg ) . '" placeholder="' . esc_attr( $pack_errmsg ) . '" />';
 			$html .= '</div>';
 
 			// Choice labels.
 			if ( ! empty( $choices ) ) {
 				$ov_choices = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
-				$html      .= '<div style="margin-top:8px;padding-left:8px;border-left:3px solid #ddd">';
+				$html      .= '<div class="xpressui-field-control is-full"><div class="xpressui-choice-group">';
 				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels:', 'xpressui-bridge-pro' ) . '</p>';
 				foreach ( $choices as $choice ) {
 					$cv = (string) ( $choice['value'] ?? '' );
@@ -609,13 +714,15 @@ function xpressui_pro_render_customize_page(): void {
 						continue;
 					}
 					$ov_cl = (string) ( $ov_choices[ $cv ] ?? '' );
-					$html .= '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
-					$html .= '<span style="min-width:120px;color:#666;font-size:12px">' . esc_html( $cl ) . '</span>';
+					$html .= '<div class="xpressui-choice-row">';
+					$html .= '<span class="xpressui-choice-label">' . esc_html( $cl ) . '</span>';
 					$html .= '<input type="text" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . ']" class="regular-text" style="max-width:260px" value="' . esc_attr( $ov_cl ) . '" placeholder="' . esc_attr( $cl ) . '" />';
 					$html .= '</div>';
 				}
-				$html .= '</div>';
+				$html .= '</div></div>';
 			}
+
+			$html .= '</div></div>';
 
 			xpressui_pro_row( '', $header, $html );
 		}
@@ -625,6 +732,24 @@ function xpressui_pro_render_customize_page(): void {
 	}
 
 	echo '</form>';
+	echo '<script>
+document.addEventListener("click", function(event){
+	const trigger = event.target.closest(".xpressui-pro-details-toggle");
+	if(!trigger){return;}
+	const container = document.querySelector(".xpressui-admin-wrap");
+	if(!container){return;}
+	const target = trigger.getAttribute("data-target");
+	container.querySelectorAll("details.xpressui-admin-card").forEach(function(card){
+		if(target === "all"){
+			card.open = true;
+		}else if(target === "none"){
+			card.open = false;
+		}else if(target === "customized"){
+			card.open = card.getAttribute("data-xpressui-customized") === "1";
+		}
+	});
+});
+</script>';
 	echo '</div>';
 }
 
