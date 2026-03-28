@@ -133,6 +133,12 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 
 	if ( $raw_config_json !== '' ) {
 		$form_config = json_decode( $raw_config_json, true );
+		if ( is_array( $form_config ) ) {
+			// Patch top-level title used by the JS runtime.
+			if ( $project_name !== '' && isset( $form_config['title'] ) ) {
+				$form_config['title'] = $project_name;
+			}
+		}
 		if ( is_array( $form_config ) && isset( $form_config['sections'] ) && is_array( $form_config['sections'] ) ) {
 			foreach ( $form_config['sections'] as $section_key => &$section_fields ) {
 				if ( $section_key === 'custom' || ! is_array( $section_fields ) ) {
