@@ -1,17 +1,22 @@
 <?php
 /**
- * Workflow overlay: per-workflow label customizations stored in wp_options.
+ * Workflow overlay: per-workflow customizations stored in wp_options.
  *
  * The overlay is a minimal diff applied on top of the static template context
  * at render time. Only values that differ from the pack defaults are stored.
  *
- * Overlay structure (stored as an associative array in wp_options):
+ * Overlay structure:
  *   [
  *     'project_name' => 'Custom form title',
- *     'fields' => [
- *       'fieldname' => [
- *         'label'   => 'Custom label',
- *         'choices' => [ 'choice_value' => 'Custom choice label', ... ],
+ *     'sections'     => [ 'section_name' => 'Custom section label', ... ],
+ *     'fields'       => [
+ *       'fieldname'  => [
+ *         'label'         => 'Custom label',
+ *         'required'      => true|false,      // omit to keep pack default
+ *         'placeholder'   => 'Hint text',
+ *         'desc'          => 'Help text',
+ *         'error_message' => 'Custom error',
+ *         'choices'       => [ 'choice_value' => 'Custom choice label', ... ],
  *       ],
  *       ...
  *     ],
@@ -58,115 +63,92 @@ function xpressui_pro_delete_workflow_overlay( string $slug ): void {
 /**
  * Apply a customization overlay onto a template context array.
  *
- * Patches project.name, rendered_form.title, field labels, and choice labels
- * in-place. Only non-empty overlay values are applied.
+ * Patches rendered_form and runtime.form_config_json in a single pass.
+ * Only non-empty overlay values are applied; pack defaults are preserved
+ * for any key absent from the overlay.
  *
  * @param array<string, mixed> $context Original template context.
  * @param array<string, mixed> $overlay Customization overlay.
  * @return array<string, mixed> Patched context.
  */
 function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): array {
-	// --- Form title ---
-	$project_name = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
-	if ( $project_name !== '' ) {
-		if ( isset( $context['project'] ) && is_array( $context['project'] ) ) {
-			$context['project']['name'] = $project_name;
-		}
-		if ( isset( $context['rendered_form'] ) && is_array( $context['rendered_form'] ) ) {
+
+	$sections_overlay = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
+	$fields_overlay   = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
+	$navigation       = isset( $overlay['navigation'] ) && is_array( $overlay['navigation'] ) ? $overlay['navigation'] : [];
+	$project_name     = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
+	$success_message  = isset( $overlay['success_message'] ) ? trim( (string) $overlay['success_message'] ) : '';
+	$form_error_msg   = isset( $overlay['error_message'] ) ? trim( (string) $overlay['error_message'] ) : '';
+
+	// -----------------------------------------------------------------------
+	// rendered_form patches (consumed by PHP templates)
+	// -----------------------------------------------------------------------
+
+	if ( isset( $context['rendered_form'] ) && is_array( $context['rendered_form'] ) ) {
+		if ( $project_name !== '' ) {
 			$context['rendered_form']['title'] = $project_name;
 		}
-	}
 
-	// --- Field labels and choice labels ---
-	$fields_overlay = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
-	if ( empty( $fields_overlay ) ) {
-		return $context;
-	}
-
-	if ( ! isset( $context['rendered_form']['sections'] ) || ! is_array( $context['rendered_form']['sections'] ) ) {
-		return $context;
-	}
-
-	foreach ( $context['rendered_form']['sections'] as &$section ) {
-		if ( ! isset( $section['fields'] ) || ! is_array( $section['fields'] ) ) {
-			continue;
-		}
-		foreach ( $section['fields'] as &$field ) {
-			$field_name = (string) ( $field['name'] ?? '' );
-			if ( $field_name === '' || ! isset( $fields_overlay[ $field_name ] ) ) {
-				continue;
-			}
-			$field_overlay = $fields_overlay[ $field_name ];
-
-			$custom_label = isset( $field_overlay['label'] ) ? trim( (string) $field_overlay['label'] ) : '';
-			if ( $custom_label !== '' ) {
-				$field['label'] = $custom_label;
-			}
-
-			$choices_overlay = isset( $field_overlay['choices'] ) && is_array( $field_overlay['choices'] )
-				? $field_overlay['choices']
-				: [];
-
-			if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-				foreach ( $field['choices'] as &$choice ) {
-					$choice_value = (string) ( $choice['value'] ?? '' );
-					if ( $choice_value !== '' && isset( $choices_overlay[ $choice_value ] ) ) {
-						$custom_choice_label = trim( (string) $choices_overlay[ $choice_value ] );
-						if ( $custom_choice_label !== '' ) {
-							$choice['label'] = $custom_choice_label;
-						}
+		// Section labels.
+		if ( ! empty( $sections_overlay ) && isset( $context['rendered_form']['sections'] ) ) {
+			foreach ( $context['rendered_form']['sections'] as &$section ) {
+				$sname = (string) ( $section['name'] ?? '' );
+				if ( $sname !== '' && isset( $sections_overlay[ $sname ] ) ) {
+					$custom = trim( (string) $sections_overlay[ $sname ] );
+					if ( $custom !== '' ) {
+						$section['label'] = $custom;
 					}
 				}
-				unset( $choice );
 			}
+			unset( $section );
 		}
-		unset( $field );
-	}
-	unset( $section );
 
-	// --- Patch runtime.form_config_json (read by the JS runtime) ---
-	// The JS runtime hydrates the form from this embedded JSON and would
-	// override the PHP-rendered labels if left unpatched.
-	$raw_config_json = isset( $context['runtime']['form_config_json'] )
-		? (string) $context['runtime']['form_config_json']
-		: '';
-
-	if ( $raw_config_json !== '' ) {
-		$form_config = json_decode( $raw_config_json, true );
-		if ( is_array( $form_config ) ) {
-			// Patch top-level title used by the JS runtime.
-			if ( $project_name !== '' && isset( $form_config['title'] ) ) {
-				$form_config['title'] = $project_name;
-			}
-		}
-		if ( is_array( $form_config ) && isset( $form_config['sections'] ) && is_array( $form_config['sections'] ) ) {
-			foreach ( $form_config['sections'] as $section_key => &$section_fields ) {
-				if ( $section_key === 'custom' || ! is_array( $section_fields ) ) {
+		// Field properties.
+		if ( ! empty( $fields_overlay ) && isset( $context['rendered_form']['sections'] ) ) {
+			foreach ( $context['rendered_form']['sections'] as &$section ) {
+				if ( ! isset( $section['fields'] ) || ! is_array( $section['fields'] ) ) {
 					continue;
 				}
-				foreach ( $section_fields as &$field ) {
-					$field_name = (string) ( $field['name'] ?? '' );
-					if ( $field_name === '' || ! isset( $fields_overlay[ $field_name ] ) ) {
+				foreach ( $section['fields'] as &$field ) {
+					$fname = (string) ( $field['name'] ?? '' );
+					if ( $fname === '' || ! isset( $fields_overlay[ $fname ] ) ) {
 						continue;
 					}
-					$field_overlay = $fields_overlay[ $field_name ];
+					$fo = $fields_overlay[ $fname ];
 
-					$custom_label = isset( $field_overlay['label'] ) ? trim( (string) $field_overlay['label'] ) : '';
-					if ( $custom_label !== '' ) {
-						$field['label'] = $custom_label;
+					$v = isset( $fo['label'] ) ? trim( (string) $fo['label'] ) : '';
+					if ( $v !== '' ) {
+						$field['label'] = $v;
 					}
 
-					$choices_overlay = isset( $field_overlay['choices'] ) && is_array( $field_overlay['choices'] )
-						? $field_overlay['choices']
-						: [];
+					if ( array_key_exists( 'required', $fo ) ) {
+						$field['required'] = (bool) $fo['required'];
+					}
 
+					$v = isset( $fo['placeholder'] ) ? trim( (string) $fo['placeholder'] ) : '';
+					if ( $v !== '' ) {
+						$field['placeholder'] = $v;
+					}
+
+					$v = isset( $fo['desc'] ) ? trim( (string) $fo['desc'] ) : '';
+					if ( $v !== '' ) {
+						$field['desc'] = $v;
+					}
+
+					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
+					if ( $v !== '' ) {
+						$field['error_message'] = $v;
+					}
+
+					// Choice labels.
+					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
 						foreach ( $field['choices'] as &$choice ) {
-							$choice_value = (string) ( $choice['value'] ?? '' );
-							if ( $choice_value !== '' && isset( $choices_overlay[ $choice_value ] ) ) {
-								$custom_choice_label = trim( (string) $choices_overlay[ $choice_value ] );
-								if ( $custom_choice_label !== '' ) {
-									$choice['label'] = $custom_choice_label;
+							$cv = (string) ( $choice['value'] ?? '' );
+							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
+								$cl = trim( (string) $choices_overlay[ $cv ] );
+								if ( $cl !== '' ) {
+									$choice['label'] = $cl;
 								}
 							}
 						}
@@ -175,13 +157,137 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 				}
 				unset( $field );
 			}
-			unset( $section_fields );
+			unset( $section );
+		}
+	}
 
-			$patched = wp_json_encode( $form_config );
-			if ( $patched !== false ) {
-				$context['runtime']['form_config_json'] = $patched;
+	if ( isset( $context['project'] ) && is_array( $context['project'] ) && $project_name !== '' ) {
+		$context['project']['name'] = $project_name;
+	}
+
+	// -----------------------------------------------------------------------
+	// form_config_json patches (consumed by the JS runtime)
+	// -----------------------------------------------------------------------
+
+	$raw = isset( $context['runtime']['form_config_json'] ) ? (string) $context['runtime']['form_config_json'] : '';
+	if ( $raw === '' ) {
+		return $context;
+	}
+
+	$cfg = json_decode( $raw, true );
+	if ( ! is_array( $cfg ) ) {
+		return $context;
+	}
+
+	// Form title.
+	if ( $project_name !== '' && array_key_exists( 'title', $cfg ) ) {
+		$cfg['title'] = $project_name;
+	}
+
+	// Navigation button labels.
+	if ( ! empty( $navigation ) ) {
+		foreach ( [ 'prev' => 'prevLabel', 'next' => 'nextLabel', 'submit' => 'submitLabel' ] as $key => $cfg_key ) {
+			$v = isset( $navigation[ $key ] ) ? trim( (string) $navigation[ $key ] ) : '';
+			if ( $v !== '' ) {
+				$cfg['navigationLabels'][ $cfg_key ] = $v;
+				// Also patch project-level navigationLabels if present.
+				if ( isset( $cfg['project']['navigationLabels'] ) ) {
+					$cfg['project']['navigationLabels'][ $cfg_key ] = $v;
+				}
 			}
 		}
+	}
+
+	// Success / error messages (workflowConfig + submitFeedback).
+	if ( $success_message !== '' ) {
+		if ( isset( $cfg['workflowConfig']['successMessage'] ) ) {
+			$cfg['workflowConfig']['successMessage'] = $success_message;
+		}
+		if ( isset( $cfg['submitFeedback']['success_message'] ) ) {
+			$cfg['submitFeedback']['success_message'] = $success_message;
+		}
+	}
+	if ( $form_error_msg !== '' ) {
+		if ( isset( $cfg['workflowConfig']['errorMessage'] ) ) {
+			$cfg['workflowConfig']['errorMessage'] = $form_error_msg;
+		}
+		if ( isset( $cfg['submitFeedback']['error_message'] ) ) {
+			$cfg['submitFeedback']['error_message'] = $form_error_msg;
+		}
+	}
+
+	// Sections and fields.
+	if ( isset( $cfg['sections'] ) && is_array( $cfg['sections'] ) ) {
+		// Section labels (sections.custom[]).
+		if ( ! empty( $sections_overlay ) && isset( $cfg['sections']['custom'] ) && is_array( $cfg['sections']['custom'] ) ) {
+			foreach ( $cfg['sections']['custom'] as &$cs ) {
+				$sname = (string) ( $cs['name'] ?? '' );
+				if ( $sname !== '' && isset( $sections_overlay[ $sname ] ) ) {
+					$custom = trim( (string) $sections_overlay[ $sname ] );
+					if ( $custom !== '' ) {
+						$cs['label']      = $custom;
+						$cs['adminLabel'] = $custom;
+					}
+				}
+			}
+			unset( $cs );
+		}
+
+		// Field properties.
+		if ( ! empty( $fields_overlay ) ) {
+			foreach ( $cfg['sections'] as $skey => &$sfields ) {
+				if ( $skey === 'custom' || ! is_array( $sfields ) ) {
+					continue;
+				}
+				foreach ( $sfields as &$field ) {
+					$fname = (string) ( $field['name'] ?? '' );
+					if ( $fname === '' || ! isset( $fields_overlay[ $fname ] ) ) {
+						continue;
+					}
+					$fo = $fields_overlay[ $fname ];
+
+					$v = isset( $fo['label'] ) ? trim( (string) $fo['label'] ) : '';
+					if ( $v !== '' ) {
+						$field['label'] = $v;
+					}
+
+					if ( array_key_exists( 'required', $fo ) ) {
+						$field['required'] = (bool) $fo['required'];
+					}
+
+					$v = isset( $fo['placeholder'] ) ? trim( (string) $fo['placeholder'] ) : '';
+					if ( $v !== '' ) {
+						$field['placeholder'] = $v;
+					}
+
+					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
+					if ( $v !== '' ) {
+						$field['errorMsg'] = $v;
+					}
+
+					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
+					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
+						foreach ( $field['choices'] as &$choice ) {
+							$cv = (string) ( $choice['value'] ?? '' );
+							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
+								$cl = trim( (string) $choices_overlay[ $cv ] );
+								if ( $cl !== '' ) {
+									$choice['label'] = $cl;
+								}
+							}
+						}
+						unset( $choice );
+					}
+				}
+				unset( $field );
+			}
+			unset( $sfields );
+		}
+	}
+
+	$patched = wp_json_encode( $cfg );
+	if ( $patched !== false ) {
+		$context['runtime']['form_config_json'] = $patched;
 	}
 
 	return $context;
