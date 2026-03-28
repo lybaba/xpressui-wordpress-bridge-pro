@@ -39,7 +39,10 @@ function xpressui_pro_workflow_row_actions( array $actions, string $slug ): arra
 		],
 		admin_url( 'edit.php' )
 	);
-	$actions[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Customize', 'xpressui-bridge-pro' ) . '</a>';
+	$actions[] = '<a href="' . esc_url( $url ) . '" style="color:#7c3aed;font-weight:600">'
+		. esc_html__( 'Customize', 'xpressui-bridge-pro' )
+		. ' <span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.04em;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-radius:3px;padding:1px 5px;vertical-align:middle;line-height:16px">PRO</span>'
+		. '</a>';
 	return $actions;
 }
 
@@ -276,8 +279,18 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-card-summary h2{margin:0;font-size:14px;font-weight:600;flex:1}
 .xpressui-card-body{padding:0 12px}
 .xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border:1px solid #c3c4c7;border-radius:3px;padding:8px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;align-items:center;gap:10px}
+.xpressui-pro-header{background:linear-gradient(135deg,#4c1d95,#6d28d9 60%,#7c3aed);border-radius:6px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.xpressui-pro-header-left h1{margin:0 0 4px;font-size:20px;font-weight:700;color:#fff}
+.xpressui-pro-header-left p{margin:0;font-size:13px;color:rgba(255,255,255,.75)}
+.xpressui-pro-header-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;color:#fff;white-space:nowrap;text-transform:uppercase}
 </style>';
-	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . ' <span class="xpressui-badge xpressui-badge--muted">' . esc_html( $slug ) . '</span></h1>';
+	echo '<div class="xpressui-pro-header">';
+	echo '<div class="xpressui-pro-header-left">';
+	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . ' <span style="opacity:.6;font-size:14px;font-weight:400">' . esc_html( $slug ) . '</span></h1>';
+	echo '<p>' . esc_html__( 'Override labels, section titles, field settings and navigation for this workflow.', 'xpressui-bridge-pro' ) . '</p>';
+	echo '</div>';
+	echo '<span class="xpressui-pro-badge">✦ Pro</span>';
+	echo '</div>';
 	echo '<p><a href="' . esc_url( $back_url ) . '">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a></p>';
 
 	if ( $notice_message !== '' ) {
