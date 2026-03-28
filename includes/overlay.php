@@ -89,6 +89,22 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 			$context['rendered_form']['title'] = $project_name;
 		}
 
+		// Navigation button labels (rendered by the PHP template — the web component reuses these DOM buttons).
+		if ( ! empty( $navigation ) ) {
+			$v = isset( $navigation['prev'] ) ? trim( (string) $navigation['prev'] ) : '';
+			if ( $v !== '' ) {
+				$context['rendered_form']['navigation_labels']['previous'] = $v;
+			}
+			$v = isset( $navigation['next'] ) ? trim( (string) $navigation['next'] ) : '';
+			if ( $v !== '' ) {
+				$context['rendered_form']['navigation_labels']['next'] = $v;
+			}
+			$v = isset( $navigation['submit'] ) ? trim( (string) $navigation['submit'] ) : '';
+			if ( $v !== '' ) {
+				$context['rendered_form']['submit_label'] = $v;
+			}
+		}
+
 		// Section labels.
 		if ( ! empty( $sections_overlay ) && isset( $context['rendered_form']['sections'] ) ) {
 			foreach ( $context['rendered_form']['sections'] as &$section ) {

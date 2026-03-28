@@ -251,15 +251,15 @@ function xpressui_pro_render_customize_page(): void {
 	$ov_sections        = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
 	$ov_fields          = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
 
-	// Read pack defaults for navigation labels from form_config_json.
-	$pack_nav    = [];
-	$raw_cfg_str = (string) ( $template_context['runtime']['form_config_json'] ?? '' );
-	if ( $raw_cfg_str !== '' ) {
-		$raw_cfg  = json_decode( $raw_cfg_str, true );
-		$pack_nav = is_array( $raw_cfg ) && isset( $raw_cfg['navigationLabels'] ) && is_array( $raw_cfg['navigationLabels'] )
-			? $raw_cfg['navigationLabels']
-			: [];
-	}
+	// Read pack defaults for navigation labels from rendered_form (source of truth for PHP-rendered buttons).
+	$rf_nav_labels = isset( $template_context['rendered_form']['navigation_labels'] ) && is_array( $template_context['rendered_form']['navigation_labels'] )
+		? $template_context['rendered_form']['navigation_labels']
+		: [];
+	$pack_nav = [
+		'prevLabel'   => (string) ( $rf_nav_labels['previous'] ?? 'Back' ),
+		'nextLabel'   => (string) ( $rf_nav_labels['next'] ?? 'Continue' ),
+		'submitLabel' => (string) ( $template_context['rendered_form']['submit_label'] ?? 'Submit' ),
+	];
 
 	// -----------------------------------------------------------------------
 	// Render
