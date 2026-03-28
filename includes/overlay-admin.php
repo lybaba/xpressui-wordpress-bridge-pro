@@ -395,7 +395,15 @@ function xpressui_pro_render_customize_page(): void {
 	echo '<div class="xpressui-sticky-actions">';
 	submit_button( __( 'Save Customizations', 'xpressui-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
 	echo ' &nbsp; ';
-	submit_button( __( 'Reset to Defaults', 'xpressui-bridge-pro' ), 'secondary', 'xpressui_reset_overlay', false );
+	submit_button(
+		__( 'Reset to Defaults', 'xpressui-bridge-pro' ),
+		'secondary',
+		'xpressui_reset_overlay',
+		false,
+		[
+			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-bridge-pro' ) ) . "');",
+		]
+	);
 	echo '</div>';
 
 	// -----------------------------------------------------------------------
