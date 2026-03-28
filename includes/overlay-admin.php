@@ -62,13 +62,13 @@ function xpressui_pro_render_workflow_action_styles(): void {
 	max-width:100%;
 	padding:3px 9px;
 	border-radius:999px;
-	background:linear-gradient(135deg,#183ea8 0%,#2966ff 100%);
+	background:linear-gradient(135deg,#14213d 0%,#2b4fd8 52%,#6d4dff 100%);
 	color:#fff !important;
 	font-size:12px;
 	font-weight:700;
 	line-height:1.2;
 	text-decoration:none;
-	box-shadow:0 6px 14px rgba(41,102,255,.18);
+	box-shadow:0 8px 16px rgba(43,79,216,.22);
 	transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
 	white-space:nowrap;
 	vertical-align:middle;
@@ -77,11 +77,11 @@ function xpressui_pro_render_workflow_action_styles(): void {
 .xpressui-pro-action-link:focus{
 	color:#fff !important;
 	transform:translateY(-1px);
-	box-shadow:0 8px 18px rgba(41,102,255,.24);
+	box-shadow:0 10px 20px rgba(43,79,216,.28);
 }
 .xpressui-pro-action-link:focus{
 	outline:none;
-	box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 4px rgba(41,102,255,.45),0 8px 18px rgba(41,102,255,.24);
+	box-shadow:0 0 0 2px rgba(255,255,255,.92),0 0 0 4px rgba(109,77,255,.4),0 10px 20px rgba(43,79,216,.28);
 }
 .xpressui-pro-action-badge{
 	display:inline-flex;
@@ -89,8 +89,8 @@ function xpressui_pro_render_workflow_action_styles(): void {
 	justify-content:center;
 	border-radius:999px;
 	padding:1px 6px;
-	background:rgba(255,255,255,.16);
-	border:1px solid rgba(255,255,255,.28);
+	background:rgba(255,255,255,.14);
+	border:1px solid rgba(255,255,255,.24);
 	color:#fff;
 	font-size:9px;
 	font-weight:800;
@@ -376,14 +376,19 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#122033}
 .xpressui-card-body{padding:0 12px}
 .xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #2966ff;border-radius:0 4px 4px 0;padding:8px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(41,102,255,.15);display:flex;align-items:center;gap:10px}
-.xpressui-pro-header{background:linear-gradient(120deg,#122033 0%,#183ea8 55%,#2966ff 100%);margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
-.xpressui-pro-header::after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.05);border-radius:50%}
+.xpressui-pro-header{background:
+radial-gradient(circle at top right, rgba(109,77,255,.28), transparent 28%),
+radial-gradient(circle at 85% 20%, rgba(56,189,248,.18), transparent 24%),
+linear-gradient(125deg,#0f172a 0%,#14213d 34%,#2b4fd8 68%,#6d4dff 100%);
+margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
+.xpressui-pro-header::after{content:"";position:absolute;right:-56px;top:-56px;width:220px;height:220px;background:rgba(255,255,255,.05);border-radius:50%}
+.xpressui-pro-header::before{content:"";position:absolute;left:-48px;bottom:-72px;width:220px;height:220px;background:rgba(56,189,248,.08);border-radius:50%}
 .xpressui-pro-header-left{position:relative;z-index:1}
 .xpressui-pro-header-left h1{margin:0 0 6px;font-size:24px;font-weight:700;color:#fff;line-height:1.2}
-.xpressui-pro-header-left p{margin:0;font-size:13px;color:rgba(255,255,255,.7);line-height:1.5}
+.xpressui-pro-header-left p{margin:0;font-size:13px;color:rgba(255,255,255,.74);line-height:1.5}
 .xpressui-pro-header-right{position:relative;z-index:1;text-align:right;flex-shrink:0}
-.xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase}
-.xpressui-pro-back{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.6);text-decoration:none}
+.xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.24);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#fff;text-transform:uppercase;box-shadow:0 10px 24px rgba(15,23,42,.18)}
+.xpressui-pro-back{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.68);text-decoration:none}
 .xpressui-pro-back:hover{color:#fff}
 .xpressui-inline-notice{margin:0 0 16px;padding:12px 16px;border-radius:6px;border-left:4px solid #00a32a;background:#fff;color:#1d2327;box-shadow:0 1px 2px rgba(15,23,42,.06)}
 .xpressui-inline-notice p{margin:0;font-size:13px;font-weight:600;color:#1d2327}
