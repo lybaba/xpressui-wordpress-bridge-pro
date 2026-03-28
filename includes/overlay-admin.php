@@ -398,9 +398,14 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-pro-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
 .xpressui-pro-toolbar button{border:1px solid #c5d4ee;background:#fff;color:#183ea8;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
 .xpressui-pro-toolbar button:hover{background:#f5f9ff}
+.xpressui-pro-toolbar button.is-accent{background:#183ea8;border-color:#183ea8;color:#fff}
+.xpressui-pro-toolbar button.is-accent:hover{background:#122f80}
 .xpressui-card-meta{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
 .xpressui-card-badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:999px;background:#eef4ff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
 .xpressui-card-badge.is-customized{background:#e9f7ef;color:#0a7a32}
+.xpressui-sticky-status{margin-left:auto;font-size:12px;font-weight:600;color:#5b6b82}
+.xpressui-sticky-status.is-dirty{color:#b45309}
+.xpressui-sticky-status.is-saved{color:#0a7a32}
 .xpressui-field-block{padding:12px 14px;border:1px solid #e5edf8;border-radius:10px;background:#fff}
 .xpressui-field-block.is-customized{border-color:#b8ccff;background:linear-gradient(180deg,#f9fbff 0%,#f3f7ff 100%)}
 .xpressui-field-block-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
@@ -465,6 +470,7 @@ function xpressui_pro_render_customize_page(): void {
 	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="all">' . esc_html__( 'Open all sections', 'xpressui-bridge-pro' ) . '</button>';
 	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="customized">' . esc_html__( 'Open customized only', 'xpressui-bridge-pro' ) . '</button>';
 	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="none">' . esc_html__( 'Collapse all', 'xpressui-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle is-accent" data-target="jump-customized">' . esc_html__( 'Jump to first customized section', 'xpressui-bridge-pro' ) . '</button>';
 	echo '</div>';
 
 	// Sticky save bar.
@@ -480,14 +486,26 @@ function xpressui_pro_render_customize_page(): void {
 			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-bridge-pro' ) ) . "');",
 		]
 	);
+	echo '<span class="xpressui-sticky-status is-saved" data-xpressui-dirty-status="saved">' . esc_html__( 'No unsaved changes', 'xpressui-bridge-pro' ) . '</span>';
 	echo '</div>';
 
 	// -----------------------------------------------------------------------
 	// Card: Project Settings
 	// -----------------------------------------------------------------------
 
-	echo '<details class="xpressui-admin-card" open>';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	$project_settings_count = 0;
+	foreach ( [ $ov_project_name, $proj_settings['notifyEmail'], $proj_settings['redirectUrl'] ] as $project_setting_value ) {
+		if ( (string) $project_setting_value !== '' ) {
+			$project_settings_count++;
+		}
+	}
+	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="project-settings" data-xpressui-customized="' . ( $summary_stats['has_project_settings'] ? '1' : '0' ) . '" id="xpressui-pro-card-project-settings">';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	if ( $summary_stats['has_project_settings'] ) {
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
+	}
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) $project_settings_count ) . ' ' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</span>';
+	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
@@ -518,8 +536,19 @@ function xpressui_pro_render_customize_page(): void {
 	// Card: Submit feedback
 	// -----------------------------------------------------------------------
 
-	echo '<details class="xpressui-admin-card" open>';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Submit Feedback', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	$submit_feedback_count = 0;
+	foreach ( [ $ov_success_message, $ov_error_message ] as $submit_feedback_value ) {
+		if ( (string) $submit_feedback_value !== '' ) {
+			$submit_feedback_count++;
+		}
+	}
+	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="submit-feedback" data-xpressui-customized="' . ( $summary_stats['has_submit_feedback'] ? '1' : '0' ) . '" id="xpressui-pro-card-submit-feedback">';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Submit Feedback', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	if ( $summary_stats['has_submit_feedback'] ) {
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
+	}
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) $submit_feedback_count ) . ' ' . esc_html__( 'Messages', 'xpressui-bridge-pro' ) . '</span>';
+	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
@@ -542,7 +571,7 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
-	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '">';
+	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '" id="xpressui-pro-card-navigation">';
 	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( ! empty( $ov_navigation ) ) {
 		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
@@ -605,7 +634,7 @@ function xpressui_pro_render_customize_page(): void {
 			}
 		}
 
-		echo '<details class="xpressui-admin-card"' . $card_open . ' data-xpressui-card-type="section" data-xpressui-customized="' . ( $section_has_custom ? '1' : '0' ) . '">';
+		echo '<details class="xpressui-admin-card"' . $card_open . ' data-xpressui-card-type="section" data-xpressui-customized="' . ( $section_has_custom ? '1' : '0' ) . '" id="xpressui-pro-card-' . esc_attr( $section_name ) . '">';
 		echo '<summary class="xpressui-card-summary"><h2>' . esc_html( $section_label ) . '</h2><span class="xpressui-card-meta">';
 		if ( $section_has_custom ) {
 			echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
@@ -733,12 +762,40 @@ function xpressui_pro_render_customize_page(): void {
 
 	echo '</form>';
 	echo '<script>
+let xpressuiProFormDirty = false;
+const xpressuiProForm = document.querySelector(".xpressui-admin-wrap form");
+const xpressuiDirtyStatus = document.querySelector("[data-xpressui-dirty-status]");
+function xpressuiSetDirtyState(isDirty){
+	xpressuiProFormDirty = isDirty;
+	if(!xpressuiDirtyStatus){return;}
+	xpressuiDirtyStatus.classList.toggle("is-dirty", isDirty);
+	xpressuiDirtyStatus.classList.toggle("is-saved", !isDirty);
+	xpressuiDirtyStatus.textContent = isDirty ? "Unsaved changes" : "No unsaved changes";
+}
+if(xpressuiProForm){
+	xpressuiProForm.addEventListener("input", function(){ xpressuiSetDirtyState(true); });
+	xpressuiProForm.addEventListener("change", function(){ xpressuiSetDirtyState(true); });
+	xpressuiProForm.addEventListener("submit", function(){ xpressuiSetDirtyState(false); });
+	window.addEventListener("beforeunload", function(event){
+		if(!xpressuiProFormDirty){return;}
+		event.preventDefault();
+		event.returnValue = "";
+	});
+}
 document.addEventListener("click", function(event){
 	const trigger = event.target.closest(".xpressui-pro-details-toggle");
 	if(!trigger){return;}
 	const container = document.querySelector(".xpressui-admin-wrap");
 	if(!container){return;}
 	const target = trigger.getAttribute("data-target");
+	if(target === "jump-customized"){
+		const firstCustomized = container.querySelector("details.xpressui-admin-card[data-xpressui-customized=\"1\"]");
+		if(firstCustomized){
+			firstCustomized.open = true;
+			firstCustomized.scrollIntoView({behavior:"smooth", block:"start"});
+		}
+		return;
+	}
 	container.querySelectorAll("details.xpressui-admin-card").forEach(function(card){
 		if(target === "all"){
 			card.open = true;
