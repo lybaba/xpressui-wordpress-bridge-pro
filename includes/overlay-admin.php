@@ -270,34 +270,40 @@ function xpressui_pro_render_customize_page(): void {
 
 	echo '<div class="wrap xpressui-admin-wrap">';
 	echo '<style>
-.xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:3px;margin-bottom:12px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
-.xpressui-card-summary{cursor:pointer;padding:10px 16px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
+.xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:4px;margin-bottom:10px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
+.xpressui-card-summary{cursor:pointer;padding:11px 16px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
 .xpressui-card-summary::-webkit-details-marker{display:none}
-.xpressui-card-summary::before{content:"▶";font-size:10px;color:#666;flex-shrink:0;transition:transform .15s}
+.xpressui-card-summary::before{content:"▶";font-size:9px;color:#7c3aed;flex-shrink:0;transition:transform .15s}
 .xpressui-admin-card[open]>.xpressui-card-summary::before{transform:rotate(90deg)}
-.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#f0f0f0}
-.xpressui-card-summary h2{margin:0;font-size:14px;font-weight:600;flex:1}
+.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#ede9fe}
+.xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#4c1d95}
 .xpressui-card-body{padding:0 12px}
-.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border:1px solid #c3c4c7;border-radius:3px;padding:8px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;align-items:center;gap:10px}
-.xpressui-pro-header{background:linear-gradient(135deg,#4c1d95,#6d28d9 60%,#7c3aed);border-radius:6px;padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.xpressui-pro-header-left h1{margin:0 0 4px;font-size:20px;font-weight:700;color:#fff}
-.xpressui-pro-header-left p{margin:0;font-size:13px;color:rgba(255,255,255,.75)}
-.xpressui-pro-header-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:.08em;color:#fff;white-space:nowrap;text-transform:uppercase}
+.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #7c3aed;border-radius:0 4px 4px 0;padding:8px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(109,40,217,.15);display:flex;align-items:center;gap:10px}
+.xpressui-pro-header{background:linear-gradient(120deg,#3b0764 0%,#6d28d9 55%,#8b5cf6 100%);margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
+.xpressui-pro-header::after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.05);border-radius:50%}
+.xpressui-pro-header-left{position:relative;z-index:1}
+.xpressui-pro-header-left h1{margin:0 0 6px;font-size:24px;font-weight:700;color:#fff;line-height:1.2}
+.xpressui-pro-header-left p{margin:0;font-size:13px;color:rgba(255,255,255,.7);line-height:1.5}
+.xpressui-pro-header-right{position:relative;z-index:1;text-align:right;flex-shrink:0}
+.xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase}
+.xpressui-pro-back{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.6);text-decoration:none}
+.xpressui-pro-back:hover{color:#fff}
 </style>';
 	echo '<div class="xpressui-pro-header">';
 	echo '<div class="xpressui-pro-header-left">';
-	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . ' <span style="opacity:.6;font-size:14px;font-weight:400">' . esc_html( $slug ) . '</span></h1>';
-	echo '<p>' . esc_html__( 'Override labels, section titles, field settings and navigation for this workflow.', 'xpressui-bridge-pro' ) . '</p>';
+	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . '</h1>';
+	echo '<p><strong style="color:rgba(255,255,255,.9)">' . esc_html( $slug ) . '</strong> &mdash; '
+		. esc_html__( 'Override labels, section titles, field settings and navigation.', 'xpressui-bridge-pro' ) . '</p>';
 	echo '</div>';
-	echo '<span class="xpressui-pro-badge">✦ Pro</span>';
+	echo '<div class="xpressui-pro-header-right">';
+	echo '<span class="xpressui-pro-badge">✦ &nbsp;XPressUI Pro</span>';
+	echo '<a href="' . esc_url( $back_url ) . '" class="xpressui-pro-back">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a>';
 	echo '</div>';
-	echo '<p><a href="' . esc_url( $back_url ) . '">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a></p>';
+	echo '</div>';
 
 	if ( $notice_message !== '' ) {
 		echo '<div class="notice ' . esc_attr( $notice_class ) . ' is-dismissible"><p>' . esc_html( $notice_message ) . '</p></div>';
 	}
-
-	echo '<p class="xpressui-page-intro">' . esc_html__( 'Override form settings, section labels, and field properties. Leave a field blank to keep the pack default.', 'xpressui-bridge-pro' ) . '</p>';
 
 	echo '<form method="post" action="">';
 	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
