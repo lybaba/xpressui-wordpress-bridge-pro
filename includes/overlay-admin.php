@@ -273,13 +273,13 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:4px;margin-bottom:10px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
 .xpressui-card-summary{cursor:pointer;padding:11px 16px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
 .xpressui-card-summary::-webkit-details-marker{display:none}
-.xpressui-card-summary::before{content:"▶";font-size:9px;color:#7c3aed;flex-shrink:0;transition:transform .15s}
+.xpressui-card-summary::before{content:"▶";font-size:9px;color:#2966ff;flex-shrink:0;transition:transform .15s}
 .xpressui-admin-card[open]>.xpressui-card-summary::before{transform:rotate(90deg)}
-.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#ede9fe}
-.xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#4c1d95}
+.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#dfe8f2}
+.xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#122033}
 .xpressui-card-body{padding:0 12px}
-.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #7c3aed;border-radius:0 4px 4px 0;padding:8px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(109,40,217,.15);display:flex;align-items:center;gap:10px}
-.xpressui-pro-header{background:linear-gradient(120deg,#3b0764 0%,#6d28d9 55%,#8b5cf6 100%);margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
+.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #2966ff;border-radius:0 4px 4px 0;padding:8px 16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(41,102,255,.15);display:flex;align-items:center;gap:10px}
+.xpressui-pro-header{background:linear-gradient(120deg,#122033 0%,#183ea8 55%,#2966ff 100%);margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;overflow:hidden}
 .xpressui-pro-header::after{content:"";position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.05);border-radius:50%}
 .xpressui-pro-header-left{position:relative;z-index:1}
 .xpressui-pro-header-left h1{margin:0 0 6px;font-size:24px;font-weight:700;color:#fff;line-height:1.2}
