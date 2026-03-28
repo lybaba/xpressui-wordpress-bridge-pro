@@ -146,7 +146,7 @@ function xpressui_pro_render_customize_page(): void {
 			: [];
 		$sections_overlay = [];
 		foreach ( $raw_sections as $sname => $slabel ) {
-			$sname  = sanitize_key( (string) $sname );
+			$sname  = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $sname );
 			$slabel = sanitize_text_field( wp_unslash( (string) $slabel ) );
 			if ( $sname !== '' && $slabel !== '' ) {
 				$sections_overlay[ $sname ] = $slabel;
@@ -162,7 +162,7 @@ function xpressui_pro_render_customize_page(): void {
 			: [];
 		$fields_overlay = [];
 		foreach ( $raw_fields as $field_name => $field_data ) {
-			$field_name = sanitize_key( (string) $field_name );
+			$field_name = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $field_name );
 			if ( $field_name === '' || ! is_array( $field_data ) ) {
 				continue;
 			}
