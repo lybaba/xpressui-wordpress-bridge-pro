@@ -266,6 +266,17 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	echo '<div class="wrap xpressui-admin-wrap">';
+	echo '<style>
+.xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:3px;margin-bottom:12px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
+.xpressui-card-summary{cursor:pointer;padding:10px 16px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
+.xpressui-card-summary::-webkit-details-marker{display:none}
+.xpressui-card-summary::before{content:"▶";font-size:10px;color:#666;flex-shrink:0;transition:transform .15s}
+.xpressui-admin-card[open]>.xpressui-card-summary::before{transform:rotate(90deg)}
+.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#f0f0f0}
+.xpressui-card-summary h2{margin:0;font-size:14px;font-weight:600;flex:1}
+.xpressui-card-body{padding:0 12px}
+.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border:1px solid #c3c4c7;border-radius:3px;padding:8px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;align-items:center;gap:10px}
+</style>';
 	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . ' <span class="xpressui-badge xpressui-badge--muted">' . esc_html( $slug ) . '</span></h1>';
 	echo '<p><a href="' . esc_url( $back_url ) . '">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a></p>';
 
@@ -278,13 +289,20 @@ function xpressui_pro_render_customize_page(): void {
 	echo '<form method="post" action="">';
 	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
 
+	// Sticky save bar.
+	echo '<div class="xpressui-sticky-actions">';
+	submit_button( __( 'Save Customizations', 'xpressui-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
+	echo ' &nbsp; ';
+	submit_button( __( 'Reset to Defaults', 'xpressui-bridge-pro' ), 'secondary', 'xpressui_reset_overlay', false );
+	echo '</div>';
+
 	// -----------------------------------------------------------------------
 	// Card: Project Settings
 	// -----------------------------------------------------------------------
 
-	echo '<div class="card xpressui-admin-card">';
-	echo '<h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2>';
-	echo '<table class="form-table"><tbody>';
+	echo '<details class="xpressui-admin-card" open>';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
 		'xpressui_overlay_project_name',
@@ -307,16 +325,16 @@ function xpressui_pro_render_customize_page(): void {
 		. '<p class="description">' . esc_html__( 'Redirect users here after a successful submission.', 'xpressui-bridge-pro' ) . '</p>'
 	);
 
-	echo '</tbody></table>';
-	echo '</div>';
+	echo '</tbody></table></div>';
+	echo '</details>';
 
 	// -----------------------------------------------------------------------
 	// Card: Submit feedback
 	// -----------------------------------------------------------------------
 
-	echo '<div class="card xpressui-admin-card">';
-	echo '<h2>' . esc_html__( 'Submit Feedback', 'xpressui-bridge-pro' ) . '</h2>';
-	echo '<table class="form-table"><tbody>';
+	echo '<details class="xpressui-admin-card" open>';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Submit Feedback', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
 		'xpressui_overlay_success_message',
@@ -330,16 +348,17 @@ function xpressui_pro_render_customize_page(): void {
 		'<input type="text" id="xpressui_overlay_error_message" name="xpressui_overlay_error_message" class="large-text" value="' . esc_attr( $ov_error_message ) . '" />'
 	);
 
-	echo '</tbody></table>';
-	echo '</div>';
+	echo '</tbody></table></div>';
+	echo '</details>';
 
 	// -----------------------------------------------------------------------
 	// Card: Navigation labels
 	// -----------------------------------------------------------------------
 
-	echo '<div class="card xpressui-admin-card">';
-	echo '<h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2>';
-	echo '<table class="form-table"><tbody>';
+	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
+	echo '<details class="xpressui-admin-card"' . $nav_open . '>';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2></summary>';
+	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	$nav_fields = [
 		'prev'   => [ __( 'Back button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
@@ -357,8 +376,8 @@ function xpressui_pro_render_customize_page(): void {
 		);
 	}
 
-	echo '</tbody></table>';
-	echo '</div>';
+	echo '</tbody></table></div>';
+	echo '</details>';
 
 	// -----------------------------------------------------------------------
 	// Cards: Sections and fields
@@ -374,9 +393,22 @@ function xpressui_pro_render_customize_page(): void {
 
 		$current_section_label = (string) ( $ov_sections[ $section_name ] ?? '' );
 
-		echo '<div class="card xpressui-admin-card">';
-		echo '<h2>' . esc_html( $section_label ) . '</h2>';
-		echo '<table class="form-table"><tbody>';
+		// Open the card if any customization exists for this section or its fields.
+		$section_has_custom = $current_section_label !== '';
+		if ( ! $section_has_custom ) {
+			foreach ( $fields as $f ) {
+				$fn = (string) ( $f['name'] ?? '' );
+				if ( $fn !== '' && isset( $ov_fields[ $fn ] ) && ! empty( $ov_fields[ $fn ] ) ) {
+					$section_has_custom = true;
+					break;
+				}
+			}
+		}
+		$card_open = $section_has_custom ? ' open' : '';
+
+		echo '<details class="xpressui-admin-card"' . $card_open . '>';
+		echo '<summary class="xpressui-card-summary"><h2>' . esc_html( $section_label ) . '</h2></summary>';
+		echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 		// Section label row.
 		xpressui_pro_row(
@@ -478,19 +510,9 @@ function xpressui_pro_render_customize_page(): void {
 			xpressui_pro_row( '', $header, $html );
 		}
 
-		echo '</tbody></table>';
-		echo '</div>';
+		echo '</tbody></table></div>';
+		echo '</details>';
 	}
-
-	// -----------------------------------------------------------------------
-	// Actions
-	// -----------------------------------------------------------------------
-
-	echo '<p>';
-	submit_button( __( 'Save Customizations', 'xpressui-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
-	echo ' &nbsp; ';
-	submit_button( __( 'Reset to Defaults', 'xpressui-bridge-pro' ), 'secondary', 'xpressui_reset_overlay', false );
-	echo '</p>';
 
 	echo '</form>';
 	echo '</div>';
