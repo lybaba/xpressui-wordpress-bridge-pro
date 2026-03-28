@@ -276,6 +276,11 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 						$field['placeholder'] = $v;
 					}
 
+					$v = isset( $fo['desc'] ) ? trim( (string) $fo['desc'] ) : '';
+					if ( $v !== '' ) {
+						$field['desc'] = $v;
+					}
+
 					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
 					if ( $v !== '' ) {
 						$field['errorMsg'] = $v;

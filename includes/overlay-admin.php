@@ -39,11 +39,60 @@ function xpressui_pro_workflow_row_actions( array $actions, string $slug ): arra
 		],
 		admin_url( 'edit.php' )
 	);
-	$actions[] = '<a href="' . esc_url( $url ) . '" style="color:#7c3aed;font-weight:600">'
-		. esc_html__( 'Customize', 'xpressui-bridge-pro' )
-		. ' <span style="display:inline-block;font-size:9px;font-weight:700;letter-spacing:.04em;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-radius:3px;padding:1px 5px;vertical-align:middle;line-height:16px">PRO</span>'
+	$actions[] = '<a href="' . esc_url( $url ) . '" class="xpressui-pro-action-link">'
+		. '<span>' . esc_html__( 'Customize', 'xpressui-bridge-pro' ) . '</span>'
+		. ' <span class="xpressui-pro-action-badge">PRO</span>'
 		. '</a>';
 	return $actions;
+}
+
+add_action( 'admin_head', 'xpressui_pro_render_workflow_action_styles' );
+
+function xpressui_pro_render_workflow_action_styles(): void {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || 'xpressui_submission_page_xpressui-bridge' !== $screen->id ) {
+		return;
+	}
+
+	echo '<style>
+.xpressui-pro-action-link{
+	display:inline-flex;
+	align-items:center;
+	gap:6px;
+	padding:4px 10px;
+	border-radius:999px;
+	background:linear-gradient(135deg,#183ea8 0%,#2966ff 100%);
+	color:#fff !important;
+	font-weight:700;
+	text-decoration:none;
+	box-shadow:0 6px 14px rgba(41,102,255,.18);
+	transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.xpressui-pro-action-link:hover,
+.xpressui-pro-action-link:focus{
+	color:#fff !important;
+	transform:translateY(-1px);
+	box-shadow:0 8px 18px rgba(41,102,255,.24);
+}
+.xpressui-pro-action-link:focus{
+	outline:none;
+	box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 4px rgba(41,102,255,.45),0 8px 18px rgba(41,102,255,.24);
+}
+.xpressui-pro-action-badge{
+	display:inline-flex;
+	align-items:center;
+	justify-content:center;
+	border-radius:999px;
+	padding:2px 7px;
+	background:rgba(255,255,255,.16);
+	border:1px solid rgba(255,255,255,.28);
+	color:#fff;
+	font-size:10px;
+	font-weight:800;
+	letter-spacing:.08em;
+	line-height:1.2;
+}
+</style>';
 }
 
 // ---------------------------------------------------------------------------
@@ -99,8 +148,8 @@ function xpressui_pro_render_customize_page(): void {
 		admin_url( 'edit.php' )
 	);
 
-	$notice_class   = '';
-	$notice_message = '';
+	$notice_class    = '';
+	$notice_messages = [];
 
 	// -----------------------------------------------------------------------
 	// Handle save
@@ -109,8 +158,18 @@ function xpressui_pro_render_customize_page(): void {
 	if ( isset( $_POST['xpressui_save_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
 
 		// Project settings (stored separately in xpressui_project_settings).
-		$notify_email = sanitize_email( wp_unslash( (string) ( $_POST['xpressui_notify_email'] ?? '' ) ) );
-		$redirect_url = esc_url_raw( wp_unslash( (string) ( $_POST['xpressui_redirect_url'] ?? '' ) ) );
+		$raw_notify_email = trim( wp_unslash( (string) ( $_POST['xpressui_notify_email'] ?? '' ) ) );
+		$raw_redirect_url = trim( wp_unslash( (string) ( $_POST['xpressui_redirect_url'] ?? '' ) ) );
+		$notify_email     = sanitize_email( $raw_notify_email );
+		$redirect_url     = esc_url_raw( $raw_redirect_url );
+
+		$save_warnings = [];
+		if ( $raw_notify_email !== '' && $notify_email === '' ) {
+			$save_warnings[] = __( 'The notification email was not saved because it is not a valid email address.', 'xpressui-bridge-pro' );
+		}
+		if ( $raw_redirect_url !== '' && $redirect_url === '' ) {
+			$save_warnings[] = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-bridge-pro' );
+		}
 		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url );
 
 		// Overlay.
@@ -203,7 +262,7 @@ function xpressui_pro_render_customize_page(): void {
 			if ( isset( $field_data['choices'] ) && is_array( $field_data['choices'] ) ) {
 				$choices_entry = [];
 				foreach ( $field_data['choices'] as $cv => $cl ) {
-					$cv = sanitize_key( (string) $cv );
+					$cv = (string) $cv;
 					$cl = sanitize_text_field( wp_unslash( (string) $cl ) );
 					if ( $cv !== '' && $cl !== '' ) {
 						$choices_entry[ $cv ] = $cl;
@@ -223,15 +282,18 @@ function xpressui_pro_render_customize_page(): void {
 		}
 
 		xpressui_pro_save_workflow_overlay( $slug, $overlay );
-		$notice_class   = 'notice-success';
-		$notice_message = __( 'Customizations saved.', 'xpressui-bridge-pro' );
+		$notice_class    = empty( $save_warnings ) ? 'notice-success' : 'notice-warning';
+		$notice_messages = array_merge(
+			[ __( 'Customizations saved.', 'xpressui-bridge-pro' ) ],
+			$save_warnings
+		);
 	}
 
 	// Handle reset.
 	if ( isset( $_POST['xpressui_reset_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
 		xpressui_pro_delete_workflow_overlay( $slug );
-		$notice_class   = 'notice-success';
-		$notice_message = __( 'Customizations reset to pack defaults.', 'xpressui-bridge-pro' );
+		$notice_class    = 'notice-success';
+		$notice_messages = [ __( 'Customizations reset to pack defaults.', 'xpressui-bridge-pro' ) ];
 	}
 
 	// -----------------------------------------------------------------------
@@ -288,6 +350,12 @@ function xpressui_pro_render_customize_page(): void {
 .xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase}
 .xpressui-pro-back{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.6);text-decoration:none}
 .xpressui-pro-back:hover{color:#fff}
+.xpressui-inline-notice{margin:0 0 16px;padding:12px 16px;border-radius:6px;border-left:4px solid #00a32a;background:#fff;color:#1d2327;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+.xpressui-inline-notice p{margin:0;font-size:13px;font-weight:600;color:#1d2327}
+.xpressui-inline-notice.is-error{border-left-color:#d63638}
+.xpressui-inline-notice.is-warning{border-left-color:#dba617;background:#fffbf0}
+.xpressui-inline-notice ul{margin:8px 0 0 18px;padding:0}
+.xpressui-inline-notice li{margin:0 0 4px;font-size:13px;color:#1d2327}
 </style>';
 	echo '<div class="xpressui-pro-header">';
 	echo '<div class="xpressui-pro-header-left">';
@@ -301,8 +369,23 @@ function xpressui_pro_render_customize_page(): void {
 	echo '</div>';
 	echo '</div>';
 
-	if ( $notice_message !== '' ) {
-		echo '<div class="notice ' . esc_attr( $notice_class ) . ' is-dismissible"><p>' . esc_html( $notice_message ) . '</p></div>';
+	if ( ! empty( $notice_messages ) ) {
+		$inline_notice_class = 'xpressui-inline-notice';
+		if ( $notice_class === 'notice-error' ) {
+			$inline_notice_class .= ' is-error';
+		} elseif ( $notice_class === 'notice-warning' ) {
+			$inline_notice_class .= ' is-warning';
+		}
+		echo '<div class="' . esc_attr( $inline_notice_class ) . '" role="status" aria-live="polite">';
+		echo '<p>' . esc_html( (string) array_shift( $notice_messages ) ) . '</p>';
+		if ( ! empty( $notice_messages ) ) {
+			echo '<ul>';
+			foreach ( $notice_messages as $notice_message ) {
+				echo '<li>' . esc_html( (string) $notice_message ) . '</li>';
+			}
+			echo '</ul>';
+		}
+		echo '</div>';
 	}
 
 	echo '<form method="post" action="">';
