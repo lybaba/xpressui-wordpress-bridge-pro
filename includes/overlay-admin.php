@@ -571,6 +571,11 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
+	$nav_fields = [
+		'prev'   => [ __( 'Back button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
+		'next'   => [ __( 'Continue button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['nextLabel'] ?? 'Continue' ) ],
+		'submit' => [ __( 'Submit button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['submitLabel'] ?? 'Submit' ) ],
+	];
 	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '" id="xpressui-pro-card-navigation">';
 	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( ! empty( $ov_navigation ) ) {
@@ -579,12 +584,6 @@ function xpressui_pro_render_customize_page(): void {
 	echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $nav_fields ) ) . ' ' . esc_html__( 'Buttons', 'xpressui-bridge-pro' ) . '</span>';
 	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
-
-	$nav_fields = [
-		'prev'   => [ __( 'Back button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
-		'next'   => [ __( 'Continue button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['nextLabel'] ?? 'Continue' ) ],
-		'submit' => [ __( 'Submit button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['submitLabel'] ?? 'Submit' ) ],
-	];
 
 	foreach ( $nav_fields as $nav_key => [ $nav_label, $nav_default ] ) {
 		$current_val = (string) ( $ov_navigation[ $nav_key ] ?? '' );
