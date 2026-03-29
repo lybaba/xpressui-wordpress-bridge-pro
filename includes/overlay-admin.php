@@ -110,16 +110,21 @@ function xpressui_pro_render_workflow_action_styles(): void {
 /**
  * Returns current project settings for a slug.
  *
- * @return array{notifyEmail: string, redirectUrl: string, showProjectTitle: string, showRequiredFieldsNote: string}
+ * @return array{notifyEmail: string, redirectUrl: string, showProjectTitle: string, showRequiredFieldsNote: string, sectionLabelVisibility: string}
  */
 function xpressui_pro_get_project_settings( string $slug ): array {
 	$all = get_option( 'xpressui_project_settings', [] );
 	$row = isset( $all[ $slug ] ) && is_array( $all[ $slug ] ) ? $all[ $slug ] : [];
+	$section_label_visibility = strtolower( (string) ( $row['sectionLabelVisibility'] ?? 'auto' ) );
+	if ( ! in_array( $section_label_visibility, [ 'auto', 'show', 'hide' ], true ) ) {
+		$section_label_visibility = 'auto';
+	}
 	return [
 		'notifyEmail'            => (string) ( $row['notifyEmail'] ?? '' ),
 		'redirectUrl'            => (string) ( $row['redirectUrl'] ?? '' ),
 		'showProjectTitle'       => ! empty( $row['showProjectTitle'] ) ? '1' : '0',
 		'showRequiredFieldsNote' => ! empty( $row['showRequiredFieldsNote'] ) ? '1' : '0',
+		'sectionLabelVisibility' => $section_label_visibility,
 	];
 }
 
@@ -131,7 +136,8 @@ function xpressui_pro_save_project_settings(
 	string $notify_email,
 	string $redirect_url,
 	string $show_project_title,
-	string $show_required_fields_note
+	string $show_required_fields_note,
+	string $section_label_visibility
 ): void {
 	$all = get_option( 'xpressui_project_settings', [] );
 	if ( ! is_array( $all ) ) {
@@ -145,6 +151,7 @@ function xpressui_pro_save_project_settings(
 		'redirectUrl'            => $redirect_url,
 		'showProjectTitle'       => $show_project_title,
 		'showRequiredFieldsNote' => $show_required_fields_note,
+		'sectionLabelVisibility' => $section_label_visibility,
 		]
 	);
 	update_option( 'xpressui_project_settings', $all );
@@ -301,6 +308,10 @@ function xpressui_pro_render_customize_page(): void {
 		$raw_redirect_url         = trim( wp_unslash( (string) ( $_POST['xpressui_redirect_url'] ?? '' ) ) );
 		$show_project_title       = ! empty( $_POST['xpressui_show_project_title'] ) ? '1' : '0';
 		$show_required_note       = ! empty( $_POST['xpressui_show_required_fields_note'] ) ? '1' : '0';
+		$section_label_visibility = sanitize_key( wp_unslash( (string) ( $_POST['xpressui_section_label_visibility'] ?? 'auto' ) ) );
+		if ( ! in_array( $section_label_visibility, [ 'auto', 'show', 'hide' ], true ) ) {
+			$section_label_visibility = 'auto';
+		}
 		$notify_email             = sanitize_email( $raw_notify_email );
 		$redirect_url             = esc_url_raw( $raw_redirect_url );
 
@@ -313,7 +324,7 @@ function xpressui_pro_render_customize_page(): void {
 			$save_warnings[] = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-bridge-pro' );
 			$invalid_fields[] = 'xpressui_redirect_url';
 		}
-		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url, $show_project_title, $show_required_note );
+		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url, $show_project_title, $show_required_note, $section_label_visibility );
 
 		// Overlay.
 		$overlay = [];
@@ -552,7 +563,7 @@ function xpressui_pro_render_customize_page(): void {
 		'field_count'          => 0,
 		'choice_count'         => 0,
 		'navigation_count'     => count( $ov_navigation ),
-		'has_project_settings' => $ov_project_name !== '' || $proj_settings['notifyEmail'] !== '' || $proj_settings['redirectUrl'] !== '' || $proj_settings['showProjectTitle'] === '1' || $proj_settings['showRequiredFieldsNote'] === '1',
+		'has_project_settings' => $ov_project_name !== '' || $proj_settings['notifyEmail'] !== '' || $proj_settings['redirectUrl'] !== '' || $proj_settings['showProjectTitle'] === '1' || $proj_settings['showRequiredFieldsNote'] === '1' || $proj_settings['sectionLabelVisibility'] !== 'auto',
 		'has_submit_feedback'  => $ov_success_message !== '' || $ov_error_message !== '',
 	];
 
@@ -756,7 +767,10 @@ margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;j
 	if ( $proj_settings['showRequiredFieldsNote'] === '1' ) {
 		$project_settings_count++;
 	}
-	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="project-settings" data-xpressui-customized="' . ( $summary_stats['has_project_settings'] ? '1' : '0' ) . '" data-xpressui-search-text="project settings custom form title notification email post submit redirect redirect url form title required fields note wordpress page title" data-xpressui-reset-scope="project-settings" id="xpressui-pro-card-project-settings">';
+	if ( $proj_settings['sectionLabelVisibility'] !== 'auto' ) {
+		$project_settings_count++;
+	}
+	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="project-settings" data-xpressui-customized="' . ( $summary_stats['has_project_settings'] ? '1' : '0' ) . '" data-xpressui-search-text="project settings custom form title notification email post submit redirect redirect url form title required fields note section labels single section wordpress page title" data-xpressui-reset-scope="project-settings" id="xpressui-pro-card-project-settings">';
 	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( $summary_stats['has_project_settings'] ) {
 		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
@@ -803,6 +817,17 @@ margin:-10px -20px 16px;padding:28px 28px 24px;display:flex;align-items:center;j
 		'<label><input type="checkbox" id="xpressui_show_required_fields_note" name="xpressui_show_required_fields_note" value="1"' . checked( $proj_settings['showRequiredFieldsNote'], '1', false ) . ' /> '
 		. esc_html__( 'Display the "* Required fields" note above the form.', 'xpressui-bridge-pro' ) . '</label>'
 		. '<p class="description">' . esc_html__( 'Disabled by default for a cleaner WordPress page layout.', 'xpressui-bridge-pro' ) . '</p>'
+	);
+
+	xpressui_pro_row(
+		'xpressui_section_label_visibility',
+		__( 'Section labels', 'xpressui-bridge-pro' ),
+		'<select id="xpressui_section_label_visibility" name="xpressui_section_label_visibility" class="regular-text">'
+		. '<option value="auto"' . selected( $proj_settings['sectionLabelVisibility'], 'auto', false ) . '>' . esc_html__( 'Auto', 'xpressui-bridge-pro' ) . '</option>'
+		. '<option value="show"' . selected( $proj_settings['sectionLabelVisibility'], 'show', false ) . '>' . esc_html__( 'Always show', 'xpressui-bridge-pro' ) . '</option>'
+		. '<option value="hide"' . selected( $proj_settings['sectionLabelVisibility'], 'hide', false ) . '>' . esc_html__( 'Always hide', 'xpressui-bridge-pro' ) . '</option>'
+		. '</select>'
+		. '<p class="description">' . esc_html__( 'Auto hides section titles when the workflow only contains one section.', 'xpressui-bridge-pro' ) . '</p>'
 	);
 
 	echo '</tbody></table></div>';
