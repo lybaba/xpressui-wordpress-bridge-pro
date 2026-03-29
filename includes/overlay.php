@@ -28,6 +28,25 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Returns whether a field supports min/max choice limits.
+ */
+function xpressui_pro_overlay_supports_choice_limits( array $field ): bool {
+	$field_type = (string) ( $field['type'] ?? '' );
+	$multiple   = ! empty( $field['multiple'] );
+
+	return $multiple || in_array( $field_type, [ 'select-multiple', 'checkboxes' ], true );
+}
+
+/**
+ * Returns whether a field supports regex pattern validation.
+ */
+function xpressui_pro_overlay_supports_pattern( array $field ): bool {
+	$field_type = (string) ( $field['type'] ?? '' );
+
+	return in_array( $field_type, [ 'text', 'email', 'tel', 'url', 'search', 'slug' ], true );
+}
+
+/**
  * Returns the wp_options key for a workflow's overlay.
  */
 function xpressui_pro_get_overlay_option_key( string $slug ): string {
@@ -154,6 +173,34 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
 					if ( $v !== '' ) {
 						$field['error_message'] = $v;
+					}
+
+					$v = isset( $fo['pattern'] ) ? trim( (string) $fo['pattern'] ) : '';
+					if ( $v !== '' && xpressui_pro_overlay_supports_pattern( $field ) ) {
+						$field['pattern'] = $v;
+					}
+
+					foreach (
+						[
+							'min_len'            => 'min_len',
+							'max_len'            => 'max_len',
+							'accept'             => 'accept',
+							'min_value'          => 'min_value',
+							'max_value'          => 'max_value',
+							'step_value'         => 'step_value',
+							'upload_accept_label' => 'upload_accept_label',
+						] as $overlay_key => $field_key
+					) {
+						if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
+							$field[ $field_key ] = $fo[ $overlay_key ];
+						}
+					}
+					if ( xpressui_pro_overlay_supports_choice_limits( $field ) ) {
+						foreach ( [ 'min_choices' => 'min_choices', 'max_choices' => 'max_choices' ] as $overlay_key => $field_key ) {
+							if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
+								$field[ $field_key ] = $fo[ $overlay_key ];
+							}
+						}
 					}
 
 					// Choice labels.
@@ -284,6 +331,48 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
 					if ( $v !== '' ) {
 						$field['errorMsg'] = $v;
+					}
+
+					$v = isset( $fo['pattern'] ) ? trim( (string) $fo['pattern'] ) : '';
+					if ( $v !== '' && xpressui_pro_overlay_supports_pattern( $field ) ) {
+						$field['pattern'] = $v;
+					}
+
+					if ( array_key_exists( 'min_len', $fo ) ) {
+						$field['minLen'] = (int) $fo['min_len'];
+					}
+					if ( array_key_exists( 'max_len', $fo ) ) {
+						$field['maxLen'] = (int) $fo['max_len'];
+					}
+					if ( xpressui_pro_overlay_supports_choice_limits( $field ) && array_key_exists( 'min_choices', $fo ) ) {
+						$field['minNumOfChoices'] = (int) $fo['min_choices'];
+					}
+					if ( xpressui_pro_overlay_supports_choice_limits( $field ) && array_key_exists( 'max_choices', $fo ) ) {
+						$field['maxNumOfChoices'] = (int) $fo['max_choices'];
+					}
+					if ( array_key_exists( 'min_value', $fo ) ) {
+						$field['min'] = 0 + $fo['min_value'];
+					}
+					if ( array_key_exists( 'max_value', $fo ) ) {
+						$field['max'] = 0 + $fo['max_value'];
+					}
+					if ( array_key_exists( 'step_value', $fo ) ) {
+						$field['step'] = 0 + $fo['step_value'];
+					}
+					if ( array_key_exists( 'max_file_size_mb', $fo ) ) {
+						$field['maxFileSizeMb'] = 0 + $fo['max_file_size_mb'];
+					}
+					$v = isset( $fo['accept'] ) ? trim( (string) $fo['accept'] ) : '';
+					if ( $v !== '' ) {
+						$field['accept'] = $v;
+					}
+					$v = isset( $fo['file_type_error_message'] ) ? trim( (string) $fo['file_type_error_message'] ) : '';
+					if ( $v !== '' ) {
+						$field['fileTypeErrorMsg'] = $v;
+					}
+					$v = isset( $fo['file_size_error_message'] ) ? trim( (string) $fo['file_size_error_message'] ) : '';
+					if ( $v !== '' ) {
+						$field['fileSizeErrorMsg'] = $v;
 					}
 
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];

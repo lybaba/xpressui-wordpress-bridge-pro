@@ -9,10 +9,11 @@
 
 ## What it adds
 
-The PRO plugin is a companion to the free [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge) plugin. It does not replace it — it extends it with two things:
+The PRO plugin is a companion to the free [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge) plugin. It does not replace it — it extends it with three things:
 
 1. **Full XPressUI runtime** — replaces the light bundle with the standard runtime, unlocking all advanced field types
 2. **PRO field templates** — server-side PHP shells for fields not included in the base plugin
+3. **Included Pro tools** — bundled QA workflows such as `Validation Playground` to test validation, uploads, and runtime behavior directly inside WordPress
 
 Everything else (submissions inbox, REST endpoint, shortcode, file uploads, notifications) stays in the base plugin.
 
@@ -50,6 +51,14 @@ Everything else (submissions inbox, REST endpoint, shortcode, file uploads, noti
 
 The PRO runtime is activated automatically — no configuration required.
 
+The plugin also bundles a QA starter workflow:
+
+- `Validation Playground`
+
+Once the PRO plugin is active, it is installed automatically and appears in:
+
+- `XPressUI -> Workflows -> Included Pro Tools`
+
 ---
 
 ## How it works
@@ -75,5 +84,5 @@ To request access, contact [hello@iakpress.com](mailto:hello@iakpress.com).
 ## Links
 
 - Base plugin: [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge)
-- Demo gallery: [demos.iakpress.com](https://demos.iakpress.com/)
+- Demo gallery: [xpressui.iakpress.com/#/demos](https://xpressui.iakpress.com/#/demos)
 - Contact: [hello@iakpress.com](mailto:hello@iakpress.com)

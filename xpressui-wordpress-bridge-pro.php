@@ -14,11 +14,19 @@ defined( 'ABSPATH' ) || exit;
 define( 'XPRESSUI_PRO_VERSION', '1.0.7' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.0' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
+define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
 
 // Register PRO detection filters immediately — before other plugins finish loading.
 // This ensures xpressui_is_pro_extension_active() returns true regardless of plugin load order.
 add_filter( 'xpressui_bridge_is_pro_extension_active', '__return_true' );
 add_filter( 'xpressui_bridge_has_valid_pro_license', '__return_true' );
+add_filter( 'xpressui_bundled_workflow_source_dirs', 'xpressui_pro_register_bundled_workflow_source_dirs' );
+
+function xpressui_pro_register_bundled_workflow_source_dirs( $dirs ) {
+	$dirs   = is_array( $dirs ) ? $dirs : [];
+	$dirs[] = XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR;
+	return $dirs;
+}
 
 register_activation_hook( __FILE__, 'xpressui_pro_check_dependencies' );
 
@@ -28,6 +36,10 @@ function xpressui_pro_check_dependencies(): void {
 		wp_die(
 			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-bridge-pro' )
 		);
+	}
+
+	if ( function_exists( 'xpressui_maybe_install_bundled_workflows' ) ) {
+		xpressui_maybe_install_bundled_workflows();
 	}
 }
 
