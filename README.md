@@ -61,6 +61,34 @@ Once the PRO plugin is active, it is installed automatically and appears in:
 
 ---
 
+## What you can edit locally in WordPress
+
+The PRO plugin is designed to reduce routine trips back to the Console after delivery.
+
+Inside wp-admin you can use `Customize Workflow` for local adaptations such as:
+
+- project title and section labels
+- field labels, helper text, placeholders, and choice labels
+- validation limits such as required, min/max length, min/max choices, and numeric ranges
+- upload rules such as accepted file types and max file size
+- navigation labels and submit feedback messages
+
+These edits are stored as a lightweight overlay in WordPress, so the installed pack stays usable even if the original Console project is not open.
+
+## What still requires the Console
+
+Structural changes still belong in the XPressUI Console. This includes:
+
+- adding or removing fields
+- changing field types
+- reworking multi-step structure
+- adding new conditional logic or workflow behavior
+- producing a new exported pack version for distribution
+
+This keeps the WordPress side focused on safe local customization while the Console remains the place for deeper product changes.
+
+---
+
 ## How it works
 
 ### Runtime swap
@@ -70,6 +98,10 @@ The base plugin loads the light XPressUI runtime by default. The PRO plugin hook
 ### Template resolution
 
 Field PHP templates are resolved by scanning a list of directories. The PRO plugin appends its own `templates/generated/fields/` directory via the `xpressui_field_template_dirs` filter, making PRO field types available without modifying the base plugin.
+
+### Local autonomy
+
+An installed workflow pack does not call back to the XPressUI Console at runtime. The site keeps rendering and accepting submissions with the assets already bundled in WordPress. The Console is only needed later if you want to make structural edits and export a new pack version.
 
 ---
 

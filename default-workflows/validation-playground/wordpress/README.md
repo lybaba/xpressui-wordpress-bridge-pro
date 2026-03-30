@@ -2,6 +2,9 @@
 
 This package gives you a ready-to-publish workflow for testing field validation in WordPress.
 
+It is bundled with the Pro extension because it exercises advanced runtime
+coverage, including `select-multiple`, alongside upload and validation checks.
+
 ## What you get
 - A multi-step workflow covering the most useful field types
 - Upload fields for file type and file size validation

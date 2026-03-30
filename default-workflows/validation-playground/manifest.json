@@ -25,7 +25,7 @@
     "submissionEndpoint": "rest_url('xpressui/v1/submit')"
   },
   "runtimeRequirements": {
-    "tier": "light",
+    "tier": "pro",
     "minimumPluginVersion": "1.0.0",
     "minimumRuntimeVersion": "1.0.0"
   },
@@ -67,7 +67,7 @@
     "fallbackBridgeMode": "none",
     "shortcodeMode": "config-driven",
     "supportsBundledDemo": false,
-    "requiresLicense": false
+    "requiresLicense": true
   },
   "integrationTargets": {
     "wordpress": {

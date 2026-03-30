@@ -7,11 +7,10 @@ require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 add_filter( 'xpressui_runtime_url', 'xpressui_pro_override_runtime_url', 10, 2 );
 
 function xpressui_pro_override_runtime_url( string $url, string $slug ): string {
-	$runtime_file = XPRESSUI_PRO_DIR . 'runtime/xpressui-' . XPRESSUI_PRO_RUNTIME_VERSION . '.umd.js';
-	if ( ! file_exists( $runtime_file ) ) {
+	if ( ! xpressui_pro_has_bundled_runtime() ) {
 		return $url;
 	}
-	return plugin_dir_url( XPRESSUI_PRO_DIR . 'xpressui-wordpress-bridge-pro.php' ) . 'runtime/xpressui-' . XPRESSUI_PRO_RUNTIME_VERSION . '.umd.js';
+	return xpressui_pro_get_runtime_asset_url();
 }
 
 add_filter( 'xpressui_field_template_dirs', 'xpressui_pro_register_template_dirs' );
