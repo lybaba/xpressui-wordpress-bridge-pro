@@ -274,6 +274,33 @@ function xpressui_pro_field_has_choices( array $field ): bool {
 }
 
 /**
+ * Normalize a saved choice overlay entry for admin rendering.
+ *
+ * @param mixed $entry Raw overlay entry.
+ * @return array{label:string, enabled:bool|null}
+ */
+function xpressui_pro_admin_normalize_choice_overlay_entry( $entry ): array {
+	if ( is_string( $entry ) ) {
+		return [
+			'label'   => $entry,
+			'enabled' => null,
+		];
+	}
+
+	if ( ! is_array( $entry ) ) {
+		return [
+			'label'   => '',
+			'enabled' => null,
+		];
+	}
+
+	return [
+		'label'   => isset( $entry['label'] ) ? (string) $entry['label'] : '',
+		'enabled' => array_key_exists( 'enabled', $entry ) ? (bool) $entry['enabled'] : null,
+	];
+}
+
+/**
  * Returns whether a field supports regex pattern validation.
  */
 function xpressui_pro_field_supports_pattern( array $field ): bool {
@@ -524,14 +551,45 @@ function xpressui_pro_render_customize_page(): void {
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_choices';
 			}
 
-			// Choice labels.
+			// Choice labels and enabled state.
 			if ( xpressui_pro_field_has_choices( $pack_field ) && isset( $field_data['choices'] ) && is_array( $field_data['choices'] ) ) {
 				$choices_entry = [];
-				foreach ( $field_data['choices'] as $cv => $cl ) {
+				$pack_choices_map = [];
+				foreach ( (array) $pack_field['choices'] as $pack_choice ) {
+					$pack_choice_value = (string) ( $pack_choice['value'] ?? '' );
+					if ( '' === $pack_choice_value ) {
+						continue;
+					}
+					$pack_choices_map[ $pack_choice_value ] = [
+						'label'   => (string) ( $pack_choice['label'] ?? $pack_choice_value ),
+						'enabled' => empty( $pack_choice['disabled'] ),
+					];
+				}
+				foreach ( $field_data['choices'] as $cv => $choice_data ) {
 					$cv = (string) $cv;
-					$cl = sanitize_text_field( wp_unslash( (string) $cl ) );
-					if ( $cv !== '' && $cl !== '' ) {
-						$choices_entry[ $cv ] = $cl;
+					if ( '' === $cv || ! isset( $pack_choices_map[ $cv ] ) ) {
+						continue;
+					}
+
+					$choice_entry   = [];
+					$choice_label   = '';
+					$choice_enabled = $pack_choices_map[ $cv ]['enabled'];
+
+					if ( is_array( $choice_data ) ) {
+						$choice_label = sanitize_text_field( wp_unslash( (string) ( $choice_data['label'] ?? '' ) ) );
+						$choice_enabled = isset( $choice_data['enabled'] ) && '1' === (string) wp_unslash( $choice_data['enabled'] );
+					} else {
+						$choice_label = sanitize_text_field( wp_unslash( (string) $choice_data ) );
+					}
+
+					if ( $choice_label !== '' && $choice_label !== $pack_choices_map[ $cv ]['label'] ) {
+						$choice_entry['label'] = $choice_label;
+					}
+					if ( $choice_enabled !== $pack_choices_map[ $cv ]['enabled'] ) {
+						$choice_entry['enabled'] = $choice_enabled;
+					}
+					if ( ! empty( $choice_entry ) ) {
+						$choices_entry[ $cv ] = $choice_entry;
 					}
 				}
 				if ( ! empty( $choices_entry ) ) {
@@ -602,8 +660,9 @@ function xpressui_pro_render_customize_page(): void {
 		}
 		$summary_stats['field_count']++;
 		$field_choices = isset( $field_overlay['choices'] ) && is_array( $field_overlay['choices'] ) ? $field_overlay['choices'] : [];
-		foreach ( $field_choices as $choice_label ) {
-			if ( (string) $choice_label !== '' ) {
+		foreach ( $field_choices as $choice_entry ) {
+			$normalized_choice = xpressui_pro_admin_normalize_choice_overlay_entry( $choice_entry );
+			if ( $normalized_choice['label'] !== '' || null !== $normalized_choice['enabled'] ) {
 				$summary_stats['choice_count']++;
 			}
 		}
@@ -690,8 +749,10 @@ margin:-10px -20px 12px;padding:16px 18px 15px;display:flex;align-items:flex-sta
 .xpressui-field-control.is-full{grid-column:1 / -1}
 .xpressui-field-control-row{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 12px}
 .xpressui-choice-group{margin-top:10px;padding-left:12px;border-left:3px solid #d8e3f7}
-.xpressui-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.xpressui-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .xpressui-choice-label{min-width:120px;color:#5b6b82;font-size:12px;font-weight:600}
+.xpressui-choice-toggle{display:inline-flex;align-items:center;gap:6px;padding:0 8px;height:32px;border:1px solid #d6def2;border-radius:999px;background:#f8fbff;color:#183ea8;font-size:12px;font-weight:600}
+.xpressui-choice-toggle input{margin:0}
 .xpressui-muted{color:#5b6b82;font-size:12px}
 .xpressui-input-invalid{border-color:#d63638 !important;box-shadow:0 0 0 1px rgba(214,54,56,.18)}
 .xpressui-inline-field-error{margin:6px 0 0;color:#b42318;font-size:12px;font-weight:600}
@@ -722,7 +783,7 @@ echo '</div>';
 	echo '<div class="xpressui-pro-summary">';
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['section_count'] ) . '</strong><span>' . esc_html__( 'Sections customized', 'xpressui-bridge-pro' ) . '</span></div>';
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['field_count'] ) . '</strong><span>' . esc_html__( 'Fields overridden', 'xpressui-bridge-pro' ) . '</span></div>';
-	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choice labels changed', 'xpressui-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choices customized', 'xpressui-bridge-pro' ) . '</span></div>';
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['navigation_count'] ) . '</strong><span>' . esc_html__( 'Navigation labels', 'xpressui-bridge-pro' ) . '</span></div>';
 	if ( $summary_stats['has_project_settings'] ) {
 		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</strong><span>' . esc_html__( 'Project settings', 'xpressui-bridge-pro' ) . '</span></div>';
@@ -1173,21 +1234,27 @@ echo '</div>';
 				$html .= '</div>';
 			}
 
-			// Choice labels.
+			// Choice labels and enabled state.
 			if ( $supports_choice_labels ) {
 				$ov_choices = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 				$html      .= '<div class="xpressui-field-control is-full"><div class="xpressui-choice-group">';
-				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels:', 'xpressui-bridge-pro' ) . '</p>';
+				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels and availability:', 'xpressui-bridge-pro' ) . '</p>';
 				foreach ( $choices as $choice ) {
 					$cv = (string) ( $choice['value'] ?? '' );
 					$cl = (string) ( $choice['label'] ?? $cv );
 					if ( $cv === '' ) {
 						continue;
 					}
-					$ov_cl = (string) ( $ov_choices[ $cv ] ?? '' );
+					$ov_choice      = xpressui_pro_admin_normalize_choice_overlay_entry( $ov_choices[ $cv ] ?? [] );
+					$choice_enabled = null === $ov_choice['enabled'] ? empty( $choice['disabled'] ) : (bool) $ov_choice['enabled'];
 					$html .= '<div class="xpressui-choice-row">';
 					$html .= '<span class="xpressui-choice-label">' . esc_html( $cl ) . '</span>';
-					$html .= '<input type="text" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . ']" class="regular-text" style="max-width:260px" value="' . esc_attr( $ov_cl ) . '" placeholder="' . esc_attr( $cl ) . '" />';
+					$html .= '<input type="text" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][label]" class="regular-text" style="max-width:260px" value="' . esc_attr( $ov_choice['label'] ) . '" placeholder="' . esc_attr( $cl ) . '" />';
+					$html .= '<label class="xpressui-choice-toggle">';
+					$html .= '<input type="hidden" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][enabled]" value="0" />';
+					$html .= '<input type="checkbox" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][enabled]" value="1"' . checked( $choice_enabled, true, false ) . ' />';
+					$html .= '<span>' . esc_html__( 'Enabled', 'xpressui-bridge-pro' ) . '</span>';
+					$html .= '</label>';
 					$html .= '</div>';
 				}
 				$html .= '</div></div>';

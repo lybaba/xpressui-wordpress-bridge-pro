@@ -16,7 +16,12 @@
  *         'placeholder'   => 'Hint text',
  *         'desc'          => 'Help text',
  *         'error_message' => 'Custom error',
- *         'choices'       => [ 'choice_value' => 'Custom choice label', ... ],
+ *         'choices'       => [
+ *           'choice_value' => [
+ *             'label'   => 'Custom choice label',
+ *             'enabled' => true|false,
+ *           ],
+ *         ],
  *       ],
  *       ...
  *     ],
@@ -51,6 +56,50 @@ function xpressui_pro_overlay_supports_pattern( array $field ): bool {
  */
 function xpressui_pro_get_overlay_option_key( string $slug ): string {
 	return 'xpressui_overlay_' . $slug;
+}
+
+/**
+ * Normalize a choice overlay entry while staying backward-compatible with
+ * older string-only label overrides.
+ *
+ * @param mixed $entry Raw overlay entry.
+ * @return array{label:string, has_label:bool, enabled:bool, has_enabled:bool}
+ */
+function xpressui_pro_normalize_choice_overlay_entry( $entry ): array {
+	$normalized = [
+		'label'       => '',
+		'has_label'   => false,
+		'enabled'     => true,
+		'has_enabled' => false,
+	];
+
+	if ( is_string( $entry ) ) {
+		$label = trim( $entry );
+		if ( $label !== '' ) {
+			$normalized['label']     = $label;
+			$normalized['has_label'] = true;
+		}
+		return $normalized;
+	}
+
+	if ( ! is_array( $entry ) ) {
+		return $normalized;
+	}
+
+	if ( isset( $entry['label'] ) ) {
+		$label = trim( (string) $entry['label'] );
+		if ( $label !== '' ) {
+			$normalized['label']     = $label;
+			$normalized['has_label'] = true;
+		}
+	}
+
+	if ( array_key_exists( 'enabled', $entry ) ) {
+		$normalized['enabled']     = (bool) $entry['enabled'];
+		$normalized['has_enabled'] = true;
+	}
+
+	return $normalized;
 }
 
 /**
@@ -203,15 +252,18 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 						}
 					}
 
-					// Choice labels.
+					// Choice labels and enabled state.
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
 						foreach ( $field['choices'] as &$choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
 							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
-								$cl = trim( (string) $choices_overlay[ $cv ] );
-								if ( $cl !== '' ) {
-									$choice['label'] = $cl;
+								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
+								if ( $choice_overlay['has_label'] ) {
+									$choice['label'] = $choice_overlay['label'];
+								}
+								if ( $choice_overlay['has_enabled'] ) {
+									$choice['disabled'] = ! $choice_overlay['enabled'];
 								}
 							}
 						}
@@ -380,9 +432,12 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 						foreach ( $field['choices'] as &$choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
 							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
-								$cl = trim( (string) $choices_overlay[ $cv ] );
-								if ( $cl !== '' ) {
-									$choice['label'] = $cl;
+								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
+								if ( $choice_overlay['has_label'] ) {
+									$choice['label'] = $choice_overlay['label'];
+								}
+								if ( $choice_overlay['has_enabled'] ) {
+									$choice['disabled'] = ! $choice_overlay['enabled'];
 								}
 							}
 						}
