@@ -51,13 +51,9 @@ define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL', 6 * HOUR_IN_SECONDS );
  */
 define( 'XPRESSUI_PRO_LICENSE_GRACE_PERIOD', 3 * DAY_IN_SECONDS );
 
-/**
- * Registers the hooks for license management.
- */
-function xpressui_pro_initialize_license_handler() {
-	add_action( 'admin_init', 'xpressui_pro_handle_license_form_submission' );
-}
-add_action( 'plugins_loaded', 'xpressui_pro_initialize_license_handler' );
+
+// L'action est enregistrée directement pour éviter tout problème de timing d'inclusion.
+add_action( 'admin_post_xpressui_pro_license_actions', 'xpressui_pro_handle_license_form_submission' );
 
 /**
  * Handles the submission of the license activation/deactivation form.
@@ -65,33 +61,34 @@ add_action( 'plugins_loaded', 'xpressui_pro_initialize_license_handler' );
  * @return void
  */
 function xpressui_pro_handle_license_form_submission() {
-	if ( ! isset( $_POST['xpressui_pro_license_nonce'] ) ) {
-		return;
-	}
-
-	if ( ! wp_verify_nonce( sanitize_key( $_POST['xpressui_pro_license_nonce'] ), 'xpressui_pro_license_action' ) ) {
-		return;
-	}
+	// Use the standard WordPress nonce verification helper. It will die with a 403 error if the check fails.
+	check_admin_referer( 'xpressui_pro_license_actions', 'xpressui_pro_license_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You do not have permission to manage licenses.', 'xpressui-bridge' ) );
 	}
 
-	$base_redirect_url = admin_url( 'admin.php?page=xpressui-workflows&tab=license' );
+	$base_redirect_url = add_query_arg(
+		[
+			'post_type' => 'xpressui_submission',
+			'page'      => 'xpressui-bridge',
+		],
+		admin_url( 'edit.php' )
+	);
 
 	if ( isset( $_POST['xpressui_pro_deactivate'] ) ) {
 		delete_option( XPRESSUI_PRO_LICENSE_OPTION_KEY );
 		delete_transient( XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT );
 
-		add_settings_error(
-			'xpressui-pro-license',
-			'deactivated',
-			__( 'License deactivated.', 'xpressui-bridge' ),
-			'updated'
+		$redirect_url = add_query_arg(
+			[
+				'xpressui_notice'      => rawurlencode( __( 'License deactivated.', 'xpressui-bridge' ) ),
+				'xpressui_notice_type' => 'success',
+			],
+			$base_redirect_url
 		);
 
-		set_transient( 'settings_errors', get_settings_errors(), 30 );
-		wp_safe_redirect( $base_redirect_url );
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 
@@ -101,26 +98,27 @@ function xpressui_pro_handle_license_form_submission() {
 		$result = xpressui_pro_fetch_and_verify_license_from_api( $license_key );
 
 		if ( is_wp_error( $result ) ) {
-			add_settings_error(
-				'xpressui-pro-license',
-				'activation_failed',
-				$result->get_error_message(),
-				'error'
+			$redirect_url = add_query_arg(
+				[
+					'xpressui_notice'      => rawurlencode( $result->get_error_message() ),
+					'xpressui_notice_type' => 'error',
+				],
+				$base_redirect_url
 			);
 		} else {
 			update_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, $result );
 			delete_transient( XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT );
 
-			add_settings_error(
-				'xpressui-pro-license',
-				'activated',
-				__( 'License activated successfully!', 'xpressui-bridge' ),
-				'updated'
+			$redirect_url = add_query_arg(
+				[
+					'xpressui_notice'      => rawurlencode( __( 'License activated successfully!', 'xpressui-bridge' ) ),
+					'xpressui_notice_type' => 'success',
+				],
+				$base_redirect_url
 			);
 		}
 
-		set_transient( 'settings_errors', get_settings_errors(), 30 );
-		wp_safe_redirect( $base_redirect_url );
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 }
@@ -151,6 +149,13 @@ function xpressui_pro_fetch_and_verify_license_from_api( $license_key ) {
 			),
 		]
 	);
+
+	// --- DEBUGGING: Log API response ---
+	if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+		$log_message = is_wp_error( $api_response ) ? 'WP_Error: ' . $api_response->get_error_message() : 'Response Body: ' . wp_remote_retrieve_body( $api_response );
+		error_log( '[XPressUI Pro] License API Response: ' . $log_message );
+	}
+	// --- END DEBUGGING ---
 
 	if ( is_wp_error( $api_response ) ) {
 		return new WP_Error(

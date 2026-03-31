@@ -32,8 +32,9 @@ function xpressui_pro_render_license_form() {
 		$masked_key = substr( $license_key, 0, 4 ) . str_repeat( '*', max( 0, strlen( $license_key ) - 8 ) ) . substr( $license_key, -4 );
 	}
 	?>
-	<form method="post">
-		<?php wp_nonce_field( 'xpressui_pro_license_action', 'xpressui_pro_license_nonce' ); ?>
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<?php wp_nonce_field( 'xpressui_pro_license_actions', 'xpressui_pro_license_nonce' ); ?>
+		<input type="hidden" name="action" value="xpressui_pro_license_actions" />
 		<table class="form-table">
 			<tbody>
 				<tr>
