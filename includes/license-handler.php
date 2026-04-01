@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The API endpoint for license verification.
  */
-define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://console.iakpress.com/api/v1/licenses/verify' );
+define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://xpressui.iakpress.com/api/v1/licenses/verify' );
 
 /**
  * Option key to store license data in wp_options.
