@@ -1,4 +1,4 @@
-=== XPressUI Bridge PRO ===
+=== XPressUI WordPress Bridge PRO ===
 Contributors: iakpressteam
 Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
