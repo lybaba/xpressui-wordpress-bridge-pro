@@ -38,11 +38,11 @@ function xpressui_pro_render_license_form() {
 		<table class="form-table">
 			<tbody>
 				<tr>
-					<th><label for="xpressui_pro_license_key"><?php esc_html_e( 'License key', 'xpressui-bridge' ); ?></label></th>
+					<th><label for="xpressui_pro_license_key"><?php esc_html_e( 'License key', 'xpressui-wordpress-bridge-pro' ); ?></label></th>
 					<td>
 						<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>" autocomplete="off" <?php echo $is_active ? 'readonly' : ''; ?> />
 						<?php if ( $is_active && $masked_key ) : ?>
-							<p class="description"><?php esc_html_e( 'Active key:', 'xpressui-bridge' ); ?> <code><?php echo esc_html( $masked_key ); ?></code></p>
+							<p class="description"><?php esc_html_e( 'Active key:', 'xpressui-wordpress-bridge-pro' ); ?> <code><?php echo esc_html( $masked_key ); ?></code></p>
 						<?php endif; ?>
 					</td>
 				</tr>
@@ -50,9 +50,9 @@ function xpressui_pro_render_license_form() {
 		</table>
 		<p class="submit">
 			<?php if ( $is_active ) : ?>
-				<input type="submit" name="xpressui_pro_deactivate" class="button" value="<?php esc_attr_e( 'Deactivate License', 'xpressui-bridge-pro' ); ?>" />
+				<input type="submit" name="xpressui_pro_deactivate" class="button" value="<?php esc_attr_e( 'Deactivate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php else : ?>
-				<input type="submit" name="xpressui_pro_activate" class="button button-primary" value="<?php esc_attr_e( 'Activate License', 'xpressui-bridge-pro' ); ?>" />
+				<input type="submit" name="xpressui_pro_activate" class="button button-primary" value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php endif; ?>
 		</p>
 	</form>

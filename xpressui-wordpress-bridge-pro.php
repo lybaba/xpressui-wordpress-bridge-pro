@@ -3,15 +3,15 @@
  * Plugin Name: XPressUI WordPress Bridge PRO
  * Plugin URI:  https://github.com/lybaba/xpressui-wordpress-bridge-pro
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
- * Version:     1.0.8
+ * Version:     1.0.9
  * Author:      Babaly LY
  * License:     GPL-2.0-or-later
- * Text Domain: xpressui-bridge-pro
+ * Text Domain:        xpressui-wordpress-bridge-pro
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_VERSION', '1.0.8' );
+define( 'XPRESSUI_PRO_VERSION', '1.0.9' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.0' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
@@ -49,7 +49,7 @@ function xpressui_pro_check_dependencies(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-bridge-pro' )
+			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -64,7 +64,7 @@ add_action( 'admin_notices', 'xpressui_pro_runtime_notice' );
 function xpressui_pro_dependency_notice(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		echo '<div class="notice notice-error"><p>' .
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin.', 'xpressui-bridge-pro' ) .
+			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin.', 'xpressui-wordpress-bridge-pro' ) .
 			'</p></div>';
 	}
 }
@@ -75,7 +75,7 @@ function xpressui_pro_runtime_notice(): void {
 	}
 
 	echo '<div class="notice notice-warning"><p>' .
-		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-bridge-pro' ) .
+		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-wordpress-bridge-pro' ) .
 		'</p></div>';
 }
 

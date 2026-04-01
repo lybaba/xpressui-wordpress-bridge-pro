@@ -16,8 +16,8 @@ add_action( 'admin_menu', 'xpressui_pro_register_customize_page' );
 function xpressui_pro_register_customize_page(): void {
 	add_submenu_page(
 		null,
-		__( 'Customize Workflow', 'xpressui-bridge-pro' ),
-		__( 'Customize Workflow', 'xpressui-bridge-pro' ),
+		__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ),
+		__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ),
 		'manage_options',
 		'xpressui-customize',
 		'xpressui_pro_render_customize_page'
@@ -40,7 +40,7 @@ function xpressui_pro_workflow_row_actions( array $actions, string $slug ): arra
 		admin_url( 'edit.php' )
 	);
 	$actions[] = '<a href="' . esc_url( $url ) . '" class="xpressui-pro-action-link">'
-		. '<span>' . esc_html__( 'Customize', 'xpressui-bridge-pro' ) . '</span>'
+		. '<span>' . esc_html__( 'Customize', 'xpressui-wordpress-bridge-pro' ) . '</span>'
 		. ' <span class="xpressui-pro-action-badge">PRO</span>'
 		. '</a>';
 	return $actions;
@@ -212,7 +212,7 @@ function xpressui_pro_collect_overlay_int(
 	if ( ! preg_match( '/^\d+$/', $raw ) ) {
 		$warnings[]       = sprintf(
 			/* translators: 1: field label, 2: validation label. */
-			__( 'The value for "%1$s" (%2$s) was not saved because it must be a whole number.', 'xpressui-bridge-pro' ),
+			__( 'The value for "%1$s" (%2$s) was not saved because it must be a whole number.', 'xpressui-wordpress-bridge-pro' ),
 			$field_name,
 			$label
 		);
@@ -246,7 +246,7 @@ function xpressui_pro_collect_overlay_number(
 	if ( ! is_numeric( $raw ) ) {
 		$warnings[]       = sprintf(
 			/* translators: 1: field label, 2: validation label. */
-			__( 'The value for "%1$s" (%2$s) was not saved because it must be numeric.', 'xpressui-bridge-pro' ),
+			__( 'The value for "%1$s" (%2$s) was not saved because it must be numeric.', 'xpressui-wordpress-bridge-pro' ),
 			$field_name,
 			$label
 		);
@@ -315,13 +315,13 @@ function xpressui_pro_field_supports_pattern( array $field ): bool {
 
 function xpressui_pro_render_customize_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-bridge-pro' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
 	}
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$slug = sanitize_title( wp_unslash( (string) ( $_GET['xpressui_slug'] ?? '' ) ) );
 	if ( $slug === '' || ! xpressui_is_installed_workflow( $slug ) ) {
-		wp_die( esc_html__( 'Workflow not found.', 'xpressui-bridge-pro' ) );
+		wp_die( esc_html__( 'Workflow not found.', 'xpressui-wordpress-bridge-pro' ) );
 	}
 
 	$back_url = add_query_arg(
@@ -355,24 +355,22 @@ function xpressui_pro_render_customize_page(): void {
 	if ( isset( $_POST['xpressui_save_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
 
 		// Project settings (stored separately in xpressui_project_settings).
-		$raw_notify_email         = trim( wp_unslash( (string) ( $_POST['xpressui_notify_email'] ?? '' ) ) );
-		$raw_redirect_url         = trim( wp_unslash( (string) ( $_POST['xpressui_redirect_url'] ?? '' ) ) );
+		$notify_email             = sanitize_email( trim( wp_unslash( $_POST['xpressui_notify_email'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_email() is applied
+		$redirect_url             = esc_url_raw( trim( wp_unslash( $_POST['xpressui_redirect_url'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() is applied
 		$show_project_title       = ! empty( $_POST['xpressui_show_project_title'] ) ? '1' : '0';
 		$show_required_note       = ! empty( $_POST['xpressui_show_required_fields_note'] ) ? '1' : '0';
 		$section_label_visibility = sanitize_key( wp_unslash( (string) ( $_POST['xpressui_section_label_visibility'] ?? 'auto' ) ) );
 		if ( ! in_array( $section_label_visibility, [ 'auto', 'show', 'hide' ], true ) ) {
 			$section_label_visibility = 'auto';
 		}
-		$notify_email             = sanitize_email( $raw_notify_email );
-		$redirect_url             = esc_url_raw( $raw_redirect_url );
 
 		$save_warnings = [];
 		if ( $raw_notify_email !== '' && $notify_email === '' ) {
-			$save_warnings[] = __( 'The notification email was not saved because it is not a valid email address.', 'xpressui-bridge-pro' );
+			$save_warnings[] = __( 'The notification email was not saved because it is not a valid email address.', 'xpressui-wordpress-bridge-pro' );
 			$invalid_fields[] = 'xpressui_notify_email';
 		}
 		if ( $raw_redirect_url !== '' && $redirect_url === '' ) {
-			$save_warnings[] = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-bridge-pro' );
+			$save_warnings[] = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-wordpress-bridge-pro' );
 			$invalid_fields[] = 'xpressui_redirect_url';
 		}
 		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url, $show_project_title, $show_required_note, $section_label_visibility );
@@ -409,7 +407,7 @@ function xpressui_pro_render_customize_page(): void {
 
 		// Section labels.
 		$raw_sections = isset( $_POST['xpressui_overlay_sections'] ) && is_array( $_POST['xpressui_overlay_sections'] )
-			? $_POST['xpressui_overlay_sections'] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			? wp_unslash( $_POST['xpressui_overlay_sections'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value sanitized individually below
 			: [];
 		$sections_overlay = [];
 		foreach ( $raw_sections as $sname => $slabel ) {
@@ -425,7 +423,7 @@ function xpressui_pro_render_customize_page(): void {
 
 		// Fields.
 		$raw_fields = isset( $_POST['xpressui_overlay_fields'] ) && is_array( $_POST['xpressui_overlay_fields'] )
-			? $_POST['xpressui_overlay_fields'] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			? wp_unslash( $_POST['xpressui_overlay_fields'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value sanitized individually below
 			: [];
 		$fields_overlay = [];
 		foreach ( $raw_fields as $field_name => $field_data ) {
@@ -469,16 +467,16 @@ function xpressui_pro_render_customize_page(): void {
 				$entry['pattern'] = $v;
 			}
 
-			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_len', 'min_len', __( 'Min length', 'xpressui-bridge-pro' ) );
-			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_len', 'max_len', __( 'Max length', 'xpressui-bridge-pro' ) );
+			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_len', 'min_len', __( 'Min length', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_len', 'max_len', __( 'Max length', 'xpressui-wordpress-bridge-pro' ) );
 			if ( xpressui_pro_field_supports_choice_limits( $pack_field ) ) {
-				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_choices', 'min_choices', __( 'Minimum choices', 'xpressui-bridge-pro' ) );
-				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_choices', 'max_choices', __( 'Maximum choices', 'xpressui-bridge-pro' ) );
+				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_choices', 'min_choices', __( 'Minimum choices', 'xpressui-wordpress-bridge-pro' ) );
+				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_choices', 'max_choices', __( 'Maximum choices', 'xpressui-wordpress-bridge-pro' ) );
 			}
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_value', 'min_value', __( 'Minimum value', 'xpressui-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_value', 'max_value', __( 'Maximum value', 'xpressui-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'step_value', 'step_value', __( 'Step', 'xpressui-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_file_size_mb', 'max_file_size_mb', __( 'Maximum file size (MB)', 'xpressui-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_value', 'min_value', __( 'Minimum value', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_value', 'max_value', __( 'Maximum value', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'step_value', 'step_value', __( 'Step', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_file_size_mb', 'max_file_size_mb', __( 'Maximum file size (MB)', 'xpressui-wordpress-bridge-pro' ) );
 
 			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'accept' ) );
 			if ( $v !== '' ) {
@@ -502,7 +500,7 @@ function xpressui_pro_render_customize_page(): void {
 				unset( $entry['min_len'], $entry['max_len'] );
 				$save_warnings[] = sprintf(
 					/* translators: %s: field label. */
-					__( 'The min/max length values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-bridge-pro' ),
+					__( 'The min/max length values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
 					$field_name
 				);
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_len';
@@ -513,7 +511,7 @@ function xpressui_pro_render_customize_page(): void {
 				unset( $entry['min_value'], $entry['max_value'] );
 				$save_warnings[] = sprintf(
 					/* translators: %s: field label. */
-					__( 'The min/max values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-bridge-pro' ),
+					__( 'The min/max values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
 					$field_name
 				);
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_value';
@@ -524,7 +522,7 @@ function xpressui_pro_render_customize_page(): void {
 				unset( $entry['step_value'] );
 				$save_warnings[] = sprintf(
 					/* translators: %s: field label. */
-					__( 'The step value for "%s" was not saved because it must be greater than zero.', 'xpressui-bridge-pro' ),
+					__( 'The step value for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
 					$field_name
 				);
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_step_value';
@@ -534,7 +532,7 @@ function xpressui_pro_render_customize_page(): void {
 				unset( $entry['max_file_size_mb'] );
 				$save_warnings[] = sprintf(
 					/* translators: %s: field label. */
-					__( 'The maximum file size for "%s" was not saved because it must be greater than zero.', 'xpressui-bridge-pro' ),
+					__( 'The maximum file size for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
 					$field_name
 				);
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_file_size_mb';
@@ -544,7 +542,7 @@ function xpressui_pro_render_customize_page(): void {
 				unset( $entry['min_choices'], $entry['max_choices'] );
 				$save_warnings[] = sprintf(
 					/* translators: %s: field label. */
-					__( 'The minimum/maximum choices for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-bridge-pro' ),
+					__( 'The minimum/maximum choices for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
 					$field_name
 				);
 				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_choices';
@@ -608,7 +606,7 @@ function xpressui_pro_render_customize_page(): void {
 		xpressui_pro_save_workflow_overlay( $slug, $overlay );
 		$notice_class    = empty( $save_warnings ) ? 'notice-success' : 'notice-warning';
 		$notice_messages = array_merge(
-			[ __( 'Customizations saved.', 'xpressui-bridge-pro' ) ],
+			[ __( 'Customizations saved.', 'xpressui-wordpress-bridge-pro' ) ],
 			$save_warnings
 		);
 	}
@@ -617,7 +615,7 @@ function xpressui_pro_render_customize_page(): void {
 	if ( isset( $_POST['xpressui_reset_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
 		xpressui_pro_delete_workflow_overlay( $slug );
 		$notice_class    = 'notice-success';
-		$notice_messages = [ __( 'Customizations reset to pack defaults.', 'xpressui-bridge-pro' ) ];
+		$notice_messages = [ __( 'Customizations reset to pack defaults.', 'xpressui-wordpress-bridge-pro' ) ];
 	}
 
 	// -----------------------------------------------------------------------
@@ -761,35 +759,35 @@ margin:-10px -20px 12px;padding:16px 18px 15px;display:flex;align-items:flex-sta
 </style>';
 echo '<div class="xpressui-pro-header">';
 echo '<div class="xpressui-pro-header-left">';
-echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-bridge-pro' ) . '</h1>';
+echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
 echo '<p><strong style="color:rgba(255,255,255,.9)">' . esc_html( $slug ) . '</strong> &mdash; '
-		. esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-bridge-pro' ) . '</p>';
+		. esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 echo '</div>';
 	echo '<div class="xpressui-pro-header-right">';
 	echo '<span class="xpressui-pro-badge">✦ &nbsp;XPressUI Pro</span>';
-	echo '<a href="' . esc_url( $back_url ) . '" class="xpressui-pro-back">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-bridge-pro' ) . '</a>';
+	echo '<a href="' . esc_url( $back_url ) . '" class="xpressui-pro-back">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-wordpress-bridge-pro' ) . '</a>';
 echo '</div>';
 
 echo '<div class="xpressui-inline-notice" style="border-left-color:#183ea8;background:#f5f9ff">';
-echo '<p>' . esc_html__( 'Use this screen for local wording, validation, upload, and branding-safe adjustments. Keep structural changes such as new steps, new fields, or workflow logic in the XPressUI Console, then re-export the pack.', 'xpressui-bridge-pro' ) . '</p>';
+echo '<p>' . esc_html__( 'Use this screen for local wording, validation, upload, and branding-safe adjustments. Keep structural changes such as new steps, new fields, or workflow logic in the XPressUI Console, then re-export the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 echo '<ul>';
-echo '<li>' . esc_html__( 'Project Settings: notification, redirect, and page-level display behavior.', 'xpressui-bridge-pro' ) . '</li>';
-echo '<li>' . esc_html__( 'Customize Workflow: labels, helper text, validation limits, upload rules, and navigation wording.', 'xpressui-bridge-pro' ) . '</li>';
-echo '<li>' . esc_html__( 'XPressUI Console: structural edits, new sections, new fields, and conditional workflow logic.', 'xpressui-bridge-pro' ) . '</li>';
+echo '<li>' . esc_html__( 'Project Settings: notification, redirect, and page-level display behavior.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
+echo '<li>' . esc_html__( 'Customize Workflow: labels, helper text, validation limits, upload rules, and navigation wording.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
+echo '<li>' . esc_html__( 'XPressUI Console: structural edits, new sections, new fields, and conditional workflow logic.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
 echo '</ul>';
 echo '</div>';
 	echo '</div>';
 
 	echo '<div class="xpressui-pro-summary">';
-	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['section_count'] ) . '</strong><span>' . esc_html__( 'Sections customized', 'xpressui-bridge-pro' ) . '</span></div>';
-	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['field_count'] ) . '</strong><span>' . esc_html__( 'Fields overridden', 'xpressui-bridge-pro' ) . '</span></div>';
-	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choices customized', 'xpressui-bridge-pro' ) . '</span></div>';
-	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['navigation_count'] ) . '</strong><span>' . esc_html__( 'Navigation labels', 'xpressui-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['section_count'] ) . '</strong><span>' . esc_html__( 'Sections customized', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['field_count'] ) . '</strong><span>' . esc_html__( 'Fields overridden', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choices customized', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
+	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['navigation_count'] ) . '</strong><span>' . esc_html__( 'Navigation labels', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	if ( $summary_stats['has_project_settings'] ) {
-		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</strong><span>' . esc_html__( 'Project settings', 'xpressui-bridge-pro' ) . '</span></div>';
+		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-wordpress-bridge-pro' ) . '</strong><span>' . esc_html__( 'Project settings', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	}
 	if ( $summary_stats['has_submit_feedback'] ) {
-		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</strong><span>' . esc_html__( 'Submit feedback', 'xpressui-bridge-pro' ) . '</span></div>';
+		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-wordpress-bridge-pro' ) . '</strong><span>' . esc_html__( 'Submit feedback', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	}
 	echo '</div>';
 
@@ -816,31 +814,31 @@ echo '</div>';
 	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
 
 	echo '<div class="xpressui-pro-toolbar">';
-	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="all">' . esc_html__( 'Open all sections', 'xpressui-bridge-pro' ) . '</button>';
-	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="customized">' . esc_html__( 'Open customized only', 'xpressui-bridge-pro' ) . '</button>';
-	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="none">' . esc_html__( 'Collapse all', 'xpressui-bridge-pro' ) . '</button>';
-	echo '<button type="button" class="xpressui-pro-details-toggle is-accent" data-target="jump-customized">' . esc_html__( 'Jump to first customized section', 'xpressui-bridge-pro' ) . '</button>';
-	echo '<button type="button" class="xpressui-pro-filter-toggle" data-filter="customized-only" aria-pressed="false">' . esc_html__( 'Customized cards only', 'xpressui-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="all">' . esc_html__( 'Open all sections', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="customized">' . esc_html__( 'Open customized only', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="none">' . esc_html__( 'Collapse all', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-details-toggle is-accent" data-target="jump-customized">' . esc_html__( 'Jump to first customized section', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	echo '<button type="button" class="xpressui-pro-filter-toggle" data-filter="customized-only" aria-pressed="false">' . esc_html__( 'Customized cards only', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 	echo '<div class="xpressui-pro-toolbar-search">';
-	echo '<input type="search" value="" placeholder="' . esc_attr__( 'Search sections, fields, labels…', 'xpressui-bridge-pro' ) . '" data-xpressui-card-search />';
-	echo '<button type="button" class="xpressui-pro-clear-search" data-action="clear-search">' . esc_html__( 'Clear', 'xpressui-bridge-pro' ) . '</button>';
-	echo '<span class="xpressui-pro-toolbar-meta"><strong data-xpressui-visible-count>0</strong> ' . esc_html__( 'visible', 'xpressui-bridge-pro' ) . '</span>';
+	echo '<input type="search" value="" placeholder="' . esc_attr__( 'Search sections, fields, labels…', 'xpressui-wordpress-bridge-pro' ) . '" data-xpressui-card-search />';
+	echo '<button type="button" class="xpressui-pro-clear-search" data-action="clear-search">' . esc_html__( 'Clear', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	echo '<span class="xpressui-pro-toolbar-meta"><strong data-xpressui-visible-count>0</strong> ' . esc_html__( 'visible', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 	echo '</div>';
 	echo '</div>';
-	echo '<div class="xpressui-pro-empty-state" data-xpressui-empty-state>' . esc_html__( 'No customization cards match the current filters. Try clearing the search or turning off the customized-only filter.', 'xpressui-bridge-pro' ) . '</div>';
+	echo '<div class="xpressui-pro-empty-state" data-xpressui-empty-state>' . esc_html__( 'No customization cards match the current filters. Try clearing the search or turning off the customized-only filter.', 'xpressui-wordpress-bridge-pro' ) . '</div>';
 
 	// Sticky save bar.
 	echo '<div class="xpressui-sticky-actions">';
-	echo '<span class="xpressui-sticky-status is-saved" data-xpressui-dirty-status="saved">' . esc_html__( 'No unsaved changes', 'xpressui-bridge-pro' ) . '</span>';
+	echo '<span class="xpressui-sticky-status is-saved" data-xpressui-dirty-status="saved">' . esc_html__( 'No unsaved changes', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 	echo '<div class="xpressui-sticky-actions-buttons">';
-	submit_button( __( 'Save Customizations', 'xpressui-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
+	submit_button( __( 'Save Customizations', 'xpressui-wordpress-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
 	submit_button(
-		__( 'Reset to Defaults', 'xpressui-bridge-pro' ),
+		__( 'Reset to Defaults', 'xpressui-wordpress-bridge-pro' ),
 		'secondary',
 		'xpressui_reset_overlay',
 		false,
 		[
-			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-bridge-pro' ) ) . "');",
+			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-wordpress-bridge-pro' ) ) . "');",
 		]
 	);
 	echo '</div>';
@@ -866,63 +864,63 @@ echo '</div>';
 		$project_settings_count++;
 	}
 	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="project-settings" data-xpressui-customized="' . ( $summary_stats['has_project_settings'] ? '1' : '0' ) . '" data-xpressui-search-text="project settings custom form title notification email post submit redirect redirect url form title required fields note section labels single section wordpress page title" data-xpressui-reset-scope="project-settings" id="xpressui-pro-card-project-settings">';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Project Settings', 'xpressui-wordpress-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( $summary_stats['has_project_settings'] ) {
-		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
-		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="project-settings">' . esc_html__( 'Restore block', 'xpressui-bridge-pro' ) . '</button>';
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="project-settings">' . esc_html__( 'Restore block', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 	}
-	echo '<span class="xpressui-card-badge">' . esc_html( (string) $project_settings_count ) . ' ' . esc_html__( 'Active', 'xpressui-bridge-pro' ) . '</span>';
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) $project_settings_count ) . ' ' . esc_html__( 'Active', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
 		'xpressui_overlay_project_name',
-		__( 'Custom form title', 'xpressui-bridge-pro' ),
+		__( 'Custom form title', 'xpressui-wordpress-bridge-pro' ),
 		'<input type="text" id="xpressui_overlay_project_name" name="xpressui_overlay_project_name" class="regular-text" value="' . esc_attr( $ov_project_name ) . '" placeholder="' . esc_attr( $original_title ) . '" />'
-		. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-bridge-pro' ) . ' <em>' . esc_html( $original_title ) . '</em></p>'
+		. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-wordpress-bridge-pro' ) . ' <em>' . esc_html( $original_title ) . '</em></p>'
 	);
 
 	xpressui_pro_row(
 		'xpressui_notify_email',
-		__( 'Notification email', 'xpressui-bridge-pro' ),
+		__( 'Notification email', 'xpressui-wordpress-bridge-pro' ),
 		'<input type="email" id="xpressui_notify_email" name="xpressui_notify_email" class="regular-text' . ( in_array( 'xpressui_notify_email', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $proj_settings['notifyEmail'] ) . '" />'
-		. ( in_array( 'xpressui_notify_email', $invalid_fields, true ) ? '<p class="xpressui-inline-field-error">' . esc_html__( 'Enter a valid email address to keep notifications enabled.', 'xpressui-bridge-pro' ) . '</p>' : '' )
-		. '<p class="description">' . esc_html__( 'Receive an email for each new submission.', 'xpressui-bridge-pro' ) . '</p>'
+		. ( in_array( 'xpressui_notify_email', $invalid_fields, true ) ? '<p class="xpressui-inline-field-error">' . esc_html__( 'Enter a valid email address to keep notifications enabled.', 'xpressui-wordpress-bridge-pro' ) . '</p>' : '' )
+		. '<p class="description">' . esc_html__( 'Receive an email for each new submission.', 'xpressui-wordpress-bridge-pro' ) . '</p>'
 	);
 
 	xpressui_pro_row(
 		'xpressui_redirect_url',
-		__( 'Post-submit redirect', 'xpressui-bridge-pro' ),
+		__( 'Post-submit redirect', 'xpressui-wordpress-bridge-pro' ),
 		'<input type="url" id="xpressui_redirect_url" name="xpressui_redirect_url" class="regular-text' . ( in_array( 'xpressui_redirect_url', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $proj_settings['redirectUrl'] ) . '" placeholder="https://" />'
-		. ( in_array( 'xpressui_redirect_url', $invalid_fields, true ) ? '<p class="xpressui-inline-field-error">' . esc_html__( 'Enter a full valid URL, including https://, to keep the redirect active.', 'xpressui-bridge-pro' ) . '</p>' : '' )
-		. '<p class="description">' . esc_html__( 'Redirect users here after a successful submission.', 'xpressui-bridge-pro' ) . '</p>'
+		. ( in_array( 'xpressui_redirect_url', $invalid_fields, true ) ? '<p class="xpressui-inline-field-error">' . esc_html__( 'Enter a full valid URL, including https://, to keep the redirect active.', 'xpressui-wordpress-bridge-pro' ) . '</p>' : '' )
+		. '<p class="description">' . esc_html__( 'Redirect users here after a successful submission.', 'xpressui-wordpress-bridge-pro' ) . '</p>'
 	);
 
 	xpressui_pro_row(
 		'xpressui_show_project_title',
-		__( 'Form title', 'xpressui-bridge-pro' ),
+		__( 'Form title', 'xpressui-wordpress-bridge-pro' ),
 		'<label><input type="checkbox" id="xpressui_show_project_title" name="xpressui_show_project_title" value="1"' . checked( $proj_settings['showProjectTitle'], '1', false ) . ' /> '
-		. esc_html__( 'Display the workflow title above the form inside the WordPress page.', 'xpressui-bridge-pro' ) . '</label>'
-		. '<p class="description">' . esc_html__( 'Disabled by default to avoid duplicating the WordPress page title.', 'xpressui-bridge-pro' ) . '</p>'
+		. esc_html__( 'Display the workflow title above the form inside the WordPress page.', 'xpressui-wordpress-bridge-pro' ) . '</label>'
+		. '<p class="description">' . esc_html__( 'Disabled by default to avoid duplicating the WordPress page title.', 'xpressui-wordpress-bridge-pro' ) . '</p>'
 	);
 
 	xpressui_pro_row(
 		'xpressui_show_required_fields_note',
-		__( 'Required fields note', 'xpressui-bridge-pro' ),
+		__( 'Required fields note', 'xpressui-wordpress-bridge-pro' ),
 		'<label><input type="checkbox" id="xpressui_show_required_fields_note" name="xpressui_show_required_fields_note" value="1"' . checked( $proj_settings['showRequiredFieldsNote'], '1', false ) . ' /> '
-		. esc_html__( 'Display the "* Required fields" note above the form.', 'xpressui-bridge-pro' ) . '</label>'
-		. '<p class="description">' . esc_html__( 'Disabled by default for a cleaner WordPress page layout.', 'xpressui-bridge-pro' ) . '</p>'
+		. esc_html__( 'Display the "* Required fields" note above the form.', 'xpressui-wordpress-bridge-pro' ) . '</label>'
+		. '<p class="description">' . esc_html__( 'Disabled by default for a cleaner WordPress page layout.', 'xpressui-wordpress-bridge-pro' ) . '</p>'
 	);
 
 	xpressui_pro_row(
 		'xpressui_section_label_visibility',
-		__( 'Section labels', 'xpressui-bridge-pro' ),
+		__( 'Section labels', 'xpressui-wordpress-bridge-pro' ),
 		'<select id="xpressui_section_label_visibility" name="xpressui_section_label_visibility" class="regular-text">'
-		. '<option value="auto"' . selected( $proj_settings['sectionLabelVisibility'], 'auto', false ) . '>' . esc_html__( 'Auto', 'xpressui-bridge-pro' ) . '</option>'
-		. '<option value="show"' . selected( $proj_settings['sectionLabelVisibility'], 'show', false ) . '>' . esc_html__( 'Always show', 'xpressui-bridge-pro' ) . '</option>'
-		. '<option value="hide"' . selected( $proj_settings['sectionLabelVisibility'], 'hide', false ) . '>' . esc_html__( 'Always hide', 'xpressui-bridge-pro' ) . '</option>'
+		. '<option value="auto"' . selected( $proj_settings['sectionLabelVisibility'], 'auto', false ) . '>' . esc_html__( 'Auto', 'xpressui-wordpress-bridge-pro' ) . '</option>'
+		. '<option value="show"' . selected( $proj_settings['sectionLabelVisibility'], 'show', false ) . '>' . esc_html__( 'Always show', 'xpressui-wordpress-bridge-pro' ) . '</option>'
+		. '<option value="hide"' . selected( $proj_settings['sectionLabelVisibility'], 'hide', false ) . '>' . esc_html__( 'Always hide', 'xpressui-wordpress-bridge-pro' ) . '</option>'
 		. '</select>'
-		. '<p class="description">' . esc_html__( 'Auto hides section titles when the workflow only contains one section.', 'xpressui-bridge-pro' ) . '</p>'
+		. '<p class="description">' . esc_html__( 'Auto hides section titles when the workflow only contains one section.', 'xpressui-wordpress-bridge-pro' ) . '</p>'
 	);
 
 	echo '</tbody></table></div>';
@@ -939,24 +937,24 @@ echo '</div>';
 		}
 	}
 	echo '<details class="xpressui-admin-card" open data-xpressui-card-type="submit-feedback" data-xpressui-customized="' . ( $summary_stats['has_submit_feedback'] ? '1' : '0' ) . '" data-xpressui-search-text="submit feedback success message error message submission failed submission received" data-xpressui-reset-scope="submit-feedback" id="xpressui-pro-card-submit-feedback">';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Submit Feedback', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Submit Feedback', 'xpressui-wordpress-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( $summary_stats['has_submit_feedback'] ) {
-		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
-		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="submit-feedback">' . esc_html__( 'Restore block', 'xpressui-bridge-pro' ) . '</button>';
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="submit-feedback">' . esc_html__( 'Restore block', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 	}
-	echo '<span class="xpressui-card-badge">' . esc_html( (string) $submit_feedback_count ) . ' ' . esc_html__( 'Messages', 'xpressui-bridge-pro' ) . '</span>';
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) $submit_feedback_count ) . ' ' . esc_html__( 'Messages', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
 	xpressui_pro_row(
 		'xpressui_overlay_success_message',
-		__( 'Success message', 'xpressui-bridge-pro' ),
+		__( 'Success message', 'xpressui-wordpress-bridge-pro' ),
 		'<input type="text" id="xpressui_overlay_success_message" name="xpressui_overlay_success_message" class="large-text" value="' . esc_attr( $ov_success_message ) . '" />'
 	);
 
 	xpressui_pro_row(
 		'xpressui_overlay_error_message',
-		__( 'Error message', 'xpressui-bridge-pro' ),
+		__( 'Error message', 'xpressui-wordpress-bridge-pro' ),
 		'<input type="text" id="xpressui_overlay_error_message" name="xpressui_overlay_error_message" class="large-text" value="' . esc_attr( $ov_error_message ) . '" />'
 	);
 
@@ -969,17 +967,17 @@ echo '</div>';
 
 	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
 	$nav_fields = [
-		'prev'   => [ __( 'Back button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
-		'next'   => [ __( 'Continue button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['nextLabel'] ?? 'Continue' ) ],
-		'submit' => [ __( 'Submit button', 'xpressui-bridge-pro' ), (string) ( $pack_nav['submitLabel'] ?? 'Submit' ) ],
+		'prev'   => [ __( 'Back button', 'xpressui-wordpress-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
+		'next'   => [ __( 'Continue button', 'xpressui-wordpress-bridge-pro' ), (string) ( $pack_nav['nextLabel'] ?? 'Continue' ) ],
+		'submit' => [ __( 'Submit button', 'xpressui-wordpress-bridge-pro' ), (string) ( $pack_nav['submitLabel'] ?? 'Submit' ) ],
 	];
-	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '" data-xpressui-search-text="navigation labels back continue submit buttons" data-xpressui-reset-scope="navigation" id="xpressui-pro-card-navigation">';
-	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	echo '<details class="xpressui-admin-card"' . $nav_open . ' data-xpressui-card-type="navigation" data-xpressui-customized="' . ( ! empty( $ov_navigation ) ? '1' : '0' ) . '" data-xpressui-search-text="navigation labels back continue submit buttons" data-xpressui-reset-scope="navigation" id="xpressui-pro-card-navigation">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $nav_open is a hardcoded HTML attribute built from a boolean
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Navigation Labels', 'xpressui-wordpress-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
 	if ( ! empty( $ov_navigation ) ) {
-		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
-		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="navigation">' . esc_html__( 'Restore block', 'xpressui-bridge-pro' ) . '</button>';
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="navigation">' . esc_html__( 'Restore block', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 	}
-	echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $nav_fields ) ) . ' ' . esc_html__( 'Buttons', 'xpressui-bridge-pro' ) . '</span>';
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $nav_fields ) ) . ' ' . esc_html__( 'Buttons', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 	echo '</span></summary>';
 	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
 
@@ -989,7 +987,7 @@ echo '</div>';
 			'xpressui_overlay_nav_' . $nav_key,
 			$nav_label,
 			'<input type="text" id="xpressui_overlay_nav_' . esc_attr( $nav_key ) . '" name="xpressui_overlay_nav_' . esc_attr( $nav_key ) . '" class="regular-text" value="' . esc_attr( $current_val ) . '" placeholder="' . esc_attr( $nav_default ) . '" />'
-			. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-bridge-pro' ) . ' <em>' . esc_html( $nav_default ) . '</em></p>'
+			. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-wordpress-bridge-pro' ) . ' <em>' . esc_html( $nav_default ) . '</em></p>'
 		);
 	}
 
@@ -1039,15 +1037,15 @@ echo '</div>';
 		}
 		$section_search_text = strtolower( trim( implode( ' ', array_filter( array_map( 'strval', $section_search_tokens ) ) ) ) );
 
-		echo '<details class="xpressui-admin-card"' . $card_open . ' data-xpressui-card-type="section" data-xpressui-customized="' . ( $section_has_custom ? '1' : '0' ) . '" data-xpressui-search-text="' . esc_attr( $section_search_text ) . '" data-xpressui-reset-scope="section-' . esc_attr( $section_name ) . '" id="xpressui-pro-card-' . esc_attr( $section_name ) . '">';
+		echo '<details class="xpressui-admin-card"' . $card_open . ' data-xpressui-card-type="section" data-xpressui-customized="' . ( $section_has_custom ? '1' : '0' ) . '" data-xpressui-search-text="' . esc_attr( $section_search_text ) . '" data-xpressui-reset-scope="section-' . esc_attr( $section_name ) . '" id="xpressui-pro-card-' . esc_attr( $section_name ) . '">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $card_open is a hardcoded HTML attribute built from a boolean
 		echo '<summary class="xpressui-card-summary"><h2>' . esc_html( $section_label ) . '</h2><span class="xpressui-card-meta">';
 		if ( $section_has_custom ) {
-			echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
-			echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="section-' . esc_attr( $section_name ) . '">' . esc_html__( 'Restore section', 'xpressui-bridge-pro' ) . '</button>';
+			echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+			echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="section-' . esc_attr( $section_name ) . '">' . esc_html__( 'Restore section', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 		}
-		echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $fields ) ) . ' ' . esc_html__( 'Fields', 'xpressui-bridge-pro' ) . '</span>';
+		echo '<span class="xpressui-card-badge">' . esc_html( (string) count( $fields ) ) . ' ' . esc_html__( 'Fields', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 		if ( $customized_field_count > 0 ) {
-			echo '<span class="xpressui-card-badge">' . esc_html( (string) $customized_field_count ) . ' ' . esc_html__( 'Overrides', 'xpressui-bridge-pro' ) . '</span>';
+			echo '<span class="xpressui-card-badge">' . esc_html( (string) $customized_field_count ) . ' ' . esc_html__( 'Overrides', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 		}
 		echo '</span></summary>';
 		echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
@@ -1055,9 +1053,9 @@ echo '</div>';
 		// Section label row.
 		xpressui_pro_row(
 			'xpressui_overlay_sections[' . esc_attr( $section_name ) . ']',
-			'<strong>' . esc_html__( 'Section label', 'xpressui-bridge-pro' ) . '</strong>',
+			'<strong>' . esc_html__( 'Section label', 'xpressui-wordpress-bridge-pro' ) . '</strong>',
 			'<input type="text" name="xpressui_overlay_sections[' . esc_attr( $section_name ) . ']" class="regular-text" value="' . esc_attr( $current_section_label ) . '" placeholder="' . esc_attr( $section_label ) . '" />'
-			. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-bridge-pro' ) . ' <em>' . esc_html( $section_label ) . '</em></p>'
+			. '<p class="description">' . esc_html__( 'Pack default:', 'xpressui-wordpress-bridge-pro' ) . ' <em>' . esc_html( $section_label ) . '</em></p>'
 		);
 
 		echo '<tr><td colspan="2"><hr style="border:none;border-top:1px solid #eee;margin:4px 0 8px"></td></tr>';
@@ -1108,8 +1106,8 @@ echo '</div>';
 			$header      .= '<div><div class="xpressui-field-block-title">' . esc_html( $flabel ) . '</div><div class="xpressui-field-block-type">' . esc_html( $ftype ) . '</div></div>';
 			if ( $field_has_custom ) {
 				$header .= '<div style="display:flex;align-items:center;gap:8px">';
-				$header .= '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-bridge-pro' ) . '</span>';
-				$header .= '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="field-' . esc_attr( $fname ) . '">' . esc_html__( 'Restore this field', 'xpressui-bridge-pro' ) . '</button>';
+				$header .= '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+				$header .= '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="field-' . esc_attr( $fname ) . '">' . esc_html__( 'Restore this field', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 				$header .= '</div>';
 			}
 			$header .= '</div>';
@@ -1119,18 +1117,18 @@ echo '</div>';
 
 			// Label.
 			$html .= '<div class="xpressui-field-control">';
-			$html .= '<label>' . esc_html__( 'Label', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<label>' . esc_html__( 'Label', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 			$html .= '<input type="text" name="' . $field_prefix . '[label]" class="regular-text" value="' . esc_attr( $ov_label ) . '" placeholder="' . esc_attr( $flabel ) . '" />';
 			$html .= '</div>';
 
 			// Required (select, 3 states).
 			$req_options = [
-				''  => __( 'Pack default', 'xpressui-bridge-pro' ) . ' (' . ( $pack_req ? __( 'required', 'xpressui-bridge-pro' ) : __( 'optional', 'xpressui-bridge-pro' ) ) . ')',
-				'1' => __( 'Required', 'xpressui-bridge-pro' ),
-				'0' => __( 'Optional', 'xpressui-bridge-pro' ),
+				''  => __( 'Pack default', 'xpressui-wordpress-bridge-pro' ) . ' (' . ( $pack_req ? __( 'required', 'xpressui-wordpress-bridge-pro' ) : __( 'optional', 'xpressui-wordpress-bridge-pro' ) ) . ')',
+				'1' => __( 'Required', 'xpressui-wordpress-bridge-pro' ),
+				'0' => __( 'Optional', 'xpressui-wordpress-bridge-pro' ),
 			];
 			$html .= '<div class="xpressui-field-control">';
-			$html .= '<label>' . esc_html__( 'Required', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<label>' . esc_html__( 'Required', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 			$html .= '<select name="' . $field_prefix . '[required]">';
 			foreach ( $req_options as $opt_val => $opt_label ) {
 				$html .= '<option value="' . esc_attr( (string) $opt_val ) . '"' . selected( $ov_req, (string) $opt_val, false ) . '>' . esc_html( $opt_label ) . '</option>';
@@ -1142,40 +1140,40 @@ echo '</div>';
 			$text_types = [ 'text', 'email', 'tel', 'url', 'number', 'price', 'integer', 'age', 'tax', 'date', 'time', 'datetime', 'search', 'slug', 'textarea', 'rich-editor' ];
 			if ( in_array( $ftype, $text_types, true ) ) {
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Placeholder', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Placeholder', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[placeholder]" class="regular-text" value="' . esc_attr( $ov_ph ) . '" placeholder="' . esc_attr( (string) ( $field['placeholder'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 			}
 
 			// Description.
 			$html .= '<div class="xpressui-field-control is-full">';
-			$html .= '<label>' . esc_html__( 'Help text', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<label>' . esc_html__( 'Help text', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 			$html .= '<textarea name="' . $field_prefix . '[desc]" class="large-text" rows="2">' . esc_textarea( $ov_desc ) . '</textarea>';
 			$html .= '</div>';
 
 			// Error message.
 			$pack_errmsg = (string) ( $field['error_message'] ?? '' );
 			$html .= '<div class="xpressui-field-control is-full">';
-			$html .= '<label>' . esc_html__( 'Error message', 'xpressui-bridge-pro' ) . '</label>';
+			$html .= '<label>' . esc_html__( 'Error message', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 			$html .= '<input type="text" name="' . $field_prefix . '[error_message]" class="large-text" value="' . esc_attr( $ov_errmsg ) . '" placeholder="' . esc_attr( $pack_errmsg ) . '" />';
 			$html .= '</div>';
 
 			if ( in_array( $ftype, $text_validation_types, true ) ) {
 				$html .= '<div class="xpressui-field-control-row">';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Min length', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Min length', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="number" min="0" step="1" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_min_len" name="' . $field_prefix . '[min_len]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_min_len', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_min_len ) . '" placeholder="" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Max length', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Max length', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="number" min="0" step="1" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_max_len" name="' . $field_prefix . '[max_len]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_max_len', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_max_len ) . '" placeholder="" />';
 				$html .= '</div>';
 				$html .= '</div>';
 				if ( in_array( $ftype, $pattern_validation_types, true ) ) {
 					$html .= '<div class="xpressui-field-control is-full">';
-					$html .= '<label>' . esc_html__( 'Pattern', 'xpressui-bridge-pro' ) . '</label>';
+					$html .= '<label>' . esc_html__( 'Pattern', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 					$html .= '<input type="text" name="' . $field_prefix . '[pattern]" class="large-text" value="' . esc_attr( $ov_pattern ) . '" placeholder="' . esc_attr( (string) ( $field['pattern'] ?? '' ) ) . '" />';
-					$html .= '<p class="description">' . esc_html__( 'Optional regex pattern enforced by the runtime schema. Use ^...$ if you want to match the whole value.', 'xpressui-bridge-pro' ) . '</p>';
+					$html .= '<p class="description">' . esc_html__( 'Optional regex pattern enforced by the runtime schema. Use ^...$ if you want to match the whole value.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 					$html .= '</div>';
 				}
 			}
@@ -1183,15 +1181,15 @@ echo '</div>';
 			if ( in_array( $ftype, $numeric_validation_types, true ) ) {
 				$html .= '<div class="xpressui-field-control-row">';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Min value', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Min value', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_min_value" name="' . $field_prefix . '[min_value]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_min_value', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_min_value ) . '" placeholder="' . esc_attr( (string) ( $field['min_value'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Max value', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Max value', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_max_value" name="' . $field_prefix . '[max_value]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_max_value', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_max_value ) . '" placeholder="' . esc_attr( (string) ( $field['max_value'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Step', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Step', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_step_value" name="' . $field_prefix . '[step_value]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_step_value', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_step_value ) . '" placeholder="' . esc_attr( (string) ( $field['step_value'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '</div>';
@@ -1200,11 +1198,11 @@ echo '</div>';
 			if ( $supports_choice_limits ) {
 				$html .= '<div class="xpressui-field-control-row">';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Minimum choices', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Minimum choices', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="number" min="0" step="1" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_min_choices" name="' . $field_prefix . '[min_choices]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_min_choices', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_min_choices ) . '" placeholder="' . esc_attr( (string) ( $field['min_choices'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Maximum choices', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Maximum choices', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="number" min="0" step="1" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_max_choices" name="' . $field_prefix . '[max_choices]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_max_choices', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_max_choices ) . '" placeholder="' . esc_attr( (string) ( $field['max_choices'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '</div>';
@@ -1212,24 +1210,24 @@ echo '</div>';
 
 			if ( in_array( $ftype, $upload_validation_types, true ) ) {
 				$html .= '<div class="xpressui-field-control">';
-				$html .= '<label>' . esc_html__( 'Max file size (MB)', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Max file size (MB)', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" id="xpressui_overlay_fields_' . esc_attr( $fname ) . '_max_file_size_mb" name="' . $field_prefix . '[max_file_size_mb]" class="small-text' . ( in_array( 'xpressui_overlay_fields_' . $fname . '_max_file_size_mb', $invalid_fields, true ) ? ' xpressui-input-invalid' : '' ) . '" value="' . esc_attr( $ov_max_file_size_mb ) . '" placeholder="' . esc_attr( (string) ( $field['maxFileSizeMb'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control is-full">';
-				$html .= '<label>' . esc_html__( 'Accepted file types', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Accepted file types', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[accept]" class="large-text" value="' . esc_attr( $ov_accept ) . '" placeholder="' . esc_attr( (string) ( $field['accept'] ?? '' ) ) . '" />';
-				$html .= '<p class="description">' . esc_html__( 'Example: image/*,application/pdf', 'xpressui-bridge-pro' ) . '</p>';
+				$html .= '<p class="description">' . esc_html__( 'Example: image/*,application/pdf', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control is-full">';
-				$html .= '<label>' . esc_html__( 'Accepted file types label', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'Accepted file types label', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[upload_accept_label]" class="large-text" value="' . esc_attr( $ov_upload_accept_label ) . '" placeholder="' . esc_attr( (string) ( $field['upload_accept_label'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control is-full">';
-				$html .= '<label>' . esc_html__( 'File type error message', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'File type error message', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[file_type_error_message]" class="large-text" value="' . esc_attr( $ov_file_type_error_message ) . '" placeholder="' . esc_attr( (string) ( $field['fileTypeErrorMsg'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 				$html .= '<div class="xpressui-field-control is-full">';
-				$html .= '<label>' . esc_html__( 'File size error message', 'xpressui-bridge-pro' ) . '</label>';
+				$html .= '<label>' . esc_html__( 'File size error message', 'xpressui-wordpress-bridge-pro' ) . '</label>';
 				$html .= '<input type="text" name="' . $field_prefix . '[file_size_error_message]" class="large-text" value="' . esc_attr( $ov_file_size_error_message ) . '" placeholder="' . esc_attr( (string) ( $field['fileSizeErrorMsg'] ?? '' ) ) . '" />';
 				$html .= '</div>';
 			}
@@ -1238,7 +1236,7 @@ echo '</div>';
 			if ( $supports_choice_labels ) {
 				$ov_choices = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 				$html      .= '<div class="xpressui-field-control is-full"><div class="xpressui-choice-group">';
-				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels and availability:', 'xpressui-bridge-pro' ) . '</p>';
+				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels and availability:', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 				foreach ( $choices as $choice ) {
 					$cv = (string) ( $choice['value'] ?? '' );
 					$cl = (string) ( $choice['label'] ?? $cv );
@@ -1253,7 +1251,7 @@ echo '</div>';
 					$html .= '<label class="xpressui-choice-toggle">';
 					$html .= '<input type="hidden" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][enabled]" value="0" />';
 					$html .= '<input type="checkbox" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][enabled]" value="1"' . checked( $choice_enabled, true, false ) . ' />';
-					$html .= '<span>' . esc_html__( 'Enabled', 'xpressui-bridge-pro' ) . '</span>';
+					$html .= '<span>' . esc_html__( 'Enabled', 'xpressui-wordpress-bridge-pro' ) . '</span>';
 					$html .= '</label>';
 					$html .= '</div>';
 				}
@@ -1413,6 +1411,6 @@ function xpressui_pro_row( string $for, string $label, string $content ): void {
 		echo wp_kses_post( $label );
 	}
 	echo '</th>';
-	echo '<td>' . $content . '</td>'; // $content is already escaped at call sites.
+	echo '<td>' . $content . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $content is escaped at every call site before being passed here
 	echo '</tr>';
 }

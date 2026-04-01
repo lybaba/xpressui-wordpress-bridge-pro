@@ -65,13 +65,13 @@ function xpressui_pro_handle_license_form_submission() {
 	check_admin_referer( 'xpressui_pro_license_actions', 'xpressui_pro_license_nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have permission to manage licenses.', 'xpressui-bridge' ) );
+		wp_die( esc_html__( 'You do not have permission to manage licenses.', 'xpressui-wordpress-bridge-pro' ) );
 	}
 
 	$base_redirect_url = add_query_arg(
 		[
 			'post_type' => 'xpressui_submission',
-			'page'      => 'xpressui-bridge',
+			'page'      => 'xpressui-wordpress-bridge-pro',
 		],
 		admin_url( 'edit.php' )
 	);
@@ -82,7 +82,7 @@ function xpressui_pro_handle_license_form_submission() {
 
 		$redirect_url = add_query_arg(
 			[
-				'xpressui_notice'      => rawurlencode( __( 'License deactivated.', 'xpressui-bridge' ) ),
+				'xpressui_notice'      => rawurlencode( __( 'License deactivated.', 'xpressui-wordpress-bridge-pro' ) ),
 				'xpressui_notice_type' => 'success',
 			],
 			$base_redirect_url
@@ -111,7 +111,7 @@ function xpressui_pro_handle_license_form_submission() {
 
 			$redirect_url = add_query_arg(
 				[
-					'xpressui_notice'      => rawurlencode( __( 'License activated successfully!', 'xpressui-bridge' ) ),
+					'xpressui_notice'      => rawurlencode( __( 'License activated successfully!', 'xpressui-wordpress-bridge-pro' ) ),
 					'xpressui_notice_type' => 'success',
 				],
 				$base_redirect_url
@@ -153,14 +153,14 @@ function xpressui_pro_fetch_and_verify_license_from_api( $license_key ) {
 	// --- DEBUGGING: Log API response ---
 	if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
 		$log_message = is_wp_error( $api_response ) ? 'WP_Error: ' . $api_response->get_error_message() : 'Response Body: ' . wp_remote_retrieve_body( $api_response );
-		error_log( '[XPressUI Pro] License API Response: ' . $log_message );
+		error_log( '[XPressUI Pro] License API Response: ' . $log_message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional debug logging, guarded by WP_DEBUG_LOG
 	}
 	// --- END DEBUGGING ---
 
 	if ( is_wp_error( $api_response ) ) {
 		return new WP_Error(
 			'xpressui_pro_api_error',
-			__( 'API connection error: ', 'xpressui-bridge' ) . $api_response->get_error_message()
+			__( 'API connection error: ', 'xpressui-wordpress-bridge-pro' ) . $api_response->get_error_message()
 		);
 	}
 
@@ -171,7 +171,7 @@ function xpressui_pro_fetch_and_verify_license_from_api( $license_key ) {
 	if ( 200 !== (int) $status_code || ! is_array( $response ) ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_api_response',
-			__( 'Invalid response received from the license server.', 'xpressui-bridge' )
+			__( 'Invalid response received from the license server.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -224,7 +224,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	) {
 		return new WP_Error(
 			'xpressui_pro_missing_signature_fields',
-			__( 'The license server response is incomplete.', 'xpressui-bridge' )
+			__( 'The license server response is incomplete.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -233,7 +233,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( ! in_array( $response['alg'], $allowed_algorithms, true ) ) {
 		return new WP_Error(
 			'xpressui_pro_unsupported_algorithm',
-			__( 'Unsupported license signature algorithm.', 'xpressui-bridge' )
+			__( 'Unsupported license signature algorithm.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -243,7 +243,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( false === $payload || false === $signature ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_encoding',
-			__( 'Invalid license response encoding.', 'xpressui-bridge' )
+			__( 'Invalid license response encoding.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -256,7 +256,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( false === $public_key ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_public_key',
-			__( 'Unable to load the bundled public key.', 'xpressui-bridge' )
+			__( 'Unable to load the bundled public key.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -265,7 +265,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( 1 !== $verify_result ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_signature',
-			__( 'License signature verification failed.', 'xpressui-bridge' )
+			__( 'License signature verification failed.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -273,7 +273,7 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( ! is_array( $data ) ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_payload',
-			__( 'Invalid signed license payload.', 'xpressui-bridge' )
+			__( 'Invalid signed license payload.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -293,21 +293,21 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( XPRESSUI_PRO_PRODUCT_ID !== $product_id ) {
 		return new WP_Error(
 			'xpressui_pro_wrong_product',
-			__( 'This license does not belong to this product.', 'xpressui-bridge' )
+			__( 'This license does not belong to this product.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
 	if ( $expected_site !== $site_url ) {
 		return new WP_Error(
 			'xpressui_pro_wrong_site',
-			__( 'This license response does not match the current site.', 'xpressui-bridge' )
+			__( 'This license response does not match the current site.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
 	if ( empty( $issued_at ) || empty( $expires_at ) ) {
 		return new WP_Error(
 			'xpressui_pro_missing_dates',
-			__( 'The signed license response is missing required dates.', 'xpressui-bridge' )
+			__( 'The signed license response is missing required dates.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -317,14 +317,14 @@ function xpressui_pro_verify_signed_license_response( array $response, $expected
 	if ( false === $issued_ts || false === $expires_ts ) {
 		return new WP_Error(
 			'xpressui_pro_invalid_dates',
-			__( 'The signed license response contains invalid dates.', 'xpressui-bridge' )
+			__( 'The signed license response contains invalid dates.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
 	if ( $expires_ts < time() ) {
 		return new WP_Error(
 			'xpressui_pro_expired_payload',
-			__( 'The signed license response has expired.', 'xpressui-bridge' )
+			__( 'The signed license response has expired.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -340,7 +340,7 @@ function xpressui_pro_get_public_key_pem() {
 	if ( ! file_exists( XPRESSUI_PRO_PUBLIC_KEY_PATH ) ) {
 		return new WP_Error(
 			'xpressui_pro_missing_public_key',
-			__( 'Public key file not found.', 'xpressui-bridge' )
+			__( 'Public key file not found.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -349,7 +349,7 @@ function xpressui_pro_get_public_key_pem() {
 	if ( false === $key || '' === trim( $key ) ) {
 		return new WP_Error(
 			'xpressui_pro_empty_public_key',
-			__( 'Public key file is empty or unreadable.', 'xpressui-bridge' )
+			__( 'Public key file is empty or unreadable.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 
@@ -395,21 +395,21 @@ function xpressui_pro_normalize_site_url( $url ) {
 function xpressui_pro_get_license_error_message( $status ) {
 	switch ( $status ) {
 		case 'invalid_key':
-			return __( 'The license key is invalid.', 'xpressui-bridge' );
+			return __( 'The license key is invalid.', 'xpressui-wordpress-bridge-pro' );
 		case 'expired':
-			return __( 'Your license key has expired.', 'xpressui-bridge' );
+			return __( 'Your license key has expired.', 'xpressui-wordpress-bridge-pro' );
 		case 'disabled':
-			return __( 'Your license key has been disabled.', 'xpressui-bridge' );
+			return __( 'Your license key has been disabled.', 'xpressui-wordpress-bridge-pro' );
 		case 'site_inactive':
-			return __( 'This site is not active for this license.', 'xpressui-bridge' );
+			return __( 'This site is not active for this license.', 'xpressui-wordpress-bridge-pro' );
 		case 'max_sites_reached':
-			return __( 'The maximum number of sites for this license has been reached.', 'xpressui-bridge' );
+			return __( 'The maximum number of sites for this license has been reached.', 'xpressui-wordpress-bridge-pro' );
 		case 'inactive':
-			return __( 'The license is inactive.', 'xpressui-bridge' );
+			return __( 'The license is inactive.', 'xpressui-wordpress-bridge-pro' );
 		case 'active':
-			return __( 'License active.', 'xpressui-bridge' );
+			return __( 'License active.', 'xpressui-wordpress-bridge-pro' );
 		default:
-			return __( 'An unknown error occurred during license validation.', 'xpressui-bridge' );
+			return __( 'An unknown error occurred during license validation.', 'xpressui-wordpress-bridge-pro' );
 	}
 }
 
@@ -503,7 +503,7 @@ function xpressui_pro_verify_stored_license_data( array $license_data, $allow_ex
 	) {
 		return new WP_Error(
 			'xpressui_pro_missing_stored_signature',
-			__( 'Stored license data is incomplete.', 'xpressui-bridge' )
+			__( 'Stored license data is incomplete.', 'xpressui-wordpress-bridge-pro' )
 		);
 	}
 

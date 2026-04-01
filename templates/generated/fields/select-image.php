@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 // PRO field — server-side shell rendered by XPressUI Bridge PRO.
 // The PRO runtime hydrates this element into a fully interactive field.
 if ( ! isset( $xpressui_ctx ) || ! is_array( $xpressui_ctx ) ) {
