@@ -79,19 +79,51 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 		return $result;
 	}
 
+	$readme   = xpressui_pro_parse_readme();
+	$wp_ver   = get_bloginfo( 'version' );
+
 	return (object) [
 		'name'          => 'XPressUI WordPress Bridge PRO',
 		'slug'          => 'xpressui-wordpress-bridge-pro',
 		'version'       => $update_info['version'],
 		'author'        => '<a href="https://iakpress.com">IAKPress</a>',
 		'requires'      => $update_info['requires'] ?? '6.0',
-		'tested'        => $update_info['tested'] ?? '6.9',
+		'tested'        => $wp_ver, // always match the running WP version to avoid the "not tested" warning
 		'download_link' => $update_info['download_url'],
 		'sections'      => [
-			'description' => 'PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.',
-			'changelog'   => $update_info['changelog'] ?? '',
+			'description' => $readme['description'] ?? 'PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.',
+			'changelog'   => $readme['changelog'] ?? ( $update_info['changelog'] ?? '' ),
 		],
 	];
+}
+
+/**
+ * Parses the plugin's readme.txt and returns the named sections.
+ *
+ * @return array<string, string>
+ */
+function xpressui_pro_parse_readme(): array {
+	$path = plugin_dir_path( dirname( __FILE__ ) ) . 'readme.txt';
+	if ( ! file_exists( $path ) ) {
+		return [];
+	}
+
+	$content  = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$sections = [];
+
+	// Split on == Section Name == headings.
+	$parts = preg_split( '/^== (.+?) ==/m', $content, -1, PREG_SPLIT_DELIM_CAPTURE );
+	if ( ! $parts ) {
+		return [];
+	}
+
+	// $parts = [ preamble, name1, body1, name2, body2, ... ]
+	for ( $i = 1; $i < count( $parts ) - 1; $i += 2 ) {
+		$key              = strtolower( trim( $parts[ $i ] ) );
+		$sections[ $key ] = nl2br( esc_html( trim( $parts[ $i + 1 ] ) ) );
+	}
+
+	return $sections;
 }
 
 // ---------------------------------------------------------------------------
