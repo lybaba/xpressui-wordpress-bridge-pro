@@ -40,9 +40,11 @@ function xpressui_pro_render_license_form() {
 				<tr>
 					<th><label for="xpressui_pro_license_key"><?php esc_html_e( 'License key', 'xpressui-wordpress-bridge-pro' ); ?></label></th>
 					<td>
-						<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>" autocomplete="off" <?php echo $is_active ? 'readonly' : ''; ?> />
 						<?php if ( $is_active && $masked_key ) : ?>
-							<p class="description"><?php esc_html_e( 'Active key:', 'xpressui-wordpress-bridge-pro' ); ?> <code><?php echo esc_html( $masked_key ); ?></code></p>
+							<code><?php echo esc_html( $masked_key ); ?></code>
+							<p class="description" style="margin-top:4px;"><?php esc_html_e( 'License active.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+						<?php else : ?>
+							<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="" autocomplete="off" placeholder="iakp_..." />
 						<?php endif; ?>
 					</td>
 				</tr>
