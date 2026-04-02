@@ -31,74 +31,15 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 == Changelog ==
 
 = 1.0.28 =
-* Set plugin URL to xpressui.iakpress.com (GitHub repo is private)
-
-= 1.0.27 =
-* Fix plugin details popup: read Description and Changelog from readme.txt
-* Fix "not tested" warning: tested version now matches the running WordPress version
-
-= 1.0.26 =
-* Fix update checker: load unconditionally (no longer requires free plugin active to detect updates)
-* Mark beta field types: document-scan, qr-scan, product-list, quiz, section-select (@status beta, v1-unsupported)
-
-= 1.0.25 =
-* Test release for update detection
-
-= 1.0.24 =
-* Fix update detection: don't cache up-to-date/error states — only cache when an update is available
-* Clear update cache when admin visits Dashboard > Updates with force-check
-
-= 1.0.23 =
-* Fix disabled choices: remove from output instead of marking disabled (ensures runtime hides them)
-
-= 1.0.22 =
-* Test release for automatic update detection
-
-= 1.0.21 =
-* Fix update detection: clear cache when WordPress forces a check (Dashboard > Updates > Check again)
-
-= 1.0.20 =
-* Test release for automatic update detection
-
-= 1.0.19 =
-* Remove manual "Check for updates" button — WordPress checks automatically every 12h
-
-= 1.0.18 =
-* Show update-available notice directly on XPressUI Workflows page
-
-= 1.0.17 =
-* Fix license form: hide input field when license is active, show only masked key
-
-= 1.0.16 =
-* Fix license activate/deactivate redirect (wrong page slug)
-
-= 1.0.15 =
-* Add "↗ Console" link in XPressUI wp-admin sidebar — opens XPressUI Console directly
-
-= 1.0.14 =
-* Add "Check for updates" button on Workflows admin page
-* Auto-clear update transient after plugin upgrade
-* Reduce update check cache from 12h to 2h
-
-= 1.0.13 =
-* Fix license gate link on Customize Workflow page (wrong page slug)
-
-= 1.0.12 =
-* Add automatic update checker — wp-admin shows update badge when new version available
-* Gate Customize Workflow page behind active license check
-
-= 1.0.11 =
-* Wire license enforcement: xpressui_pro_is_license_active() now hooked to xpressui_bridge_has_valid_pro_license filter
-
-= 1.0.10 =
-* Fix CI: exclude scripts/ and .distignore from release ZIP
-
-= 1.0.8 =
-* Fix Plugin Check: text domain alignment, ABSPATH guards, input sanitization
+* Automatic updates now work independently of the free plugin activation state
+* Disabled choices in Customize Workflow are now correctly hidden on the frontend
+* Update detection is now immediate — new versions appear as soon as they are released
+* Plugin details popup now shows the full description and changelog from within wp-admin
+* Quick-access "Console" link added to the XPressUI wp-admin sidebar
 
 = 1.0.7 =
-* License verification with RSA-SHA256 signed API responses
-* Customize Workflow: full field-level customization UI
+* Customize Workflow: full field-level customization — labels, choices, validation rules, help text
+* License verification with RSA-SHA256 signed API responses and local cache
 
 = 1.0.0 =
-* Initial release
+* Initial release — PRO runtime bundled, license activation, advanced field type support
