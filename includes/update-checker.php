@@ -93,6 +93,15 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 // ---------------------------------------------------------------------------
 
 add_action( 'upgrader_process_complete', 'xpressui_pro_clear_update_transient_after_upgrade', 10, 2 );
+add_action( 'wp_update_plugins', 'xpressui_pro_clear_update_transient_on_wp_check' );
+
+/**
+ * Clears our cache whenever WordPress forces a fresh plugin update check
+ * (e.g. Dashboard > Updates > "Check again").
+ */
+function xpressui_pro_clear_update_transient_on_wp_check(): void {
+	delete_transient( XPRESSUI_PRO_UPDATE_TRANSIENT );
+}
 
 /**
  * @param \WP_Upgrader $upgrader
