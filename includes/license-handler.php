@@ -71,7 +71,7 @@ function xpressui_pro_handle_license_form_submission() {
 	$base_redirect_url = add_query_arg(
 		[
 			'post_type' => 'xpressui_submission',
-			'page'      => 'xpressui-wordpress-bridge-pro',
+			'page'      => 'xpressui-bridge',
 		],
 		admin_url( 'edit.php' )
 	);
