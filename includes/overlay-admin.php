@@ -318,6 +318,14 @@ function xpressui_pro_render_customize_page(): void {
 		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
 	}
 
+	if ( ! xpressui_pro_is_license_active() ) {
+		wp_die(
+			esc_html__( 'An active XPressUI Bridge PRO license is required to access this page.', 'xpressui-wordpress-bridge-pro' ) .
+			' <a href="' . esc_url( add_query_arg( [ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-wordpress-bridge-pro' ], admin_url( 'edit.php' ) ) ) . '">' .
+			esc_html__( 'Activate your license', 'xpressui-wordpress-bridge-pro' ) . '</a>.'
+		);
+	}
+
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$slug = sanitize_title( wp_unslash( (string) ( $_GET['xpressui_slug'] ?? '' ) ) );
 	if ( $slug === '' || ! xpressui_is_installed_workflow( $slug ) ) {
