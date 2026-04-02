@@ -321,7 +321,7 @@ function xpressui_pro_render_customize_page(): void {
 	if ( ! xpressui_pro_is_license_active() ) {
 		wp_die(
 			esc_html__( 'An active XPressUI Bridge PRO license is required to access this page.', 'xpressui-wordpress-bridge-pro' ) .
-			' <a href="' . esc_url( add_query_arg( [ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-wordpress-bridge-pro' ], admin_url( 'edit.php' ) ) ) . '">' .
+			' <a href="' . esc_url( add_query_arg( [ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-bridge' ], admin_url( 'edit.php' ) ) ) . '">' .
 			esc_html__( 'Activate your license', 'xpressui-wordpress-bridge-pro' ) . '</a>.'
 		);
 	}
