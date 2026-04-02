@@ -28,7 +28,9 @@ jobs:
           cd ..
           zip -r "$ZIP_NAME" xpressui-wordpress-bridge-pro \
             --exclude "*/.git/*" \
-            --exclude "*/.github/*"
+            --exclude "*/.github/*" \
+            --exclude "*/scripts/*" \
+            --exclude "*/.distignore"
           mv "$ZIP_NAME" xpressui-wordpress-bridge-pro/
 
           echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
