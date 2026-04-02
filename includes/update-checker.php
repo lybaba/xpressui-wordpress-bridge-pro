@@ -151,6 +151,44 @@ function xpressui_pro_handle_check_updates_action(): void {
 }
 
 add_action( 'xpressui_render_license_form', 'xpressui_pro_render_check_updates_button', 20 );
+add_action( 'admin_notices', 'xpressui_pro_update_available_notice' );
+
+/**
+ * Shows an update-available notice on the XPressUI Workflows page.
+ */
+function xpressui_pro_update_available_notice(): void {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || 'xpressui_submission_page_xpressui-bridge' !== $screen->id ) {
+		return;
+	}
+
+	$update_info = xpressui_pro_fetch_update_info( XPRESSUI_PRO_VERSION );
+	if ( ! is_array( $update_info ) || empty( $update_info['version'] ) ) {
+		return;
+	}
+
+	$new_version = esc_html( $update_info['version'] );
+	$update_url  = esc_url(
+		wp_nonce_url(
+			admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( XPRESSUI_PRO_PLUGIN_FILE ) ),
+			'upgrade-plugin_' . XPRESSUI_PRO_PLUGIN_FILE
+		)
+	);
+
+	echo '<div class="notice notice-warning is-dismissible">';
+	echo '<p>';
+	printf(
+		/* translators: 1: new version number, 2: update URL */
+		wp_kses(
+			__( '<strong>XPressUI WordPress Bridge PRO %1$s</strong> is available. <a href="%2$s">Update now</a>.', 'xpressui-wordpress-bridge-pro' ),
+			[ 'strong' => [], 'a' => [ 'href' => [] ] ]
+		),
+		$new_version,
+		$update_url
+	);
+	echo '</p>';
+	echo '</div>';
+}
 
 /**
  * Appends a "Check for updates" button below the Pro Extension license form.
