@@ -120,6 +120,18 @@ function xpressui_pro_clear_update_transient_after_upgrade( $upgrader, array $ho
 	}
 }
 
+add_action( 'load-update-core.php', 'xpressui_pro_clear_update_transient_on_force_check' );
+
+/**
+ * Clears our cache when the admin visits Dashboard > Updates with force-check=1
+ * (i.e. clicks "Check again").
+ */
+function xpressui_pro_clear_update_transient_on_force_check(): void {
+	if ( ! empty( $_GET['force-check'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		delete_transient( XPRESSUI_PRO_UPDATE_TRANSIENT );
+	}
+}
+
 add_action( 'admin_notices', 'xpressui_pro_update_available_notice' );
 
 /**
@@ -180,7 +192,7 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
 	$license_key  = $license_data['license_key'] ?? '';
 
 	if ( empty( $license_key ) ) {
-		set_transient( XPRESSUI_PRO_UPDATE_TRANSIENT, 'no_license', 2 * HOUR_IN_SECONDS );
+		// No license — don't cache, so activation is detected on the next check.
 		return null;
 	}
 
@@ -201,17 +213,18 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
 	);
 
 	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
-		set_transient( XPRESSUI_PRO_UPDATE_TRANSIENT, 'error', HOUR_IN_SECONDS );
+		// API error — don't cache, retry on next WordPress check.
 		return null;
 	}
 
 	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 
 	if ( ! is_array( $data ) || ! empty( $data['up_to_date'] ) ) {
-		set_transient( XPRESSUI_PRO_UPDATE_TRANSIENT, 'up_to_date', 2 * HOUR_IN_SECONDS );
+		// Up to date — don't cache so new releases are detected at the next check.
 		return null;
 	}
 
+	// Update available — cache for 2h to avoid hammering the API.
 	set_transient( XPRESSUI_PRO_UPDATE_TRANSIENT, $data, 2 * HOUR_IN_SECONDS );
 	return $data;
 }
