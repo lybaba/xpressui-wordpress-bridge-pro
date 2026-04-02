@@ -13,8 +13,10 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-wordpress-bridge-pro/update-check' );
+define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-wordpress-bridge-pro/download' );
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
 define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-wordpress-bridge-pro/xpressui-wordpress-bridge-pro.php' );
+define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-XPressUI-License-Key' );
 
 // The license option key is also defined in license-handler.php; guard against double-define
 // so this file can be loaded independently of pro-runtime.php.
@@ -27,6 +29,7 @@ if ( ! defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' ) ) {
 // ---------------------------------------------------------------------------
 
 add_filter( 'pre_set_site_transient_update_plugins', 'xpressui_pro_inject_update_info' );
+add_filter( 'http_request_args', 'xpressui_pro_attach_update_request_auth', 10, 2 );
 
 /**
  * Injects Pro plugin update data into the WordPress update transient.
@@ -236,7 +239,6 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
 
 	$api_url = add_query_arg(
 		[
-			'license_key'     => $license_key,
 			'current_version' => $current_version,
 		],
 		XPRESSUI_PRO_UPDATE_API_URL
@@ -265,4 +267,38 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
 	// Update available — cache for 2h to avoid hammering the API.
 	set_transient( XPRESSUI_PRO_UPDATE_TRANSIENT, $data, 2 * HOUR_IN_SECONDS );
 	return $data;
+}
+
+/**
+ * Injects the license key as an HTTP header for Pro update-related requests.
+ *
+ * This avoids placing the raw key in query strings, reverse-proxy logs, and
+ * browser-visible update URLs while staying compatible with WordPress core HTTP flows.
+ *
+ * @param array  $args Request args passed to wp_remote_get/wp_remote_post.
+ * @param string $url  Target request URL.
+ * @return array
+ */
+function xpressui_pro_attach_update_request_auth( array $args, string $url ): array {
+	$license_data = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
+	$license_key  = is_array( $license_data ) ? ( $license_data['license_key'] ?? '' ) : '';
+
+	if ( ! is_string( $license_key ) || '' === $license_key ) {
+		return $args;
+	}
+
+	$protected_urls = [
+		XPRESSUI_PRO_UPDATE_API_URL,
+		XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL,
+	];
+
+	foreach ( $protected_urls as $protected_url ) {
+		if ( 0 === strpos( $url, $protected_url ) ) {
+			$args['headers']                               = isset( $args['headers'] ) && is_array( $args['headers'] ) ? $args['headers'] : [];
+			$args['headers'][ XPRESSUI_PRO_LICENSE_HEADER ] = $license_key;
+			break;
+		}
+	}
+
+	return $args;
 }
