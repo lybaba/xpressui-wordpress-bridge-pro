@@ -47,7 +47,7 @@ function xpressui_pro_inject_update_info( $transient ) {
 			'slug'        => 'xpressui-wordpress-bridge-pro',
 			'plugin'      => XPRESSUI_PRO_PLUGIN_FILE,
 			'new_version' => $update_info['version'],
-			'url'         => 'https://iakpress.com',
+			'url'         => 'https://xpressui.iakpress.com/',
 			'package'     => $update_info['download_url'],
 			'requires'    => $update_info['requires'] ?? '6.0',
 			'tested'      => $update_info['tested'] ?? '6.9',
