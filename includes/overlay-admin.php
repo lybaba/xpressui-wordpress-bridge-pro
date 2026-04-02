@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 
 add_action( 'admin_menu', 'xpressui_pro_register_customize_page' );
+add_action( 'admin_menu', 'xpressui_pro_register_console_link' );
 
 function xpressui_pro_register_customize_page(): void {
 	add_submenu_page(
@@ -22,6 +23,22 @@ function xpressui_pro_register_customize_page(): void {
 		'xpressui-customize',
 		'xpressui_pro_render_customize_page'
 	);
+}
+
+function xpressui_pro_register_console_link(): void {
+	add_submenu_page(
+		'edit.php?post_type=xpressui_submission',
+		__( 'XPressUI Console', 'xpressui-wordpress-bridge-pro' ),
+		__( '↗ Console', 'xpressui-wordpress-bridge-pro' ),
+		'manage_options',
+		'xpressui-console-redirect',
+		'xpressui_pro_redirect_to_console'
+	);
+}
+
+function xpressui_pro_redirect_to_console(): void {
+	wp_redirect( 'https://xpressui.iakpress.com/console' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- intentional external redirect to known URL
+	exit;
 }
 
 // ---------------------------------------------------------------------------
