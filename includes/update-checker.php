@@ -111,46 +111,6 @@ function xpressui_pro_clear_update_transient_after_upgrade( $upgrader, array $ho
 	}
 }
 
-// ---------------------------------------------------------------------------
-// Manual "Check for updates" action
-// ---------------------------------------------------------------------------
-
-add_action( 'admin_init', 'xpressui_pro_handle_check_updates_action' );
-
-/**
- * Handles the manual "Check for updates" button click.
- * Clears both our transient and WordPress's own update_plugins transient,
- * then redirects back to the Workflows admin page.
- */
-function xpressui_pro_handle_check_updates_action(): void {
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( empty( $_GET['xpressui_pro_check_updates'] ) ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'update_plugins' ) ) {
-		wp_die( esc_html__( 'You do not have permission to check for updates.', 'xpressui-wordpress-bridge-pro' ) );
-	}
-
-	check_admin_referer( 'xpressui_pro_check_updates' );
-
-	delete_transient( XPRESSUI_PRO_UPDATE_TRANSIENT );
-	delete_site_transient( 'update_plugins' );
-
-	wp_safe_redirect(
-		add_query_arg(
-			[
-				'post_type'             => 'xpressui_submission',
-				'page'                  => 'xpressui-bridge',
-				'xpressui_pro_updated'  => '1',
-			],
-			admin_url( 'edit.php' )
-		)
-	);
-	exit;
-}
-
-add_action( 'xpressui_render_license_form', 'xpressui_pro_render_check_updates_button', 20 );
 add_action( 'admin_notices', 'xpressui_pro_update_available_notice' );
 
 /**
@@ -188,39 +148,6 @@ function xpressui_pro_update_available_notice(): void {
 	);
 	echo '</p>';
 	echo '</div>';
-}
-
-/**
- * Appends a "Check for updates" button below the Pro Extension license form.
- */
-function xpressui_pro_render_check_updates_button(): void {
-	if ( ! current_user_can( 'update_plugins' ) ) {
-		return;
-	}
-
-	$check_url = wp_nonce_url(
-		add_query_arg(
-			[
-				'post_type'                  => 'xpressui_submission',
-				'page'                       => 'xpressui-bridge',
-				'xpressui_pro_check_updates' => '1',
-			],
-			admin_url( 'edit.php' )
-		),
-		'xpressui_pro_check_updates'
-	);
-
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	$just_checked = ! empty( $_GET['xpressui_pro_updated'] );
-
-	echo '<p style="margin-top:8px;">';
-	echo '<a href="' . esc_url( $check_url ) . '" class="button button-secondary">'
-		. esc_html__( 'Check for updates', 'xpressui-wordpress-bridge-pro' )
-		. '</a>';
-	if ( $just_checked ) {
-		echo '&nbsp;<span style="color:#46b450;font-weight:600;">&#10003; ' . esc_html__( 'Done — refresh the page to see available updates.', 'xpressui-wordpress-bridge-pro' ) . '</span>';
-	}
-	echo '</p>';
 }
 
 // ---------------------------------------------------------------------------
