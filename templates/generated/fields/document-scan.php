@@ -1,4 +1,12 @@
 <?php
+/**
+ * Field type: document-scan
+ *
+ * @status  beta
+ * @scope   v1-unsupported
+ * @reason  OCR/MRZ capture — device-dependent, not covered by v1 QA baseline.
+ *          Not promoted in v1 sales materials. Use at your own risk.
+ */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }

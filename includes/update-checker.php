@@ -16,6 +16,12 @@ define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://xpressui.iakpress.com/api/v1/plu
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
 define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-wordpress-bridge-pro/xpressui-wordpress-bridge-pro.php' );
 
+// The license option key is also defined in license-handler.php; guard against double-define
+// so this file can be loaded independently of pro-runtime.php.
+if ( ! defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' ) ) {
+	define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
+}
+
 // ---------------------------------------------------------------------------
 // WordPress update hooks
 // ---------------------------------------------------------------------------

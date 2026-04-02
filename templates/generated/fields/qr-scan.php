@@ -1,4 +1,12 @@
 <?php
+/**
+ * Field type: qr-scan
+ *
+ * @status  beta
+ * @scope   v1-unsupported
+ * @reason  Camera API — device/browser-dependent (fragile on iOS Safari, Android WebView).
+ *          Not covered by v1 QA baseline. Not promoted in v1 sales materials.
+ */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }

@@ -1,4 +1,12 @@
 <?php
+/**
+ * Field type: quiz
+ *
+ * @status  beta
+ * @scope   v1-unsupported
+ * @reason  Scoring logic and conditional branching not covered by v1 QA baseline.
+ *          Not promoted in v1 sales materials.
+ */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }

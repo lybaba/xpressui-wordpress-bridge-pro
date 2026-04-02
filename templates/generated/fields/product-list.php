@@ -1,4 +1,12 @@
 <?php
+/**
+ * Field type: product-list
+ *
+ * @status  beta
+ * @scope   v1-unsupported
+ * @reason  Complex product catalog UI — not tested end-to-end in v1.
+ *          Not promoted in v1 sales materials.
+ */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }

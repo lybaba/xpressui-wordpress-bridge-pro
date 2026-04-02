@@ -1,4 +1,12 @@
 <?php
+/**
+ * Field type: section-select (reference-list)
+ *
+ * @status  beta
+ * @scope   v1-unsupported
+ * @reason  Conditional section branching — multi-step navigation edge cases not tested in v1.
+ *          Not promoted in v1 sales materials.
+ */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }

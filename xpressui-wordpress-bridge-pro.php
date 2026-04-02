@@ -3,7 +3,7 @@
  * Plugin Name: XPressUI WordPress Bridge PRO
  * Plugin URI:  https://github.com/lybaba/xpressui-wordpress-bridge-pro
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
- * Version:     1.0.25
+ * Version:     1.0.26
  * Author:      Babaly LY
  * License:     GPL-2.0-or-later
  * Text Domain:        xpressui-wordpress-bridge-pro
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_VERSION', '1.0.25' );
+define( 'XPRESSUI_PRO_VERSION', '1.0.26' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.0' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
@@ -78,6 +78,9 @@ function xpressui_pro_runtime_notice(): void {
 		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-wordpress-bridge-pro' ) .
 		'</p></div>';
 }
+
+// Update checker runs unconditionally — does not depend on the free plugin being active.
+require_once XPRESSUI_PRO_DIR . 'includes/update-checker.php';
 
 // Load runtime integrations after all plugins are loaded so XPRESSUI_BRIDGE_VERSION is defined.
 add_action( 'plugins_loaded', 'xpressui_pro_load_runtime' );
