@@ -3,7 +3,7 @@
  * Plugin Name: XPressUI WordPress Bridge PRO
  * Plugin URI:  https://github.com/lybaba/xpressui-wordpress-bridge-pro
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
- * Version:     1.0.10
+ * Version:     1.0.11
  * Author:      Babaly LY
  * License:     GPL-2.0-or-later
  * Text Domain:        xpressui-wordpress-bridge-pro
@@ -11,16 +11,16 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_VERSION', '1.0.10' );
+define( 'XPRESSUI_PRO_VERSION', '1.0.11' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.0' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
 define( 'XPRESSUI_PRO_LICENSE_KEY', '' );
 
-// Register PRO detection filters immediately — before other plugins finish loading.
+// Register PRO detection filter immediately — before other plugins finish loading.
 // This ensures xpressui_is_pro_extension_active() returns true regardless of plugin load order.
+// The license validity filter is registered later (on plugins_loaded) so the license handler is available.
 add_filter( 'xpressui_bridge_is_pro_extension_active', '__return_true' );
-add_filter( 'xpressui_bridge_has_valid_pro_license', '__return_true' );
 add_filter( 'xpressui_bundled_workflow_source_dirs', 'xpressui_pro_register_bundled_workflow_source_dirs' );
 
 function xpressui_pro_register_bundled_workflow_source_dirs( $dirs ) {
@@ -85,5 +85,6 @@ add_action( 'plugins_loaded', 'xpressui_pro_load_runtime' );
 function xpressui_pro_load_runtime(): void {
 	if ( defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		require_once XPRESSUI_PRO_DIR . 'includes/pro-runtime.php';
+		add_filter( 'xpressui_bridge_has_valid_pro_license', 'xpressui_pro_is_license_active' );
 	}
 }
