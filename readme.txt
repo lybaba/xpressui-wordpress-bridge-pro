@@ -4,7 +4,7 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,11 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 4. Upload your workflow pack ZIP via XPressUI > Workflows > Upload.
 
 == Changelog ==
+
+= 1.0.14 =
+* Add "Check for updates" button on Workflows admin page
+* Auto-clear update transient after plugin upgrade
+* Reduce update check cache from 12h to 2h
 
 = 1.0.13 =
 * Fix license gate link on Customize Workflow page (wrong page slug)
