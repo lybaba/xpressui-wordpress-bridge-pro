@@ -255,19 +255,21 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 					// Choice labels and enabled state.
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-						foreach ( $field['choices'] as &$choice ) {
+						$filtered = [];
+						foreach ( $field['choices'] as $choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
 							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
 								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
+								if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
+									continue; // Remove disabled choice entirely.
+								}
 								if ( $choice_overlay['has_label'] ) {
 									$choice['label'] = $choice_overlay['label'];
 								}
-								if ( $choice_overlay['has_enabled'] ) {
-									$choice['disabled'] = ! $choice_overlay['enabled'];
-								}
 							}
+							$filtered[] = $choice;
 						}
-						unset( $choice );
+						$field['choices'] = array_values( $filtered );
 					}
 				}
 				unset( $field );
@@ -429,19 +431,21 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-						foreach ( $field['choices'] as &$choice ) {
+						$filtered = [];
+						foreach ( $field['choices'] as $choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
 							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
 								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
+								if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
+									continue; // Remove disabled choice entirely.
+								}
 								if ( $choice_overlay['has_label'] ) {
 									$choice['label'] = $choice_overlay['label'];
 								}
-								if ( $choice_overlay['has_enabled'] ) {
-									$choice['disabled'] = ! $choice_overlay['enabled'];
-								}
 							}
+							$filtered[] = $choice;
 						}
-						unset( $choice );
+						$field['choices'] = array_values( $filtered );
 					}
 				}
 				unset( $field );
