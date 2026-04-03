@@ -380,8 +380,10 @@ function xpressui_pro_render_customize_page(): void {
 	if ( isset( $_POST['xpressui_save_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
 
 		// Project settings (stored separately in xpressui_project_settings).
-		$notify_email             = sanitize_email( trim( wp_unslash( $_POST['xpressui_notify_email'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_email() is applied
-		$redirect_url             = esc_url_raw( trim( wp_unslash( $_POST['xpressui_redirect_url'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() is applied
+		$raw_notify_email         = trim( wp_unslash( $_POST['xpressui_notify_email'] ?? '' ) );
+		$raw_redirect_url         = trim( wp_unslash( $_POST['xpressui_redirect_url'] ?? '' ) );
+		$notify_email             = sanitize_email( $raw_notify_email ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_email() is applied
+		$redirect_url             = esc_url_raw( $raw_redirect_url ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() is applied
 		$show_project_title       = ! empty( $_POST['xpressui_show_project_title'] ) ? '1' : '0';
 		$show_required_note       = ! empty( $_POST['xpressui_show_required_fields_note'] ) ? '1' : '0';
 		$section_label_visibility = sanitize_key( wp_unslash( (string) ( $_POST['xpressui_section_label_visibility'] ?? 'auto' ) ) );
