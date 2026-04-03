@@ -1,0 +1,239 @@
+{
+  "mode": "form-multi-step",
+  "navigationLabels": {
+    "prevLabel": "Back",
+    "nextLabel": "Continue",
+    "submitLabel": "Submit my answers"
+  },
+  "workflowConfig": {
+    "submissionMode": "multi-step-submit",
+    "providerMode": "wordpress-bridge",
+    "resumeSupport": "disabled",
+    "documentHandling": "basic-upload",
+    "submissionEndpoint": "/wp-json/xpressui/v1/submit",
+    "successMessage": "Thank you — your answers are in. We'll be in touch.",
+    "errorMessage": "Something went wrong. Please try again or email us at hello@iakpress.com."
+  },
+  "sections": {
+    "custom": [
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 1: Who are you?",
+        "adminLabel": "Step 1: Profile",
+        "name": "profileStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 2: Your challenges",
+        "adminLabel": "Step 2: Challenges",
+        "name": "challengesStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 3: Your ideal workflow",
+        "adminLabel": "Step 3: Use case",
+        "name": "useCaseStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 4: What matters most?",
+        "adminLabel": "Step 4: Priorities",
+        "name": "prioritiesStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 5: Stay in the loop",
+        "adminLabel": "Step 5: Contact",
+        "name": "contactStep"
+      }
+    ],
+    "profileStep": [
+      {
+        "type": "radio-buttons",
+        "label": "I am a...",
+        "name": "userProfile",
+        "required": true,
+        "helpText": "Pick the one that fits best.",
+        "choices": [
+          { "label": "🏢  Agency / freelance designer", "value": "agency" },
+          { "label": "🛍️  E-commerce or product seller", "value": "ecommerce" },
+          { "label": "🏥  Service provider (health, consulting, HR...)", "value": "service" },
+          { "label": "🎓  Educator / trainer / coach", "value": "educator" },
+          { "label": "🛠️  WordPress developer", "value": "developer" },
+          { "label": "🧪  Just exploring", "value": "other" }
+        ]
+      },
+      {
+        "type": "radio-buttons",
+        "label": "How many WordPress sites do you manage?",
+        "name": "siteCount",
+        "required": true,
+        "choices": [
+          { "label": "Just one — my own site", "value": "one" },
+          { "label": "2 to 5", "value": "small" },
+          { "label": "6 to 20", "value": "medium" },
+          { "label": "More than 20", "value": "large" }
+        ]
+      }
+    ],
+    "challengesStep": [
+      {
+        "type": "checkboxes",
+        "label": "Which of these challenges are you facing today?",
+        "name": "challenges",
+        "required": true,
+        "minNumOfChoices": 1,
+        "maxNumOfChoices": 5,
+        "helpText": "Select all that apply.",
+        "choices": [
+          { "label": "Collecting structured information from clients or customers", "value": "client_intake" },
+          { "label": "Onboarding new clients with a professional flow", "value": "onboarding" },
+          { "label": "Building multi-step forms without a developer", "value": "no_code_forms" },
+          { "label": "Handling file or document uploads inside a form", "value": "file_uploads" },
+          { "label": "Creating product configurators or quote request forms", "value": "configurator" },
+          { "label": "Running surveys or quizzes with visual choices", "value": "quiz_survey" },
+          { "label": "Managing approval or review workflows", "value": "approvals" },
+          { "label": "Replacing a clunky external tool with something built into WordPress", "value": "replace_tool" }
+        ]
+      },
+      {
+        "type": "radio-buttons",
+        "label": "How are you handling this today?",
+        "name": "currentSolution",
+        "required": true,
+        "choices": [
+          { "label": "Contact Form 7 or WPForms", "value": "basic_form" },
+          { "label": "An external tool (Typeform, Jotform, Airtable...)", "value": "external_tool" },
+          { "label": "Custom development", "value": "custom_dev" },
+          { "label": "Email back-and-forth — no real system", "value": "email" },
+          { "label": "Nothing yet — looking for a solution", "value": "nothing" }
+        ]
+      }
+    ],
+    "useCaseStep": [
+      {
+        "type": "textarea",
+        "label": "Describe the workflow you'd love to build.",
+        "name": "useCaseDescription",
+        "required": true,
+        "minLen": 30,
+        "maxLen": 1000,
+        "helpText": "Be as specific as you like — who fills it in, what happens next, what the end result looks like."
+      },
+      {
+        "type": "file",
+        "label": "Attach a reference (optional)",
+        "name": "referenceFile",
+        "required": false,
+        "accept": ".pdf,.doc,.docx,.png,.jpg,.jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg",
+        "maxFileSizeMb": 5,
+        "helpText": "A screenshot, mockup, brief, or anything that illustrates your idea."
+      }
+    ],
+    "prioritiesStep": [
+      {
+        "type": "checkboxes",
+        "label": "What matters most to you in a workflow plugin?",
+        "name": "priorities",
+        "required": true,
+        "minNumOfChoices": 1,
+        "maxNumOfChoices": 3,
+        "helpText": "Pick your top 3.",
+        "choices": [
+          { "label": "No-code setup — I want to configure everything from wp-admin", "value": "no_code" },
+          { "label": "Visual quality — the form should look great out of the box", "value": "design" },
+          { "label": "File & document handling built in", "value": "uploads" },
+          { "label": "Integration with my existing tools (CRM, Slack, email...)", "value": "integrations" },
+          { "label": "Submission tracking and notifications in wp-admin", "value": "tracking" },
+          { "label": "Performance — fast, no bloat, no external CDN", "value": "performance" },
+          { "label": "Developer-friendly — I want to extend it with code", "value": "dev_friendly" }
+        ]
+      },
+      {
+        "type": "radio-buttons",
+        "label": "How soon do you plan to use a plugin like this?",
+        "name": "timeline",
+        "required": true,
+        "choices": [
+          { "label": "Right now — I have an active project", "value": "now" },
+          { "label": "In the next few weeks", "value": "soon" },
+          { "label": "In the next few months", "value": "later" },
+          { "label": "Just evaluating for now", "value": "exploring" }
+        ]
+      }
+    ],
+    "contactStep": [
+      {
+        "type": "email",
+        "label": "Your email address",
+        "name": "email",
+        "required": true,
+        "helpText": "We'll only use this to follow up on your answers."
+      },
+      {
+        "type": "text",
+        "label": "Your name (optional)",
+        "name": "fullName",
+        "required": false,
+        "maxLen": 80
+      },
+      {
+        "type": "checkboxes",
+        "label": "I'd like to...",
+        "name": "optIns",
+        "required": false,
+        "choices": [
+          { "label": "Be notified when the features I mentioned are available", "value": "notify" },
+          { "label": "Get early access to new PRO features", "value": "early_access" },
+          { "label": "Be contacted for a 20-min user research call", "value": "research_call" }
+        ]
+      }
+    ],
+    "btngroup": [
+      {
+        "type": "submit",
+        "name": "prevbtn",
+        "label": "Back",
+        "adminLabel": "Back"
+      },
+      {
+        "type": "submit",
+        "name": "nextbtn",
+        "label": "Continue",
+        "adminLabel": "Continue"
+      },
+      {
+        "type": "submit",
+        "name": "submitbtn",
+        "label": "Submit my answers",
+        "adminLabel": "Submit my answers"
+      }
+    ]
+  },
+  "showProjectTitle": true,
+  "submit": {
+    "endpoint": "__XPRESSUI_WORDPRESS_REST_URL__",
+    "method": "POST",
+    "mode": "form-data",
+    "includeDocumentData": true,
+    "metadata": {
+      "projectId": "what-will-you-build",
+      "projectSlug": "what-will-you-build",
+      "projectConfigVersion": "what-will-you-build:2026-04-03T00:00:00+00:00"
+    }
+  },
+  "submitFeedback": {
+    "title": "Submission status",
+    "idle_message": "Submission feedback will appear here after the runtime handles the form.",
+    "loading_message": "Sending your answers...",
+    "success_title": "Got it — thank you!",
+    "success_message": "Your answers are in. We read every response and will use them to shape the next version of XPressUI.",
+    "error_title": "Submission failed",
+    "error_message": "Something went wrong. Please try again or email us at hello@iakpress.com."
+  }
+}
