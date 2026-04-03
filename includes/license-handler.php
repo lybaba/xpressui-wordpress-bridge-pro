@@ -17,39 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The API endpoint for license verification.
  */
-define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://xpressui.iakpress.com/api/v1/licenses/verify' );
-
-/**
- * Option key to store license data in wp_options.
- */
-define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
-
-/**
- * Product identifier expected inside the signed payload.
- */
-define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-wordpress-bridge-pro' );
-
-/**
- * Relative path to the public key file.
- */
-define( 'XPRESSUI_PRO_PUBLIC_KEY_PATH', dirname( __DIR__ ) . '/keys/license_signing_public.pem' );
-
-/**
- * Cache transient used only for quick repeated checks.
- */
-define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT', 'xpressui_pro_license_status' );
-
-/**
- * How long a successful local "active" result is cached in memory.
- * The real source of truth remains the signed payload in the option.
- */
-define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL', 6 * HOUR_IN_SECONDS );
-
-/**
- * Grace period if the API is temporarily unavailable and the locally stored signed payload
- * is still valid enough for temporary use.
- */
-define( 'XPRESSUI_PRO_LICENSE_GRACE_PERIOD', 3 * DAY_IN_SECONDS );
+defined( 'XPRESSUI_PRO_LICENSE_API_URL' )             || define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://xpressui.iakpress.com/api/v1/licenses/verify' );
+defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' )          || define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
+defined( 'XPRESSUI_PRO_PRODUCT_ID' )                  || define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-wordpress-bridge-pro' );
+defined( 'XPRESSUI_PRO_PUBLIC_KEY_PATH' )             || define( 'XPRESSUI_PRO_PUBLIC_KEY_PATH', dirname( __DIR__ ) . '/keys/license_signing_public.pem' );
+defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT' )    || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT', 'xpressui_pro_license_status' );
+defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL' ) || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL', 6 * HOUR_IN_SECONDS );
+defined( 'XPRESSUI_PRO_LICENSE_GRACE_PERIOD' )        || define( 'XPRESSUI_PRO_LICENSE_GRACE_PERIOD', 3 * DAY_IN_SECONDS );
 
 
 // L'action est enregistrée directement pour éviter tout problème de timing d'inclusion.
