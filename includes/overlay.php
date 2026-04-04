@@ -140,161 +140,184 @@ function xpressui_pro_delete_workflow_overlay( string $slug ): void {
  * @return array<string, mixed> Patched context.
  */
 function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): array {
-
-	$sections_overlay = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
-	$fields_overlay   = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
-	$navigation       = isset( $overlay['navigation'] ) && is_array( $overlay['navigation'] ) ? $overlay['navigation'] : [];
 	$project_name     = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
-	$success_message  = isset( $overlay['success_message'] ) ? trim( (string) $overlay['success_message'] ) : '';
-	$form_error_msg   = isset( $overlay['error_message'] ) ? trim( (string) $overlay['error_message'] ) : '';
-
-	// -----------------------------------------------------------------------
-	// rendered_form patches (consumed by PHP templates)
-	// -----------------------------------------------------------------------
 
 	if ( isset( $context['rendered_form'] ) && is_array( $context['rendered_form'] ) ) {
-		if ( $project_name !== '' ) {
-			$context['rendered_form']['title'] = $project_name;
-		}
-
-		// Navigation button labels (rendered by the PHP template — the web component reuses these DOM buttons).
-		if ( ! empty( $navigation ) ) {
-			$v = isset( $navigation['prev'] ) ? trim( (string) $navigation['prev'] ) : '';
-			if ( $v !== '' ) {
-				$context['rendered_form']['navigation_labels']['previous'] = $v;
-			}
-			$v = isset( $navigation['next'] ) ? trim( (string) $navigation['next'] ) : '';
-			if ( $v !== '' ) {
-				$context['rendered_form']['navigation_labels']['next'] = $v;
-			}
-			$v = isset( $navigation['submit'] ) ? trim( (string) $navigation['submit'] ) : '';
-			if ( $v !== '' ) {
-				$context['rendered_form']['submit_label'] = $v;
-			}
-		}
-
-		// Section labels.
-		if ( ! empty( $sections_overlay ) && isset( $context['rendered_form']['sections'] ) ) {
-			foreach ( $context['rendered_form']['sections'] as &$section ) {
-				$sname = (string) ( $section['name'] ?? '' );
-				if ( $sname !== '' && isset( $sections_overlay[ $sname ] ) ) {
-					$custom = trim( (string) $sections_overlay[ $sname ] );
-					if ( $custom !== '' ) {
-						$section['label'] = $custom;
-					}
-				}
-			}
-			unset( $section );
-		}
-
-		// Field properties.
-		if ( ! empty( $fields_overlay ) && isset( $context['rendered_form']['sections'] ) ) {
-			foreach ( $context['rendered_form']['sections'] as &$section ) {
-				if ( ! isset( $section['fields'] ) || ! is_array( $section['fields'] ) ) {
-					continue;
-				}
-				foreach ( $section['fields'] as &$field ) {
-					$fname = (string) ( $field['name'] ?? '' );
-					if ( $fname === '' || ! isset( $fields_overlay[ $fname ] ) ) {
-						continue;
-					}
-					$fo = $fields_overlay[ $fname ];
-
-					$v = isset( $fo['label'] ) ? trim( (string) $fo['label'] ) : '';
-					if ( $v !== '' ) {
-						$field['label'] = $v;
-					}
-
-					if ( array_key_exists( 'required', $fo ) ) {
-						$field['required'] = (bool) $fo['required'];
-					}
-
-					$v = isset( $fo['placeholder'] ) ? trim( (string) $fo['placeholder'] ) : '';
-					if ( $v !== '' ) {
-						$field['placeholder'] = $v;
-					}
-
-					$v = isset( $fo['desc'] ) ? trim( (string) $fo['desc'] ) : '';
-					if ( $v !== '' ) {
-						$field['desc'] = $v;
-					}
-
-					$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
-					if ( $v !== '' ) {
-						$field['error_message'] = $v;
-					}
-
-					$v = isset( $fo['pattern'] ) ? trim( (string) $fo['pattern'] ) : '';
-					if ( $v !== '' && xpressui_pro_overlay_supports_pattern( $field ) ) {
-						$field['pattern'] = $v;
-					}
-
-					foreach (
-						[
-							'min_len'            => 'min_len',
-							'max_len'            => 'max_len',
-							'accept'             => 'accept',
-							'min_value'          => 'min_value',
-							'max_value'          => 'max_value',
-							'step_value'         => 'step_value',
-							'upload_accept_label' => 'upload_accept_label',
-						] as $overlay_key => $field_key
-					) {
-						if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
-							$field[ $field_key ] = $fo[ $overlay_key ];
-						}
-					}
-					if ( xpressui_pro_overlay_supports_choice_limits( $field ) ) {
-						foreach ( [ 'min_choices' => 'min_choices', 'max_choices' => 'max_choices' ] as $overlay_key => $field_key ) {
-							if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
-								$field[ $field_key ] = $fo[ $overlay_key ];
-							}
-						}
-					}
-
-					// Choice labels and enabled state.
-					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
-					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-						$filtered = [];
-						foreach ( $field['choices'] as $choice ) {
-							$cv = (string) ( $choice['value'] ?? '' );
-							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
-								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
-								if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
-									continue; // Remove disabled choice entirely.
-								}
-								if ( $choice_overlay['has_label'] ) {
-									$choice['label'] = $choice_overlay['label'];
-								}
-							}
-							$filtered[] = $choice;
-						}
-						$field['choices'] = array_values( $filtered );
-					}
-				}
-				unset( $field );
-			}
-			unset( $section );
-		}
+		$context['rendered_form'] = xpressui_pro_patch_rendered_form( $context['rendered_form'], $overlay );
 	}
 
 	if ( isset( $context['project'] ) && is_array( $context['project'] ) && $project_name !== '' ) {
 		$context['project']['name'] = $project_name;
 	}
 
-	// -----------------------------------------------------------------------
-	// form_config_json patches (consumed by the JS runtime)
-	// -----------------------------------------------------------------------
-
-	$raw = isset( $context['runtime']['form_config_json'] ) ? (string) $context['runtime']['form_config_json'] : '';
-	if ( $raw === '' ) {
-		return $context;
+	if ( isset( $context['runtime']['form_config_json'] ) && is_string( $context['runtime']['form_config_json'] ) ) {
+		$cfg = json_decode( $context['runtime']['form_config_json'], true );
+		if ( is_array( $cfg ) ) {
+			$cfg     = xpressui_pro_patch_form_config( $cfg, $overlay );
+			$patched = wp_json_encode( $cfg );
+			if ( $patched !== false ) {
+				$context['runtime']['form_config_json'] = $patched;
+			}
+		}
 	}
 
-	$cfg = json_decode( $raw, true );
-	if ( ! is_array( $cfg ) ) {
-		return $context;
+	return $context;
+}
+
+function xpressui_pro_patch_rendered_form( array $rendered_form, array $overlay ): array {
+	$sections_overlay = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
+	$fields_overlay   = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
+	$navigation       = isset( $overlay['navigation'] ) && is_array( $overlay['navigation'] ) ? $overlay['navigation'] : [];
+	$project_name     = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
+
+	if ( $project_name !== '' ) {
+		$rendered_form['title'] = $project_name;
 	}
+
+	// Navigation button labels (rendered by the PHP template — the web component reuses these DOM buttons).
+	if ( ! empty( $navigation ) ) {
+		$v = isset( $navigation['prev'] ) ? trim( (string) $navigation['prev'] ) : '';
+		if ( $v !== '' ) {
+			$rendered_form['navigation_labels']['previous'] = $v;
+		}
+		$v = isset( $navigation['next'] ) ? trim( (string) $navigation['next'] ) : '';
+		if ( $v !== '' ) {
+			$rendered_form['navigation_labels']['next'] = $v;
+		}
+		$v = isset( $navigation['submit'] ) ? trim( (string) $navigation['submit'] ) : '';
+		if ( $v !== '' ) {
+			$rendered_form['submit_label'] = $v;
+		}
+	}
+
+	// Section labels.
+	if ( ! empty( $sections_overlay ) && isset( $rendered_form['sections'] ) ) {
+		foreach ( $rendered_form['sections'] as &$section ) {
+			$sname = (string) ( $section['name'] ?? '' );
+			if ( $sname !== '' && isset( $sections_overlay[ $sname ] ) ) {
+				$custom = trim( (string) $sections_overlay[ $sname ] );
+				if ( $custom !== '' ) {
+					$section['label'] = $custom;
+				}
+			}
+		}
+		unset( $section );
+	}
+
+	// Field properties.
+	if ( ! empty( $fields_overlay ) && isset( $rendered_form['sections'] ) ) {
+		foreach ( $rendered_form['sections'] as &$section ) {
+			if ( ! isset( $section['fields'] ) || ! is_array( $section['fields'] ) ) {
+				continue;
+			}
+			foreach ( $section['fields'] as &$field ) {
+				$fname = (string) ( $field['name'] ?? '' );
+				if ( $fname === '' || ! isset( $fields_overlay[ $fname ] ) ) {
+					continue;
+				}
+				$fo = $fields_overlay[ $fname ];
+
+				$v = isset( $fo['label'] ) ? trim( (string) $fo['label'] ) : '';
+				if ( $v !== '' ) {
+					$field['label'] = $v;
+				}
+
+				if ( array_key_exists( 'required', $fo ) ) {
+					$field['required'] = (bool) $fo['required'];
+				}
+
+				$v = isset( $fo['placeholder'] ) ? trim( (string) $fo['placeholder'] ) : '';
+				if ( $v !== '' ) {
+					$field['placeholder'] = $v;
+				}
+
+				$v = isset( $fo['desc'] ) ? trim( (string) $fo['desc'] ) : '';
+				if ( $v !== '' ) {
+					$field['desc'] = $v;
+				}
+
+				$v = isset( $fo['error_message'] ) ? trim( (string) $fo['error_message'] ) : '';
+				if ( $v !== '' ) {
+					$field['error_message'] = $v;
+				}
+
+				$v = isset( $fo['pattern'] ) ? trim( (string) $fo['pattern'] ) : '';
+				if ( $v !== '' && xpressui_pro_overlay_supports_pattern( $field ) ) {
+					$field['pattern'] = $v;
+				}
+
+				foreach (
+					[
+						'min_len'             => 'min_len',
+						'max_len'             => 'max_len',
+						'accept'              => 'accept',
+						'min_value'           => 'min_value',
+						'max_value'           => 'max_value',
+						'step_value'          => 'step_value',
+						'upload_accept_label' => 'upload_accept_label',
+					] as $overlay_key => $field_key
+				) {
+					if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
+						$field[ $field_key ] = $fo[ $overlay_key ];
+					}
+				}
+				if ( xpressui_pro_overlay_supports_choice_limits( $field ) ) {
+					foreach ( [ 'min_choices' => 'min_choices', 'max_choices' => 'max_choices' ] as $overlay_key => $field_key ) {
+						if ( array_key_exists( $overlay_key, $fo ) && '' !== (string) $fo[ $overlay_key ] ) {
+							$field[ $field_key ] = $fo[ $overlay_key ];
+						}
+					}
+				}
+
+				// Choice labels and enabled state.
+				$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
+				if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
+					$filtered              = [];
+					$pack_choices_by_value = [];
+					foreach ( $field['choices'] as $choice ) {
+						$cv = (string) ( $choice['value'] ?? '' );
+						if ( $cv !== '' ) {
+							$pack_choices_by_value[ $cv ] = $choice;
+						}
+					}
+					foreach ( $choices_overlay as $cv => $choice_overlay_raw ) {
+						$cv = (string) $cv;
+						if ( isset( $pack_choices_by_value[ $cv ] ) ) {
+							$choice         = $pack_choices_by_value[ $cv ];
+							$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choice_overlay_raw );
+							if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
+								unset( $pack_choices_by_value[ $cv ] );
+								continue; // Remove disabled choice entirely.
+							}
+							if ( $choice_overlay['has_label'] ) {
+								$choice['label'] = $choice_overlay['label'];
+							}
+							$filtered[] = $choice;
+							unset( $pack_choices_by_value[ $cv ] );
+						}
+					}
+					// Append any remaining pack choices that were not reordered in the overlay
+					foreach ( $pack_choices_by_value as $choice ) {
+						$filtered[] = $choice;
+					}
+					$field['choices'] = array_values( $filtered );
+				}
+			}
+			unset( $field );
+		}
+		unset( $section );
+	}
+
+	return $rendered_form;
+}
+
+function xpressui_pro_patch_form_config( array $cfg, array $overlay ): array {
+	$sections_overlay = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
+	$fields_overlay   = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
+	$navigation       = isset( $overlay['navigation'] ) && is_array( $overlay['navigation'] ) ? $overlay['navigation'] : [];
+	$project_name     = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
+	$success_message  = isset( $overlay['success_message'] ) ? trim( (string) $overlay['success_message'] ) : '';
+	$form_error_msg   = isset( $overlay['error_message'] ) ? trim( (string) $overlay['error_message'] ) : '';
 
 	// Form title.
 	if ( $project_name !== '' && array_key_exists( 'title', $cfg ) ) {
@@ -431,7 +454,7 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
-						$filtered = [];
+						$filtered              = [];
 						$pack_choices_by_value = [];
 						foreach ( $field['choices'] as $choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
@@ -442,7 +465,7 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 						foreach ( $choices_overlay as $cv => $choice_overlay_raw ) {
 							$cv = (string) $cv;
 							if ( isset( $pack_choices_by_value[ $cv ] ) ) {
-								$choice = $pack_choices_by_value[ $cv ];
+								$choice         = $pack_choices_by_value[ $cv ];
 								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choice_overlay_raw );
 								if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
 									unset( $pack_choices_by_value[ $cv ] );
@@ -468,13 +491,9 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 		}
 	}
 
-	$patched = wp_json_encode( $cfg );
-	if ( $patched !== false ) {
-		$context['runtime']['form_config_json'] = $patched;
-	}
-
-	return $context;
+	return $cfg;
 }
+
 
 // ---------------------------------------------------------------------------
 // Filter hooks — bridge the overlay into the base plugin's render pipeline
