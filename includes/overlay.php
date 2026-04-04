@@ -146,8 +146,18 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 		$context['rendered_form'] = xpressui_pro_patch_rendered_form( $context['rendered_form'], $overlay );
 	}
 
-	if ( isset( $context['project'] ) && is_array( $context['project'] ) && $project_name !== '' ) {
-		$context['project']['name'] = $project_name;
+	if ( isset( $context['theme'] ) && is_array( $context['theme'] ) && ! empty( $overlay['theme'] ) ) {
+		$context['theme'] = xpressui_pro_patch_theme( $context['theme'], $overlay['theme'] );
+	}
+
+	$project_bg = isset( $overlay['project_background_image_url'] ) ? trim( (string) $overlay['project_background_image_url'] ) : '';
+	if ( isset( $context['project'] ) && is_array( $context['project'] ) ) {
+		if ( $project_name !== '' ) {
+			$context['project']['name'] = $project_name;
+		}
+		if ( $project_bg !== '' ) {
+			$context['project']['background_image_url'] = $project_bg;
+		}
 	}
 
 	if ( isset( $context['runtime']['form_config_json'] ) && is_string( $context['runtime']['form_config_json'] ) ) {
@@ -309,6 +319,37 @@ function xpressui_pro_patch_rendered_form( array $rendered_form, array $overlay 
 	}
 
 	return $rendered_form;
+}
+
+function xpressui_pro_patch_theme( array $theme, array $overlay_theme ): array {
+	if ( ! empty( $overlay_theme['background_style'] ) ) {
+		$theme['background_style'] = $overlay_theme['background_style'];
+	}
+	if ( ! empty( $overlay_theme['font_family'] ) ) {
+		$theme['font_family'] = $overlay_theme['font_family'];
+	}
+
+	if ( isset( $overlay_theme['colors'] ) && is_array( $overlay_theme['colors'] ) ) {
+		if ( ! isset( $theme['colors'] ) ) {
+			$theme['colors'] = [];
+		}
+		foreach ( [ 'primary', 'surface', 'page_background', 'text', 'muted_text', 'border' ] as $color ) {
+			if ( ! empty( $overlay_theme['colors'][ $color ] ) ) {
+				$theme['colors'][ $color ] = $overlay_theme['colors'][ $color ];
+			}
+		}
+	}
+	if ( isset( $overlay_theme['radius'] ) && is_array( $overlay_theme['radius'] ) ) {
+		if ( ! isset( $theme['radius'] ) ) {
+			$theme['radius'] = [];
+		}
+		foreach ( [ 'card', 'input', 'button' ] as $radius ) {
+			if ( array_key_exists( $radius, $overlay_theme['radius'] ) ) {
+				$theme['radius'][ $radius ] = $overlay_theme['radius'][ $radius ];
+			}
+		}
+	}
+	return $theme;
 }
 
 function xpressui_pro_patch_form_config( array $cfg, array $overlay ): array {
