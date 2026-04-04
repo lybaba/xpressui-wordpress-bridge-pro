@@ -369,281 +369,11 @@ function xpressui_pro_render_customize_page(): void {
 		}
 	}
 
-	$notice_class    = '';
-	$notice_messages = [];
-	$invalid_fields  = [];
-
-	// -----------------------------------------------------------------------
-	// Handle save
-	// -----------------------------------------------------------------------
-
-	if ( isset( $_POST['xpressui_save_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
-
-		// Project settings (stored separately in xpressui_project_settings).
-		$raw_notify_email         = trim( wp_unslash( $_POST['xpressui_notify_email'] ?? '' ) );
-		$raw_redirect_url         = trim( wp_unslash( $_POST['xpressui_redirect_url'] ?? '' ) );
-		$notify_email             = sanitize_email( $raw_notify_email ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_email() is applied
-		$redirect_url             = esc_url_raw( $raw_redirect_url ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() is applied
-		$show_project_title       = ! empty( $_POST['xpressui_show_project_title'] ) ? '1' : '0';
-		$show_required_note       = ! empty( $_POST['xpressui_show_required_fields_note'] ) ? '1' : '0';
-		$section_label_visibility = sanitize_key( wp_unslash( (string) ( $_POST['xpressui_section_label_visibility'] ?? 'auto' ) ) );
-		if ( ! in_array( $section_label_visibility, [ 'auto', 'show', 'hide' ], true ) ) {
-			$section_label_visibility = 'auto';
-		}
-
-		$save_warnings = [];
-		if ( $raw_notify_email !== '' && $notify_email === '' ) {
-			$save_warnings[] = __( 'The notification email was not saved because it is not a valid email address.', 'xpressui-wordpress-bridge-pro' );
-			$invalid_fields[] = 'xpressui_notify_email';
-		}
-		if ( $raw_redirect_url !== '' && $redirect_url === '' ) {
-			$save_warnings[] = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-wordpress-bridge-pro' );
-			$invalid_fields[] = 'xpressui_redirect_url';
-		}
-		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url, $show_project_title, $show_required_note, $section_label_visibility );
-
-		// Overlay.
-		$overlay = [];
-
-		$project_name = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_project_name'] ?? '' ) ) );
-		if ( $project_name !== '' ) {
-			$overlay['project_name'] = $project_name;
-		}
-
-		$success_msg = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_success_message'] ?? '' ) ) );
-		if ( $success_msg !== '' ) {
-			$overlay['success_message'] = $success_msg;
-		}
-
-		$error_msg = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_error_message'] ?? '' ) ) );
-		if ( $error_msg !== '' ) {
-			$overlay['error_message'] = $error_msg;
-		}
-
-		// Navigation labels.
-		$nav = [];
-		foreach ( [ 'prev', 'next', 'submit' ] as $nav_key ) {
-			$v = sanitize_text_field( wp_unslash( (string) ( $_POST[ 'xpressui_overlay_nav_' . $nav_key ] ?? '' ) ) );
-			if ( $v !== '' ) {
-				$nav[ $nav_key ] = $v;
-			}
-		}
-		if ( ! empty( $nav ) ) {
-			$overlay['navigation'] = $nav;
-		}
-
-		// Section labels.
-		$raw_sections = isset( $_POST['xpressui_overlay_sections'] ) && is_array( $_POST['xpressui_overlay_sections'] )
-			? wp_unslash( $_POST['xpressui_overlay_sections'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value sanitized individually below
-			: [];
-		$sections_overlay = [];
-		foreach ( $raw_sections as $sname => $slabel ) {
-			$sname  = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $sname );
-			$slabel = sanitize_text_field( wp_unslash( (string) $slabel ) );
-			if ( $sname !== '' && $slabel !== '' ) {
-				$sections_overlay[ $sname ] = $slabel;
-			}
-		}
-		if ( ! empty( $sections_overlay ) ) {
-			$overlay['sections'] = $sections_overlay;
-		}
-
-		// Fields.
-		$raw_fields = isset( $_POST['xpressui_overlay_fields'] ) && is_array( $_POST['xpressui_overlay_fields'] )
-			? wp_unslash( $_POST['xpressui_overlay_fields'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value sanitized individually below
-			: [];
-		$fields_overlay = [];
-		foreach ( $raw_fields as $field_name => $field_data ) {
-			$field_name = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $field_name );
-			if ( $field_name === '' || ! is_array( $field_data ) ) {
-				continue;
-			}
-			$pack_field = isset( $pack_fields_by_name[ $field_name ] ) && is_array( $pack_fields_by_name[ $field_name ] ) ? $pack_fields_by_name[ $field_name ] : [];
-			$entry = [];
-
-			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['label'] ?? '' ) ) );
-			if ( $v !== '' ) {
-				$entry['label'] = $v;
-			}
-
-			// Required: '' = pack default, '1' = required, '0' = optional.
-			$req = (string) ( $field_data['required'] ?? '' );
-			if ( $req === '1' ) {
-				$entry['required'] = true;
-			} elseif ( $req === '0' ) {
-				$entry['required'] = false;
-			}
-
-			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['placeholder'] ?? '' ) ) );
-			if ( $v !== '' ) {
-				$entry['placeholder'] = $v;
-			}
-
-			$v = sanitize_textarea_field( wp_unslash( (string) ( $field_data['desc'] ?? '' ) ) );
-			if ( $v !== '' ) {
-				$entry['desc'] = $v;
-			}
-
-			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['error_message'] ?? '' ) ) );
-			if ( $v !== '' ) {
-				$entry['error_message'] = $v;
-			}
-
-			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'pattern' ) );
-			if ( $v !== '' && xpressui_pro_field_supports_pattern( $pack_field ) ) {
-				$entry['pattern'] = $v;
-			}
-
-			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_len', 'min_len', __( 'Min length', 'xpressui-wordpress-bridge-pro' ) );
-			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_len', 'max_len', __( 'Max length', 'xpressui-wordpress-bridge-pro' ) );
-			if ( xpressui_pro_field_supports_choice_limits( $pack_field ) ) {
-				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_choices', 'min_choices', __( 'Minimum choices', 'xpressui-wordpress-bridge-pro' ) );
-				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_choices', 'max_choices', __( 'Maximum choices', 'xpressui-wordpress-bridge-pro' ) );
-			}
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'min_value', 'min_value', __( 'Minimum value', 'xpressui-wordpress-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_value', 'max_value', __( 'Maximum value', 'xpressui-wordpress-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'step_value', 'step_value', __( 'Step', 'xpressui-wordpress-bridge-pro' ) );
-			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $invalid_fields, $field_data, $field_name, 'max_file_size_mb', 'max_file_size_mb', __( 'Maximum file size (MB)', 'xpressui-wordpress-bridge-pro' ) );
-
-			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'accept' ) );
-			if ( $v !== '' ) {
-				$entry['accept'] = $v;
-			}
-
-			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'upload_accept_label' ) );
-			if ( $v !== '' ) {
-				$entry['upload_accept_label'] = $v;
-			}
-			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'file_type_error_message' ) );
-			if ( $v !== '' ) {
-				$entry['file_type_error_message'] = $v;
-			}
-			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'file_size_error_message' ) );
-			if ( $v !== '' ) {
-				$entry['file_size_error_message'] = $v;
-			}
-
-			if ( isset( $entry['min_len'], $entry['max_len'] ) && (int) $entry['min_len'] > (int) $entry['max_len'] ) {
-				unset( $entry['min_len'], $entry['max_len'] );
-				$save_warnings[] = sprintf(
-					/* translators: %s: field label. */
-					__( 'The min/max length values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
-					$field_name
-				);
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_len';
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_len';
-			}
-
-			if ( isset( $entry['min_value'], $entry['max_value'] ) && (float) $entry['min_value'] > (float) $entry['max_value'] ) {
-				unset( $entry['min_value'], $entry['max_value'] );
-				$save_warnings[] = sprintf(
-					/* translators: %s: field label. */
-					__( 'The min/max values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
-					$field_name
-				);
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_value';
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_value';
-			}
-
-			if ( isset( $entry['step_value'] ) && (float) $entry['step_value'] <= 0 ) {
-				unset( $entry['step_value'] );
-				$save_warnings[] = sprintf(
-					/* translators: %s: field label. */
-					__( 'The step value for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
-					$field_name
-				);
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_step_value';
-			}
-
-			if ( isset( $entry['max_file_size_mb'] ) && (float) $entry['max_file_size_mb'] <= 0 ) {
-				unset( $entry['max_file_size_mb'] );
-				$save_warnings[] = sprintf(
-					/* translators: %s: field label. */
-					__( 'The maximum file size for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
-					$field_name
-				);
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_file_size_mb';
-			}
-
-			if ( xpressui_pro_field_supports_choice_limits( $pack_field ) && isset( $entry['min_choices'], $entry['max_choices'] ) && (int) $entry['min_choices'] > (int) $entry['max_choices'] ) {
-				unset( $entry['min_choices'], $entry['max_choices'] );
-				$save_warnings[] = sprintf(
-					/* translators: %s: field label. */
-					__( 'The minimum/maximum choices for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
-					$field_name
-				);
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_choices';
-				$invalid_fields[] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_choices';
-			}
-
-			// Choice labels and enabled state.
-			if ( xpressui_pro_field_has_choices( $pack_field ) && isset( $field_data['choices'] ) && is_array( $field_data['choices'] ) ) {
-				$choices_entry = [];
-				$pack_choices_map = [];
-				foreach ( (array) $pack_field['choices'] as $pack_choice ) {
-					$pack_choice_value = (string) ( $pack_choice['value'] ?? '' );
-					if ( '' === $pack_choice_value ) {
-						continue;
-					}
-					$pack_choices_map[ $pack_choice_value ] = [
-						'label'   => (string) ( $pack_choice['label'] ?? $pack_choice_value ),
-						'enabled' => empty( $pack_choice['disabled'] ),
-					];
-				}
-				foreach ( $field_data['choices'] as $cv => $choice_data ) {
-					$cv = (string) $cv;
-					if ( '' === $cv || ! isset( $pack_choices_map[ $cv ] ) ) {
-						continue;
-					}
-
-					$choice_entry   = [];
-					$choice_label   = '';
-					$choice_enabled = $pack_choices_map[ $cv ]['enabled'];
-
-					if ( is_array( $choice_data ) ) {
-						$choice_label = sanitize_text_field( wp_unslash( (string) ( $choice_data['label'] ?? '' ) ) );
-						$choice_enabled = isset( $choice_data['enabled'] ) && '1' === (string) wp_unslash( $choice_data['enabled'] );
-					} else {
-						$choice_label = sanitize_text_field( wp_unslash( (string) $choice_data ) );
-					}
-
-					if ( $choice_label !== '' && $choice_label !== $pack_choices_map[ $cv ]['label'] ) {
-						$choice_entry['label'] = $choice_label;
-					}
-					if ( $choice_enabled !== $pack_choices_map[ $cv ]['enabled'] ) {
-						$choice_entry['enabled'] = $choice_enabled;
-					}
-					if ( ! empty( $choice_entry ) ) {
-						$choices_entry[ $cv ] = $choice_entry;
-					}
-				}
-				if ( ! empty( $choices_entry ) ) {
-					$entry['choices'] = $choices_entry;
-				}
-			}
-
-			if ( ! empty( $entry ) ) {
-				$fields_overlay[ $field_name ] = $entry;
-			}
-		}
-		if ( ! empty( $fields_overlay ) ) {
-			$overlay['fields'] = $fields_overlay;
-		}
-
-		xpressui_pro_save_workflow_overlay( $slug, $overlay );
-		$notice_class    = empty( $save_warnings ) ? 'notice-success' : 'notice-warning';
-		$notice_messages = array_merge(
-			[ __( 'Customizations saved.', 'xpressui-wordpress-bridge-pro' ) ],
-			$save_warnings
-		);
-	}
-
-	// Handle reset.
-	if ( isset( $_POST['xpressui_reset_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
-		xpressui_pro_delete_workflow_overlay( $slug );
-		$notice_class    = 'notice-success';
-		$notice_messages = [ __( 'Customizations reset to pack defaults.', 'xpressui-wordpress-bridge-pro' ) ];
-	}
+	// 1. Process submissions if any
+	$post_actions    = xpressui_pro_handle_overlay_submission( $slug, $pack_fields_by_name );
+	$notice_class    = $post_actions['notice_class'];
+	$notice_messages = $post_actions['notice_messages'];
+	$invalid_fields  = $post_actions['invalid_fields'];
 
 	// -----------------------------------------------------------------------
 	// Load data for display
@@ -708,101 +438,410 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	echo '<div class="wrap xpressui-admin-wrap">';
+	xpressui_pro_render_overlay_styles();
+	xpressui_pro_render_overlay_header( $slug, $back_url, $summary_stats, $notice_class, $notice_messages );
+
+	echo '<form method="post" action="">';
+	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
+
+	xpressui_pro_render_overlay_toolbar();
+
+	// Sticky save bar.
+	echo '<div class="xpressui-sticky-actions">';
+	echo '<span class="xpressui-sticky-status is-saved" data-xpressui-dirty-status="saved">' . esc_html__( 'No unsaved changes', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+	echo '<div class="xpressui-sticky-actions-buttons">';
+	submit_button( __( 'Save Customizations', 'xpressui-wordpress-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
+	submit_button(
+		__( 'Reset to Defaults', 'xpressui-wordpress-bridge-pro' ),
+		'secondary',
+		'xpressui_reset_overlay',
+		false,
+		[
+			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-wordpress-bridge-pro' ) ) . "');",
+		]
+	);
+	echo '</div>';
+	echo '</div>';
+
+	xpressui_pro_render_card_project_settings( $proj_settings, $ov_project_name, $original_title, $summary_stats, $invalid_fields );
+	xpressui_pro_render_card_submit_feedback( $ov_success_message, $ov_error_message, $summary_stats );
+	xpressui_pro_render_card_navigation( $ov_navigation, $pack_nav );
+	xpressui_pro_render_card_sections( $sections, $ov_sections, $ov_fields, $invalid_fields );
+
+	echo '</form>';
+
+	xpressui_pro_render_overlay_scripts();
+	echo '</div>';
+}
+
+/**
+ * Handles POST submissions for saving or resetting customizations.
+ *
+ * @return array{notice_class: string, notice_messages: array<int, string>, invalid_fields: array<int, string>}
+ */
+function xpressui_pro_handle_overlay_submission( string $slug, array $pack_fields_by_name ): array {
+	$result = [
+		'notice_class'    => '',
+		'notice_messages' => [],
+		'invalid_fields'  => [],
+	];
+
+	if ( isset( $_POST['xpressui_save_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
+		$raw_notify_email         = trim( wp_unslash( $_POST['xpressui_notify_email'] ?? '' ) );
+		$raw_redirect_url         = trim( wp_unslash( $_POST['xpressui_redirect_url'] ?? '' ) );
+		$notify_email             = sanitize_email( $raw_notify_email ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$redirect_url             = esc_url_raw( $raw_redirect_url ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$show_project_title       = ! empty( $_POST['xpressui_show_project_title'] ) ? '1' : '0';
+		$show_required_note       = ! empty( $_POST['xpressui_show_required_fields_note'] ) ? '1' : '0';
+		$section_label_visibility = sanitize_key( wp_unslash( (string) ( $_POST['xpressui_section_label_visibility'] ?? 'auto' ) ) );
+		if ( ! in_array( $section_label_visibility, [ 'auto', 'show', 'hide' ], true ) ) {
+			$section_label_visibility = 'auto';
+		}
+
+		$save_warnings = [];
+		if ( $raw_notify_email !== '' && $notify_email === '' ) {
+			$save_warnings[]          = __( 'The notification email was not saved because it is not a valid email address.', 'xpressui-wordpress-bridge-pro' );
+			$result['invalid_fields'][] = 'xpressui_notify_email';
+		}
+		if ( $raw_redirect_url !== '' && $redirect_url === '' ) {
+			$save_warnings[]          = __( 'The post-submit redirect was not saved because it is not a valid URL.', 'xpressui-wordpress-bridge-pro' );
+			$result['invalid_fields'][] = 'xpressui_redirect_url';
+		}
+		xpressui_pro_save_project_settings( $slug, $notify_email, $redirect_url, $show_project_title, $show_required_note, $section_label_visibility );
+
+		$overlay      = [];
+		$project_name = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_project_name'] ?? '' ) ) );
+		if ( $project_name !== '' ) {
+			$overlay['project_name'] = $project_name;
+		}
+		$success_msg = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_success_message'] ?? '' ) ) );
+		if ( $success_msg !== '' ) {
+			$overlay['success_message'] = $success_msg;
+		}
+		$error_msg = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_overlay_error_message'] ?? '' ) ) );
+		if ( $error_msg !== '' ) {
+			$overlay['error_message'] = $error_msg;
+		}
+
+		$nav = [];
+		foreach ( [ 'prev', 'next', 'submit' ] as $nav_key ) {
+			$v = sanitize_text_field( wp_unslash( (string) ( $_POST[ 'xpressui_overlay_nav_' . $nav_key ] ?? '' ) ) );
+			if ( $v !== '' ) {
+				$nav[ $nav_key ] = $v;
+			}
+		}
+		if ( ! empty( $nav ) ) {
+			$overlay['navigation'] = $nav;
+		}
+
+		$raw_sections = isset( $_POST['xpressui_overlay_sections'] ) && is_array( $_POST['xpressui_overlay_sections'] )
+			? wp_unslash( $_POST['xpressui_overlay_sections'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			: [];
+		$sections_overlay = [];
+		foreach ( $raw_sections as $sname => $slabel ) {
+			$sname  = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $sname );
+			$slabel = sanitize_text_field( wp_unslash( (string) $slabel ) );
+			if ( $sname !== '' && $slabel !== '' ) {
+				$sections_overlay[ $sname ] = $slabel;
+			}
+		}
+		if ( ! empty( $sections_overlay ) ) {
+			$overlay['sections'] = $sections_overlay;
+		}
+
+		$raw_fields = isset( $_POST['xpressui_overlay_fields'] ) && is_array( $_POST['xpressui_overlay_fields'] )
+			? wp_unslash( $_POST['xpressui_overlay_fields'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			: [];
+		$fields_overlay = [];
+		foreach ( $raw_fields as $field_name => $field_data ) {
+			$field_name = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $field_name );
+			if ( $field_name === '' || ! is_array( $field_data ) ) {
+				continue;
+			}
+			$pack_field = isset( $pack_fields_by_name[ $field_name ] ) && is_array( $pack_fields_by_name[ $field_name ] ) ? $pack_fields_by_name[ $field_name ] : [];
+			$entry      = [];
+
+			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['label'] ?? '' ) ) );
+			if ( $v !== '' ) {
+				$entry['label'] = $v;
+			}
+
+			$req = (string) ( $field_data['required'] ?? '' );
+			if ( $req === '1' ) {
+				$entry['required'] = true;
+			} elseif ( $req === '0' ) {
+				$entry['required'] = false;
+			}
+
+			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['placeholder'] ?? '' ) ) );
+			if ( $v !== '' ) {
+				$entry['placeholder'] = $v;
+			}
+			$v = sanitize_textarea_field( wp_unslash( (string) ( $field_data['desc'] ?? '' ) ) );
+			if ( $v !== '' ) {
+				$entry['desc'] = $v;
+			}
+			$v = sanitize_text_field( wp_unslash( (string) ( $field_data['error_message'] ?? '' ) ) );
+			if ( $v !== '' ) {
+				$entry['error_message'] = $v;
+			}
+			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'pattern' ) );
+			if ( $v !== '' && xpressui_pro_field_supports_pattern( $pack_field ) ) {
+				$entry['pattern'] = $v;
+			}
+
+			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'min_len', 'min_len', __( 'Min length', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_int( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'max_len', 'max_len', __( 'Max length', 'xpressui-wordpress-bridge-pro' ) );
+			if ( xpressui_pro_field_supports_choice_limits( $pack_field ) ) {
+				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'min_choices', 'min_choices', __( 'Minimum choices', 'xpressui-wordpress-bridge-pro' ) );
+				xpressui_pro_collect_overlay_int( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'max_choices', 'max_choices', __( 'Maximum choices', 'xpressui-wordpress-bridge-pro' ) );
+			}
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'min_value', 'min_value', __( 'Minimum value', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'max_value', 'max_value', __( 'Maximum value', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'step_value', 'step_value', __( 'Step', 'xpressui-wordpress-bridge-pro' ) );
+			xpressui_pro_collect_overlay_number( $entry, $save_warnings, $result['invalid_fields'], $field_data, $field_name, 'max_file_size_mb', 'max_file_size_mb', __( 'Maximum file size (MB)', 'xpressui-wordpress-bridge-pro' ) );
+
+			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'accept' ) );
+			if ( $v !== '' ) {
+				$entry['accept'] = $v;
+			}
+			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'upload_accept_label' ) );
+			if ( $v !== '' ) {
+				$entry['upload_accept_label'] = $v;
+			}
+			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'file_type_error_message' ) );
+			if ( $v !== '' ) {
+				$entry['file_type_error_message'] = $v;
+			}
+			$v = sanitize_text_field( xpressui_pro_overlay_raw_value( $field_data, 'file_size_error_message' ) );
+			if ( $v !== '' ) {
+				$entry['file_size_error_message'] = $v;
+			}
+
+			if ( isset( $entry['min_len'], $entry['max_len'] ) && (int) $entry['min_len'] > (int) $entry['max_len'] ) {
+				unset( $entry['min_len'], $entry['max_len'] );
+				$save_warnings[]            = sprintf(
+					/* translators: %s: field label. */
+					__( 'The min/max length values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
+					$field_name
+				);
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_len';
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_len';
+			}
+
+			if ( isset( $entry['min_value'], $entry['max_value'] ) && (float) $entry['min_value'] > (float) $entry['max_value'] ) {
+				unset( $entry['min_value'], $entry['max_value'] );
+				$save_warnings[]            = sprintf(
+					/* translators: %s: field label. */
+					__( 'The min/max values for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
+					$field_name
+				);
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_value';
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_value';
+			}
+
+			if ( isset( $entry['step_value'] ) && (float) $entry['step_value'] <= 0 ) {
+				unset( $entry['step_value'] );
+				$save_warnings[]            = sprintf(
+					/* translators: %s: field label. */
+					__( 'The step value for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
+					$field_name
+				);
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_step_value';
+			}
+
+			if ( isset( $entry['max_file_size_mb'] ) && (float) $entry['max_file_size_mb'] <= 0 ) {
+				unset( $entry['max_file_size_mb'] );
+				$save_warnings[]            = sprintf(
+					/* translators: %s: field label. */
+					__( 'The maximum file size for "%s" was not saved because it must be greater than zero.', 'xpressui-wordpress-bridge-pro' ),
+					$field_name
+				);
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_file_size_mb';
+			}
+
+			if ( xpressui_pro_field_supports_choice_limits( $pack_field ) && isset( $entry['min_choices'], $entry['max_choices'] ) && (int) $entry['min_choices'] > (int) $entry['max_choices'] ) {
+				unset( $entry['min_choices'], $entry['max_choices'] );
+				$save_warnings[]            = sprintf(
+					/* translators: %s: field label. */
+					__( 'The minimum/maximum choices for "%s" were not saved because the minimum cannot be greater than the maximum.', 'xpressui-wordpress-bridge-pro' ),
+					$field_name
+				);
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_min_choices';
+				$result['invalid_fields'][] = 'xpressui_overlay_fields_' . sanitize_html_class( $field_name ) . '_max_choices';
+			}
+
+			if ( xpressui_pro_field_has_choices( $pack_field ) && isset( $field_data['choices'] ) && is_array( $field_data['choices'] ) ) {
+				$choices_entry    = [];
+				$pack_choices_map = [];
+				foreach ( (array) $pack_field['choices'] as $pack_choice ) {
+					$pack_choice_value = (string) ( $pack_choice['value'] ?? '' );
+					if ( '' === $pack_choice_value ) {
+						continue;
+					}
+					$pack_choices_map[ $pack_choice_value ] = [
+						'label'   => (string) ( $pack_choice['label'] ?? $pack_choice_value ),
+						'enabled' => empty( $pack_choice['disabled'] ),
+					];
+				}
+
+				$posted_keys   = array_values( array_filter( array_map( 'strval', array_keys( $field_data['choices'] ) ), function ( $k ) use ( $pack_choices_map ) {
+					return isset( $pack_choices_map[ $k ] );
+				} ) );
+				$pack_keys     = array_keys( $pack_choices_map );
+				$order_changed = $posted_keys !== $pack_keys;
+
+				foreach ( $field_data['choices'] as $cv => $choice_data ) {
+					$cv = (string) $cv;
+					if ( '' === $cv || ! isset( $pack_choices_map[ $cv ] ) ) {
+						continue;
+					}
+
+					$choice_entry   = [];
+					$choice_label   = '';
+					$choice_enabled = $pack_choices_map[ $cv ]['enabled'];
+
+					if ( is_array( $choice_data ) ) {
+						$choice_label   = sanitize_text_field( wp_unslash( (string) ( $choice_data['label'] ?? '' ) ) );
+						$choice_enabled = isset( $choice_data['enabled'] ) && '1' === (string) wp_unslash( $choice_data['enabled'] );
+					} else {
+						$choice_label = sanitize_text_field( wp_unslash( (string) $choice_data ) );
+					}
+
+					if ( $choice_label !== '' && $choice_label !== $pack_choices_map[ $cv ]['label'] ) {
+						$choice_entry['label'] = $choice_label;
+					}
+					if ( $choice_enabled !== $pack_choices_map[ $cv ]['enabled'] ) {
+						$choice_entry['enabled'] = $choice_enabled;
+					}
+					if ( ! empty( $choice_entry ) || $order_changed ) {
+						$choices_entry[ $cv ] = $choice_entry;
+					}
+				}
+				if ( ! empty( $choices_entry ) ) {
+					$entry['choices'] = $choices_entry;
+				}
+			}
+
+			if ( ! empty( $entry ) ) {
+				$fields_overlay[ $field_name ] = $entry;
+			}
+		}
+		if ( ! empty( $fields_overlay ) ) {
+			$overlay['fields'] = $fields_overlay;
+		}
+
+		xpressui_pro_save_workflow_overlay( $slug, $overlay );
+		$result['notice_class']    = empty( $save_warnings ) ? 'notice-success' : 'notice-warning';
+		$result['notice_messages'] = array_merge( [ __( 'Customizations saved.', 'xpressui-wordpress-bridge-pro' ) ], $save_warnings );
+	} elseif ( isset( $_POST['xpressui_reset_overlay'] ) && check_admin_referer( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' ) ) {
+		xpressui_pro_delete_workflow_overlay( $slug );
+		$result['notice_class']    = 'notice-success';
+		$result['notice_messages'] = [ __( 'Customizations reset to pack defaults.', 'xpressui-wordpress-bridge-pro' ) ];
+	}
+
+	return $result;
+}
+
+function xpressui_pro_render_overlay_styles(): void {
 	echo '<style>
-.xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:4px;margin-bottom:10px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
-.xpressui-card-summary{cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
-.xpressui-card-summary::-webkit-details-marker{display:none}
-.xpressui-card-summary::before{content:"▶";font-size:9px;color:#2966ff;flex-shrink:0;transition:transform .15s}
-.xpressui-admin-card[open]>.xpressui-card-summary::before{transform:rotate(90deg)}
-.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#dfe8f2}
-.xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#122033}
-.xpressui-card-body{padding:0 12px}
-.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #2966ff;border-radius:0 4px 4px 0;padding:7px 14px;margin-bottom:14px;box-shadow:0 2px 10px rgba(41,102,255,.15);display:flex;align-items:center;gap:10px}
-.xpressui-sticky-actions-buttons{display:inline-flex;align-items:center;gap:10px;margin-left:auto}
-.xpressui-pro-header{background:
-radial-gradient(circle at top right, rgba(109,77,255,.28), transparent 28%),
-radial-gradient(circle at 85% 20%, rgba(56,189,248,.18), transparent 24%),
-linear-gradient(125deg,#0f172a 0%,#14213d 34%,#2b4fd8 68%,#6d4dff 100%);
-margin:-10px -20px 12px;padding:16px 18px 15px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;overflow:hidden;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
-.xpressui-pro-header::after{content:"";position:absolute;right:-56px;top:-56px;width:220px;height:220px;background:rgba(255,255,255,.05);border-radius:50%}
-.xpressui-pro-header::before{content:"";position:absolute;left:-48px;bottom:-72px;width:220px;height:220px;background:rgba(56,189,248,.08);border-radius:50%}
-.xpressui-pro-header-left{position:relative;z-index:1}
-.xpressui-pro-header-left h1{margin:0 0 3px;font-size:18px;font-weight:700;color:#fff;line-height:1.12}
-.xpressui-pro-header-left p{margin:0;max-width:640px;font-size:11px;color:rgba(255,255,255,.76);line-height:1.4}
-.xpressui-pro-header-right{position:relative;z-index:1;text-align:right;flex-shrink:0;display:grid;justify-items:end;gap:6px}
-.xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.24);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;text-transform:uppercase;box-shadow:0 10px 24px rgba(15,23,42,.18)}
-.xpressui-pro-back{display:block;margin-top:0;font-size:12px;color:rgba(255,255,255,.68);text-decoration:none}
-.xpressui-pro-back:hover{color:#fff}
-.xpressui-inline-notice{margin:0 0 14px;padding:10px 14px;border-radius:6px;border-left:4px solid #00a32a;background:#fff;color:#1d2327;box-shadow:0 1px 2px rgba(15,23,42,.06)}
-.xpressui-inline-notice p{margin:0;font-size:12px;font-weight:600;color:#1d2327;line-height:1.45}
-.xpressui-inline-notice.is-error{border-left-color:#d63638}
-.xpressui-inline-notice.is-warning{border-left-color:#dba617;background:#fffbf0}
-.xpressui-inline-notice ul{margin:6px 0 0 18px;padding:0}
-.xpressui-inline-notice li{margin:0 0 3px;font-size:12px;color:#1d2327;line-height:1.4}
-.xpressui-pro-summary{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
-.xpressui-pro-summary-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #dfe8f2;color:#122033;box-shadow:0 1px 2px rgba(15,23,42,.05)}
-.xpressui-pro-summary-chip strong{font-size:12px}
-.xpressui-pro-summary-chip span{font-size:10px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
-.xpressui-pro-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
-.xpressui-pro-toolbar button{border:1px solid #c5d4ee;background:#fff;color:#183ea8;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
-.xpressui-pro-toolbar button:hover{background:#f5f9ff}
-.xpressui-pro-toolbar button.is-accent{background:#183ea8;border-color:#183ea8;color:#fff}
-.xpressui-pro-toolbar button.is-accent:hover{background:#122f80}
-.xpressui-pro-toolbar button.is-active{background:#e9f0ff;border-color:#9db6f7;color:#183ea8}
-.xpressui-pro-toolbar-search{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:min(360px,100%)}
-.xpressui-pro-toolbar-search input{width:100%;min-height:34px;border:1px solid #c5d4ee;border-radius:999px;padding:0 14px;font-size:12px;box-shadow:none}
-.xpressui-pro-toolbar-search input:focus{border-color:#183ea8;box-shadow:0 0 0 1px rgba(24,62,168,.15)}
-.xpressui-pro-toolbar-meta{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#5b6b82}
-.xpressui-pro-toolbar-meta strong{color:#122033}
-.xpressui-pro-empty-state{display:none;margin:0 0 14px;padding:14px 16px;border:1px dashed #c7d7f6;border-radius:10px;background:linear-gradient(180deg,#f8fbff 0%,#f1f6ff 100%);color:#36507a;font-size:13px}
-.xpressui-admin-card.is-filtered-out{display:none}
-.xpressui-card-meta{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
-.xpressui-card-badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:999px;background:#eef4ff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
-.xpressui-card-badge.is-customized{background:#e9f7ef;color:#0a7a32}
-.xpressui-sticky-status{font-size:12px;font-weight:600;color:#5b6b82}
-.xpressui-sticky-status.is-dirty{color:#b45309}
-.xpressui-sticky-status.is-saved{color:#0a7a32}
-.xpressui-reset-chip{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;border:1px solid #d6def2;background:#fff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}
-.xpressui-reset-chip:hover{background:#f5f9ff;border-color:#b7c8eb}
-.xpressui-field-block{padding:12px 14px;border:1px solid #e5edf8;border-radius:10px;background:#fff}
-.xpressui-field-block.is-customized{border-color:#b8ccff;background:linear-gradient(180deg,#f9fbff 0%,#f3f7ff 100%)}
-.xpressui-field-block-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
-.xpressui-field-block-title{font-size:13px;font-weight:700;color:#122033}
-.xpressui-field-block-type{font-size:11px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
-.xpressui-field-block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 12px}
-.xpressui-field-control label{display:block;font-size:12px;color:#5b6b82;margin-bottom:4px;font-weight:600}
-.xpressui-field-control.is-full{grid-column:1 / -1}
-.xpressui-field-control-row{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 12px}
-.xpressui-choice-group{margin-top:10px;padding-left:12px;border-left:3px solid #d8e3f7}
-.xpressui-choice-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.xpressui-choice-label{min-width:120px;color:#5b6b82;font-size:12px;font-weight:600}
-.xpressui-choice-toggle{display:inline-flex;align-items:center;gap:6px;padding:0 8px;height:32px;border:1px solid #d6def2;border-radius:999px;background:#f8fbff;color:#183ea8;font-size:12px;font-weight:600}
-.xpressui-choice-toggle input{margin:0}
-.xpressui-muted{color:#5b6b82;font-size:12px}
-.xpressui-input-invalid{border-color:#d63638 !important;box-shadow:0 0 0 1px rgba(214,54,56,.18)}
-.xpressui-inline-field-error{margin:6px 0 0;color:#b42318;font-size:12px;font-weight:600}
-@media (max-width: 960px){.xpressui-pro-header-right{width:100%;justify-items:start;text-align:left}}
-@media (max-width: 782px){.xpressui-field-control-row{grid-template-columns:1fr}.xpressui-pro-header{padding:14px 14px 13px}.xpressui-pro-header-left h1{font-size:17px}.xpressui-pro-summary{gap:7px}}
-</style>';
-echo '<div class="xpressui-pro-header">';
-echo '<div class="xpressui-pro-header-left">';
-echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
-echo '<p><strong style="color:rgba(255,255,255,.9)">' . esc_html( $slug ) . '</strong> &mdash; '
-		. esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
-echo '</div>';
+	.xpressui-admin-card{background:#fff;border:1px solid #c3c4c7;border-radius:4px;margin-bottom:10px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
+	.xpressui-card-summary{cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:8px;list-style:none;user-select:none;border-bottom:1px solid transparent}
+	.xpressui-card-summary::-webkit-details-marker{display:none}
+	.xpressui-card-summary::before{content:"▶";font-size:9px;color:#2966ff;flex-shrink:0;transition:transform .15s}
+	.xpressui-admin-card[open]>.xpressui-card-summary::before{transform:rotate(90deg)}
+	.xpressui-admin-card[open]>.xpressui-card-summary{border-bottom-color:#dfe8f2}
+	.xpressui-card-summary h2{margin:0;font-size:13px;font-weight:600;flex:1;text-transform:uppercase;letter-spacing:.04em;color:#122033}
+	.xpressui-card-body{padding:0 12px}
+	.xpressui-sticky-actions{position:sticky;top:32px;z-index:100;background:#fff;border-left:3px solid #2966ff;border-radius:0 4px 4px 0;padding:7px 14px;margin-bottom:14px;box-shadow:0 2px 10px rgba(41,102,255,.15);display:flex;align-items:center;gap:10px}
+	.xpressui-sticky-actions-buttons{display:inline-flex;align-items:center;gap:10px;margin-left:auto}
+	.xpressui-pro-header{background:radial-gradient(circle at top right, rgba(109,77,255,.28), transparent 28%),radial-gradient(circle at 85% 20%, rgba(56,189,248,.18), transparent 24%),linear-gradient(125deg,#0f172a 0%,#14213d 34%,#2b4fd8 68%,#6d4dff 100%);margin:-10px -20px 12px;padding:16px 18px 15px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;overflow:hidden;box-shadow:inset 0 -1px 0 rgba(255,255,255,.08)}
+	.xpressui-pro-header::after{content:"";position:absolute;right:-56px;top:-56px;width:220px;height:220px;background:rgba(255,255,255,.05);border-radius:50%}
+	.xpressui-pro-header::before{content:"";position:absolute;left:-48px;bottom:-72px;width:220px;height:220px;background:rgba(56,189,248,.08);border-radius:50%}
+	.xpressui-pro-header-left{position:relative;z-index:1}
+	.xpressui-pro-header-left h1{margin:0 0 3px;font-size:18px;font-weight:700;color:#fff;line-height:1.12}
+	.xpressui-pro-header-left p{margin:0;max-width:640px;font-size:11px;color:rgba(255,255,255,.76);line-height:1.4}
+	.xpressui-pro-header-right{position:relative;z-index:1;text-align:right;flex-shrink:0;display:grid;justify-items:end;gap:6px}
+	.xpressui-pro-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.24);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.08em;color:#fff;text-transform:uppercase;box-shadow:0 10px 24px rgba(15,23,42,.18)}
+	.xpressui-pro-back{display:block;margin-top:0;font-size:12px;color:rgba(255,255,255,.68);text-decoration:none}
+	.xpressui-pro-back:hover{color:#fff}
+	.xpressui-inline-notice{margin:0 0 14px;padding:10px 14px;border-radius:6px;border-left:4px solid #00a32a;background:#fff;color:#1d2327;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+	.xpressui-inline-notice p{margin:0;font-size:12px;font-weight:600;color:#1d2327;line-height:1.45}
+	.xpressui-inline-notice.is-error{border-left-color:#d63638}
+	.xpressui-inline-notice.is-warning{border-left-color:#dba617;background:#fffbf0}
+	.xpressui-inline-notice ul{margin:6px 0 0 18px;padding:0}
+	.xpressui-inline-notice li{margin:0 0 3px;font-size:12px;color:#1d2327;line-height:1.4}
+	.xpressui-pro-summary{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+	.xpressui-pro-summary-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #dfe8f2;color:#122033;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+	.xpressui-pro-summary-chip strong{font-size:12px}
+	.xpressui-pro-summary-chip span{font-size:10px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
+	.xpressui-pro-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px}
+	.xpressui-pro-toolbar button{border:1px solid #c5d4ee;background:#fff;color:#183ea8;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+	.xpressui-pro-toolbar button:hover{background:#f5f9ff}
+	.xpressui-pro-toolbar button.is-accent{background:#183ea8;border-color:#183ea8;color:#fff}
+	.xpressui-pro-toolbar button.is-accent:hover{background:#122f80}
+	.xpressui-pro-toolbar button.is-active{background:#e9f0ff;border-color:#9db6f7;color:#183ea8}
+	.xpressui-pro-toolbar-search{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:min(360px,100%)}
+	.xpressui-pro-toolbar-search input{width:100%;min-height:34px;border:1px solid #c5d4ee;border-radius:999px;padding:0 14px;font-size:12px;box-shadow:none}
+	.xpressui-pro-toolbar-search input:focus{border-color:#183ea8;box-shadow:0 0 0 1px rgba(24,62,168,.15)}
+	.xpressui-pro-toolbar-meta{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#5b6b82}
+	.xpressui-pro-toolbar-meta strong{color:#122033}
+	.xpressui-pro-empty-state{display:none;margin:0 0 14px;padding:14px 16px;border:1px dashed #c7d7f6;border-radius:10px;background:linear-gradient(180deg,#f8fbff 0%,#f1f6ff 100%);color:#36507a;font-size:13px}
+	.xpressui-admin-card.is-filtered-out{display:none}
+	.xpressui-card-meta{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
+	.xpressui-card-badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:999px;background:#eef4ff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+	.xpressui-card-badge.is-customized{background:#e9f7ef;color:#0a7a32}
+	.xpressui-sticky-status{font-size:12px;font-weight:600;color:#5b6b82}
+	.xpressui-sticky-status.is-dirty{color:#b45309}
+	.xpressui-sticky-status.is-saved{color:#0a7a32}
+	.xpressui-reset-chip{display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;border:1px solid #d6def2;background:#fff;color:#183ea8;font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}
+	.xpressui-reset-chip:hover{background:#f5f9ff;border-color:#b7c8eb}
+	.xpressui-field-block{padding:12px 14px;border:1px solid #e5edf8;border-radius:10px;background:#fff}
+	.xpressui-field-block.is-customized{border-color:#b8ccff;background:linear-gradient(180deg,#f9fbff 0%,#f3f7ff 100%)}
+	.xpressui-field-block-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+	.xpressui-field-block-title{font-size:13px;font-weight:700;color:#122033}
+	.xpressui-field-block-type{font-size:11px;color:#5b6b82;text-transform:uppercase;letter-spacing:.06em}
+	.xpressui-field-block-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 12px}
+	.xpressui-field-control label{display:block;font-size:12px;color:#5b6b82;margin-bottom:4px;font-weight:600}
+	.xpressui-field-control.is-full{grid-column:1 / -1}
+	.xpressui-field-control-row{grid-column:1 / -1;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 12px}
+	.xpressui-choice-group{margin-top:10px;padding-left:12px;border-left:3px solid #d8e3f7}
+	.xpressui-sortable-list{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+	.xpressui-choice-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid transparent;border-radius:6px;padding:4px;margin-left:-8px;transition:all .15s}
+	.xpressui-choice-row.is-dragging{opacity:.4;background:#f5f9ff;border:1px dashed #9db6f7}
+	.xpressui-drag-handle{cursor:grab;padding:0 4px;color:#a7b6cc;user-select:none;font-size:16px;line-height:1}
+	.xpressui-drag-handle:active{cursor:grabbing}
+	.xpressui-choice-label{min-width:120px;color:#5b6b82;font-size:12px;font-weight:600}
+	.xpressui-choice-toggle{display:inline-flex;align-items:center;gap:6px;padding:0 8px;height:32px;border:1px solid #d6def2;border-radius:999px;background:#f8fbff;color:#183ea8;font-size:12px;font-weight:600}
+	.xpressui-choice-toggle input{margin:0}
+	.xpressui-muted{color:#5b6b82;font-size:12px}
+	.xpressui-input-invalid{border-color:#d63638 !important;box-shadow:0 0 0 1px rgba(214,54,56,.18)}
+	.xpressui-inline-field-error{margin:6px 0 0;color:#b42318;font-size:12px;font-weight:600}
+	@media (max-width: 960px){.xpressui-pro-header-right{width:100%;justify-items:start;text-align:left}}
+	@media (max-width: 782px){.xpressui-field-control-row{grid-template-columns:1fr}.xpressui-pro-header{padding:14px 14px 13px}.xpressui-pro-header-left h1{font-size:17px}.xpressui-pro-summary{gap:7px}}
+	</style>';
+}
+
+function xpressui_pro_render_overlay_header( string $slug, string $back_url, array $summary_stats, string $notice_class, array $notice_messages ): void {
+	echo '<div class="xpressui-pro-header">';
+	echo '<div class="xpressui-pro-header-left">';
+	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
+	echo '<p><strong style="color:rgba(255,255,255,.9)">' . esc_html( $slug ) . '</strong> &mdash; '
+			. esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '</div>';
 	echo '<div class="xpressui-pro-header-right">';
 	echo '<span class="xpressui-pro-badge">✦ &nbsp;XPressUI Pro</span>';
 	echo '<a href="' . esc_url( $back_url ) . '" class="xpressui-pro-back">&larr; ' . esc_html__( 'Back to Manage Workflows', 'xpressui-wordpress-bridge-pro' ) . '</a>';
-echo '</div>';
+	echo '</div>';
 
-echo '<div class="xpressui-inline-notice" style="border-left-color:#183ea8;background:#f5f9ff">';
-echo '<p>' . esc_html__( 'Use this screen for local wording, validation, upload, and branding-safe adjustments. Keep structural changes such as new steps, new fields, or workflow logic in the XPressUI Console, then re-export the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
-echo '<ul>';
-echo '<li>' . esc_html__( 'Project Settings: notification, redirect, and page-level display behavior.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
-echo '<li>' . esc_html__( 'Customize Workflow: labels, helper text, validation limits, upload rules, and navigation wording.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
-echo '<li>' . esc_html__( 'XPressUI Console: structural edits, new sections, new fields, and conditional workflow logic.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
-echo '</ul>';
-echo '</div>';
+	echo '<div class="xpressui-inline-notice" style="border-left-color:#183ea8;background:#f5f9ff">';
+	echo '<p>' . esc_html__( 'Use this screen for local wording, validation, upload, and branding-safe adjustments. Keep structural changes such as new steps, new fields, or workflow logic in the XPressUI Console, then re-export the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<ul>';
+	echo '<li>' . esc_html__( 'Project Settings: notification, redirect, and page-level display behavior.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
+	echo '<li>' . esc_html__( 'Customize Workflow: labels, helper text, validation limits, upload rules, and navigation wording.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
+	echo '<li>' . esc_html__( 'XPressUI Console: structural edits, new sections, new fields, and conditional workflow logic.', 'xpressui-wordpress-bridge-pro' ) . '</li>';
+	echo '</ul>';
+	echo '</div>';
 	echo '</div>';
 
 	echo '<div class="xpressui-pro-summary">';
@@ -836,10 +875,9 @@ echo '</div>';
 		}
 		echo '</div>';
 	}
+}
 
-	echo '<form method="post" action="">';
-	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
-
+function xpressui_pro_render_overlay_toolbar(): void {
 	echo '<div class="xpressui-pro-toolbar">';
 	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="all">' . esc_html__( 'Open all sections', 'xpressui-wordpress-bridge-pro' ) . '</button>';
 	echo '<button type="button" class="xpressui-pro-details-toggle" data-target="customized">' . esc_html__( 'Open customized only', 'xpressui-wordpress-bridge-pro' ) . '</button>';
@@ -853,33 +891,17 @@ echo '</div>';
 	echo '</div>';
 	echo '</div>';
 	echo '<div class="xpressui-pro-empty-state" data-xpressui-empty-state>' . esc_html__( 'No customization cards match the current filters. Try clearing the search or turning off the customized-only filter.', 'xpressui-wordpress-bridge-pro' ) . '</div>';
+}
 
-	// Sticky save bar.
-	echo '<div class="xpressui-sticky-actions">';
-	echo '<span class="xpressui-sticky-status is-saved" data-xpressui-dirty-status="saved">' . esc_html__( 'No unsaved changes', 'xpressui-wordpress-bridge-pro' ) . '</span>';
-	echo '<div class="xpressui-sticky-actions-buttons">';
-	submit_button( __( 'Save Customizations', 'xpressui-wordpress-bridge-pro' ), 'primary', 'xpressui_save_overlay', false );
-	submit_button(
-		__( 'Reset to Defaults', 'xpressui-wordpress-bridge-pro' ),
-		'secondary',
-		'xpressui_reset_overlay',
-		false,
-		[
-			'onclick' => "return window.confirm('" . esc_js( __( 'Reset all customizations for this workflow and restore the pack defaults?', 'xpressui-wordpress-bridge-pro' ) ) . "');",
-		]
-	);
-	echo '</div>';
-	echo '</div>';
-
-	// -----------------------------------------------------------------------
-	// Card: Project Settings
-	// -----------------------------------------------------------------------
-
+function xpressui_pro_render_card_project_settings( array $proj_settings, string $ov_project_name, string $original_title, array $summary_stats, array $invalid_fields ): void {
 	$project_settings_count = 0;
 	foreach ( [ $ov_project_name, $proj_settings['notifyEmail'], $proj_settings['redirectUrl'] ] as $project_setting_value ) {
 		if ( (string) $project_setting_value !== '' ) {
 			$project_settings_count++;
 		}
+	}
+	if ( $proj_settings['showProjectTitle'] === '1' ) {
+		$project_settings_count++;
 	}
 	if ( $proj_settings['showProjectTitle'] === '1' ) {
 		$project_settings_count++;
@@ -952,11 +974,9 @@ echo '</div>';
 
 	echo '</tbody></table></div>';
 	echo '</details>';
+}
 
-	// -----------------------------------------------------------------------
-	// Card: Submit feedback
-	// -----------------------------------------------------------------------
-
+function xpressui_pro_render_card_submit_feedback( string $ov_success_message, string $ov_error_message, array $summary_stats ): void {
 	$submit_feedback_count = 0;
 	foreach ( [ $ov_success_message, $ov_error_message ] as $submit_feedback_value ) {
 		if ( (string) $submit_feedback_value !== '' ) {
@@ -987,11 +1007,9 @@ echo '</div>';
 
 	echo '</tbody></table></div>';
 	echo '</details>';
+}
 
-	// -----------------------------------------------------------------------
-	// Card: Navigation labels
-	// -----------------------------------------------------------------------
-
+function xpressui_pro_render_card_navigation( array $ov_navigation, array $pack_nav ): void {
 	$nav_open = ! empty( $ov_navigation ) ? ' open' : '';
 	$nav_fields = [
 		'prev'   => [ __( 'Back button', 'xpressui-wordpress-bridge-pro' ), (string) ( $pack_nav['prevLabel'] ?? 'Back' ) ],
@@ -1020,11 +1038,9 @@ echo '</div>';
 
 	echo '</tbody></table></div>';
 	echo '</details>';
+}
 
-	// -----------------------------------------------------------------------
-	// Cards: Sections and fields
-	// -----------------------------------------------------------------------
-
+function xpressui_pro_render_card_sections( array $sections, array $ov_sections, array $ov_fields, array $invalid_fields ): void {
 	foreach ( $sections as $section ) {
 		$section_name  = (string) ( $section['name'] ?? '' );
 		$section_label = (string) ( $section['label'] ?? $section_name );
@@ -1263,8 +1279,30 @@ echo '</div>';
 			if ( $supports_choice_labels ) {
 				$ov_choices = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 				$html      .= '<div class="xpressui-field-control is-full"><div class="xpressui-choice-group">';
-				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels and availability:', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+				$html      .= '<p class="description" style="margin-bottom:6px">' . esc_html__( 'Choice labels, availability, and order (drag to reorder):', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+				$html      .= '<div class="xpressui-sortable-list" data-xpressui-sortable>';
+				
+				// Pre-sort choices based on overlay data to render them in the correct saved order
+				$ordered_choices = [];
+				$choices_by_value = [];
 				foreach ( $choices as $choice ) {
+					$cv = (string) ( $choice['value'] ?? '' );
+					if ( $cv !== '' ) {
+						$choices_by_value[ $cv ] = $choice;
+					}
+				}
+				foreach ( $ov_choices as $cv => $ovc ) {
+					$cv = (string) $cv;
+					if ( isset( $choices_by_value[ $cv ] ) ) {
+						$ordered_choices[] = $choices_by_value[ $cv ];
+						unset( $choices_by_value[ $cv ] );
+					}
+				}
+				foreach ( $choices_by_value as $choice ) {
+					$ordered_choices[] = $choice;
+				}
+
+				foreach ( $ordered_choices as $choice ) {
 					$cv = (string) ( $choice['value'] ?? '' );
 					$cl = (string) ( $choice['label'] ?? $cv );
 					if ( $cv === '' ) {
@@ -1272,7 +1310,8 @@ echo '</div>';
 					}
 					$ov_choice      = xpressui_pro_admin_normalize_choice_overlay_entry( $ov_choices[ $cv ] ?? [] );
 					$choice_enabled = null === $ov_choice['enabled'] ? empty( $choice['disabled'] ) : (bool) $ov_choice['enabled'];
-					$html .= '<div class="xpressui-choice-row">';
+					$html .= '<div class="xpressui-choice-row" draggable="true">';
+					$html .= '<span class="xpressui-drag-handle" aria-hidden="true" title="' . esc_attr__( 'Drag to reorder', 'xpressui-wordpress-bridge-pro' ) . '">&#x2195;</span>';
 					$html .= '<span class="xpressui-choice-label">' . esc_html( $cl ) . '</span>';
 					$html .= '<input type="text" name="' . $field_prefix . '[choices][' . esc_attr( $cv ) . '][label]" class="regular-text" style="max-width:260px" value="' . esc_attr( $ov_choice['label'] ) . '" placeholder="' . esc_attr( $cl ) . '" />';
 					$html .= '<label class="xpressui-choice-toggle">';
@@ -1282,7 +1321,7 @@ echo '</div>';
 					$html .= '</label>';
 					$html .= '</div>';
 				}
-				$html .= '</div></div>';
+				$html .= '</div></div></div>';
 			}
 
 			$html .= '</div></div>';
@@ -1293,8 +1332,9 @@ echo '</div>';
 		echo '</tbody></table></div>';
 		echo '</details>';
 	}
+}
 
-	echo '</form>';
+function xpressui_pro_render_overlay_scripts(): void {
 	echo '<script>
 let xpressuiProFormDirty = false;
 const xpressuiProForm = document.querySelector(".xpressui-admin-wrap form");
@@ -1421,9 +1461,48 @@ document.addEventListener("click", function(event){
 	});
 });
 xpressuiApplyCardFilters();
+
+document.querySelectorAll("[data-xpressui-sortable]").forEach(function(list) {
+	let draggedItem = null;
+	list.addEventListener("dragstart", function(e) {
+		draggedItem = e.target.closest(".xpressui-choice-row");
+		if (draggedItem) {
+			setTimeout(function() { draggedItem.classList.add("is-dragging"); }, 0);
+		}
+	});
+	list.addEventListener("dragend", function(e) {
+		if (draggedItem) {
+			draggedItem.classList.remove("is-dragging");
+			draggedItem = null;
+		}
+		xpressuiSetDirtyState(true);
+	});
+	list.addEventListener("dragover", function(e) {
+		e.preventDefault();
+		const draggableElements = Array.prototype.slice.call(list.querySelectorAll(".xpressui-choice-row:not(.is-dragging)"));
+		const afterElement = draggableElements.reduce(function(closest, child) {
+			const box = child.getBoundingClientRect();
+			const offset = e.clientY - box.top - box.height / 2;
+			if (offset < 0 && offset > closest.offset) {
+				return { offset: offset, element: child };
+			} else {
+				return closest;
+			}
+		}, { offset: Number.NEGATIVE_INFINITY }).element;
+		
+		if (draggedItem) {
+			if (afterElement == null) {
+				list.appendChild(draggedItem);
+			} else {
+				list.insertBefore(draggedItem, afterElement);
+			}
+		}
+	});
+});
 </script>';
 	echo '</div>';
 }
+
 
 // ---------------------------------------------------------------------------
 // Helper: render a form-table row

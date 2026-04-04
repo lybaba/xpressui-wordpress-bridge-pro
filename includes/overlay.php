@@ -432,17 +432,31 @@ function xpressui_pro_apply_workflow_overlay( array $context, array $overlay ): 
 					$choices_overlay = isset( $fo['choices'] ) && is_array( $fo['choices'] ) ? $fo['choices'] : [];
 					if ( ! empty( $choices_overlay ) && isset( $field['choices'] ) && is_array( $field['choices'] ) ) {
 						$filtered = [];
+						$pack_choices_by_value = [];
 						foreach ( $field['choices'] as $choice ) {
 							$cv = (string) ( $choice['value'] ?? '' );
-							if ( $cv !== '' && isset( $choices_overlay[ $cv ] ) ) {
-								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choices_overlay[ $cv ] );
+							if ( $cv !== '' ) {
+								$pack_choices_by_value[ $cv ] = $choice;
+							}
+						}
+						foreach ( $choices_overlay as $cv => $choice_overlay_raw ) {
+							$cv = (string) $cv;
+							if ( isset( $pack_choices_by_value[ $cv ] ) ) {
+								$choice = $pack_choices_by_value[ $cv ];
+								$choice_overlay = xpressui_pro_normalize_choice_overlay_entry( $choice_overlay_raw );
 								if ( $choice_overlay['has_enabled'] && ! $choice_overlay['enabled'] ) {
+									unset( $pack_choices_by_value[ $cv ] );
 									continue; // Remove disabled choice entirely.
 								}
 								if ( $choice_overlay['has_label'] ) {
 									$choice['label'] = $choice_overlay['label'];
 								}
+								$filtered[] = $choice;
+								unset( $pack_choices_by_value[ $cv ] );
 							}
+						}
+						// Append any remaining pack choices that were not reordered in the overlay
+						foreach ( $pack_choices_by_value as $choice ) {
 							$filtered[] = $choice;
 						}
 						$field['choices'] = array_values( $filtered );
