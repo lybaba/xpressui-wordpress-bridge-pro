@@ -1,2 +1,7 @@
-runtime/
 node_modules/
+
+# Runtime bundles are injected by CI during packaging — do not commit
+/runtime/*.umd.js
+/runtime/*.umd.js.map
+/runtime/*.mjs
+/runtime/*.mjs.map

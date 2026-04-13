@@ -66,6 +66,18 @@ function xpressui_pro_handle_license_form_submission() {
 		exit;
 	}
 
+	if ( isset( $_POST['xpressui_pro_activate'] ) && empty( $_POST['xpressui_pro_license_key'] ) ) {
+		$redirect_url = add_query_arg(
+			[
+				'xpressui_notice'      => rawurlencode( __( 'Please enter a license key.', 'xpressui-wordpress-bridge-pro' ) ),
+				'xpressui_notice_type' => 'error',
+			],
+			$base_redirect_url
+		);
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
 	if ( isset( $_POST['xpressui_pro_activate'] ) && ! empty( $_POST['xpressui_pro_license_key'] ) ) {
 		$license_key = sanitize_text_field( wp_unslash( $_POST['xpressui_pro_license_key'] ) );
 
