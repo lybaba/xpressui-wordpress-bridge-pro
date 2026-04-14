@@ -22,7 +22,16 @@ cp -R "${PLUGIN_DIR}" "${STAGE_DIR}/${DIST_SLUG}"
 rm -rf "${STAGE_DIR:?}/${DIST_SLUG}/.git" \
        "${STAGE_DIR:?}/${DIST_SLUG}/.github" \
        "${STAGE_DIR:?}/${DIST_SLUG}/.wordpress-org" \
-       "${STAGE_DIR:?}/${DIST_SLUG}/scripts"
+       "${STAGE_DIR:?}/${DIST_SLUG}/scripts" \
+       "${STAGE_DIR:?}/${DIST_SLUG}/node_modules" \
+       "${STAGE_DIR:?}/${DIST_SLUG}/xpressui-src"
+rm -f "${STAGE_DIR:?}/${DIST_SLUG}/.gitignore" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/.gitkeep" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/.gitmodules" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/package.json" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/package-lock.json" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/xpressui-version.txt" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/README.md"
 
 cd "${STAGE_DIR}"
 zip -rq "${OUTPUT_PATH}" "${DIST_SLUG}"
