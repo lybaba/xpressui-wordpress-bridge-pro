@@ -134,17 +134,10 @@ function xpressui_pro_fetch_and_verify_license_from_api( $license_key ) {
 				]
 			),
 		]
-	);
+		);
 
-	// --- DEBUGGING: Log API response ---
-	if ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
-		$log_message = is_wp_error( $api_response ) ? 'WP_Error: ' . $api_response->get_error_message() : 'Response Body: ' . wp_remote_retrieve_body( $api_response );
-		error_log( '[XPressUI Pro] License API Response: ' . $log_message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- intentional debug logging, guarded by WP_DEBUG_LOG
-	}
-	// --- END DEBUGGING ---
-
-	if ( is_wp_error( $api_response ) ) {
-		return new WP_Error(
+		if ( is_wp_error( $api_response ) ) {
+			return new WP_Error(
 			'xpressui_pro_api_error',
 			__( 'API connection error: ', 'xpressui-wordpress-bridge-pro' ) . $api_response->get_error_message()
 		);
