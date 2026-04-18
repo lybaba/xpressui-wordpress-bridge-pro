@@ -17,6 +17,11 @@ The PRO plugin is a companion to the free [XPressUI WordPress Bridge](https://gi
 
 Everything else (submissions inbox, REST endpoint, shortcode, file uploads, notifications) stays in the base plugin.
 
+Today, this plugin sits on the main delivery path for XPressUI Console exports
+targeting WordPress. The broader product direction is for the same builder to
+support additional standalone export targets later, while WordPress remains the
+primary supported host today.
+
 ---
 
 ## PRO field types
@@ -86,6 +91,10 @@ Structural changes still belong in the XPressUI Console. This includes:
 - producing a new exported pack version for distribution
 
 This keeps the WordPress side focused on safe local customization while the Console remains the place for deeper product changes.
+
+The same Console is also intended to become the export surface for standalone
+integration packs on non-WordPress hosts. In other words, WordPress is the
+current delivery channel, not the final boundary of the builder itself.
 
 ---
 
