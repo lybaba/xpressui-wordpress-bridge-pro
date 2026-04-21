@@ -42,13 +42,15 @@ function xpressui_pro_handle_license_form_submission() {
 		wp_die( esc_html__( 'You do not have permission to manage licenses.', 'xpressui-wordpress-bridge-pro' ) );
 	}
 
-	$base_redirect_url = add_query_arg(
-		[
-			'post_type' => 'xpressui_submission',
-			'page'      => 'xpressui-bridge',
-		],
-		admin_url( 'edit.php' )
-	);
+	$base_redirect_url = function_exists( 'xpressui_pro_get_license_page_url' )
+		? xpressui_pro_get_license_page_url()
+		: add_query_arg(
+			[
+				'post_type' => 'xpressui_submission',
+				'page'      => 'xpressui-pro-license',
+			],
+			admin_url( 'edit.php' )
+		);
 
 	if ( isset( $_POST['xpressui_pro_deactivate'] ) ) {
 		delete_option( XPRESSUI_PRO_LICENSE_OPTION_KEY );

@@ -25,8 +25,8 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 
 1. Install and activate the free XPressUI Bridge plugin first.
 2. Upload and activate this plugin (xpressui-wordpress-bridge-pro.zip).
-3. Go to XPressUI > Settings > License and enter your license key.
-4. Upload your workflow pack ZIP via XPressUI > Workflows > Upload.
+3. Go to XPressUI > Pro License and enter your license key.
+4. Upload your workflow pack ZIP via XPressUI > Workflows.
 
 == Changelog ==
 

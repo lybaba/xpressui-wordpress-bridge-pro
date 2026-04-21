@@ -1,8 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';
-require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 require_once XPRESSUI_PRO_DIR . 'includes/license-handler.php';
 require_once XPRESSUI_PRO_DIR . 'includes/license-form.php';
 // update-checker.php is loaded unconditionally from the main plugin file.
