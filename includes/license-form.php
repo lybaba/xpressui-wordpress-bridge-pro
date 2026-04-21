@@ -104,9 +104,6 @@ function xpressui_pro_render_license_page(): void {
 	if ( '' !== $issued_at ) {
 		echo '<tr><td><strong>' . esc_html__( 'Issued at', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( $issued_at ) . '</td></tr>';
 	}
-	if ( '' !== $expires_at ) {
-		echo '<tr><td><strong>' . esc_html__( 'Expires at', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( $expires_at ) . '</td></tr>';
-	}
 	if ( $last_check > 0 ) {
 		echo '<tr><td><strong>' . esc_html__( 'Last verification', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( wp_date( 'Y-m-d H:i:s', $last_check ) ) . '</td></tr>';
 	}
