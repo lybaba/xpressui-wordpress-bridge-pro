@@ -70,7 +70,7 @@ function xpressui_pro_workflow_row_actions( array $actions, string $slug ): arra
 add_action( 'admin_enqueue_scripts', 'xpressui_enqueue_overlay_assets' );
 
 function xpressui_enqueue_overlay_assets(): void {
-	if ( ! defined( 'XPRESSUI_BRIDGE_URL' ) || ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
+	if ( ! defined( 'XPRESSUI_PRO_VERSION' ) || ! defined( 'XPRESSUI_PRO_URL' ) ) {
 		return;
 	}
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
@@ -83,17 +83,17 @@ function xpressui_enqueue_overlay_assets(): void {
 		return;
 	}
 	wp_enqueue_style(
-		'xpressui-bridge-admin-overlay',
-		XPRESSUI_BRIDGE_URL . 'assets/admin-overlay.css',
+		'xpressui-pro-admin-overlay',
+		XPRESSUI_PRO_URL . 'assets/admin-overlay.css',
 		[],
-		XPRESSUI_BRIDGE_VERSION
+		XPRESSUI_PRO_VERSION
 	);
 	if ( $is_customize ) {
 		wp_enqueue_script(
-			'xpressui-bridge-admin-overlay-js',
-			XPRESSUI_BRIDGE_URL . 'assets/admin-overlay.js',
+			'xpressui-pro-admin-overlay-js',
+			XPRESSUI_PRO_URL . 'assets/admin-overlay.js',
 			[],
-			XPRESSUI_BRIDGE_VERSION,
+			XPRESSUI_PRO_VERSION,
 			true
 		);
 	}

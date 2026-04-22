@@ -4,7 +4,7 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.55
+Stable tag: 1.0.56
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,7 @@ XPressUI Bridge PRO extends the free XPressUI Bridge plugin with advanced featur
 
 * Pro field types: document scan, QR capture, product list, quiz, and more
 * Customize Workflow: edit labels, choices, and validation rules from wp-admin
+* Console Sync: pull workflow packs directly from your XPressUI Console
 * Full XPressUI runtime bundled — no external CDN required
 * License-key activation with RSA-SHA256 signature verification
 
