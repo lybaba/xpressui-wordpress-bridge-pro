@@ -1,6 +1,6 @@
 # XPressUI WordPress Bridge PRO
 
-**PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.**
+**PRO extension for XPressUI WordPress Bridge — full runtime, advanced field types, workflow customization, and Console Sync.**
 
 ![WordPress: 6.0+](https://img.shields.io/badge/WordPress-6.0%2B-21759b)
 ![PHP: 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777bb4)
@@ -9,11 +9,14 @@
 
 ## What it adds
 
-The PRO plugin is a companion to the free [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge) plugin. It does not replace it — it extends it with three things:
+The PRO plugin is a companion to the free [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge) plugin. It does not replace it — it extends it with separate shipped capabilities:
 
 1. **Full XPressUI runtime** — replaces the light bundle with the standard runtime, unlocking all advanced field types
 2. **PRO field templates** — server-side PHP shells for fields not included in the base plugin
-3. **Included Pro tools** — bundled QA workflows such as `Validation Playground` to test validation, uploads, and runtime behavior directly inside WordPress
+3. **Customize Workflow** — local workflow overlay editing from wp-admin
+4. **Console Sync** — pull workflow packs directly from the XPressUI Console without manual ZIP handling
+5. **Included Pro tools** — bundled QA workflows such as `Validation Playground` to test validation, uploads, and runtime behavior directly inside WordPress
+6. **Commercial license + updates** — dedicated Pro license screen and update eligibility
 
 Everything else (submissions inbox, REST endpoint, shortcode, file uploads, notifications) stays in the base plugin.
 
@@ -55,6 +58,10 @@ primary supported host today.
 4. Activate the plugin.
 
 The PRO runtime is activated automatically — no configuration required.
+
+To enable updates and other licensed Pro services:
+
+5. Go to **XPressUI > Pro License** and activate your Pro license key.
 
 The plugin also bundles a QA starter workflow:
 
@@ -111,6 +118,10 @@ Field PHP templates are resolved by scanning a list of directories. The PRO plug
 ### Local autonomy
 
 An installed workflow pack does not call back to the XPressUI Console at runtime. The site keeps rendering and accepting submissions with the assets already bundled in WordPress. The Console is only needed later if you want to make structural edits and export a new pack version.
+
+### Console Sync
+
+If you prefer not to export and upload ZIP files manually, the Pro plugin can connect to your XPressUI Console and pull workflow packs directly into WordPress.
 
 ---
 

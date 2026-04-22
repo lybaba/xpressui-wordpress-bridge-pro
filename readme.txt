@@ -8,7 +8,7 @@ Stable tag: 1.0.56
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Pro extension for XPressUI Bridge. Unlocks advanced field types and workflow customization inside WordPress.
+Pro extension for XPressUI Bridge. Adds the full runtime, advanced field types, workflow customization, and Console Sync.
 
 == Description ==
 
@@ -19,6 +19,7 @@ XPressUI Bridge PRO extends the free XPressUI Bridge plugin with advanced featur
 * Console Sync: pull workflow packs directly from your XPressUI Console
 * Full XPressUI runtime bundled — no external CDN required
 * License-key activation with RSA-SHA256 signature verification
+* Automatic updates for the commercial Pro package
 
 Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 
