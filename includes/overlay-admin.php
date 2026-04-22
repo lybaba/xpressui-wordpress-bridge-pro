@@ -64,6 +64,42 @@ function xpressui_pro_workflow_row_actions( array $actions, string $slug ): arra
 
 
 // ---------------------------------------------------------------------------
+// Enqueue overlay assets
+// ---------------------------------------------------------------------------
+
+add_action( 'admin_enqueue_scripts', 'xpressui_enqueue_overlay_assets' );
+
+function xpressui_enqueue_overlay_assets(): void {
+	if ( ! defined( 'XPRESSUI_BRIDGE_URL' ) || ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
+		return;
+	}
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen ) {
+		return;
+	}
+	$is_workflows = 'xpressui_submission_page_xpressui-bridge' === $screen->id;
+	$is_customize = 'xpressui_submission_page_xpressui-customize' === $screen->id;
+	if ( ! $is_workflows && ! $is_customize ) {
+		return;
+	}
+	wp_enqueue_style(
+		'xpressui-bridge-admin-overlay',
+		XPRESSUI_BRIDGE_URL . 'assets/admin-overlay.css',
+		[],
+		XPRESSUI_BRIDGE_VERSION
+	);
+	if ( $is_customize ) {
+		wp_enqueue_script(
+			'xpressui-bridge-admin-overlay-js',
+			XPRESSUI_BRIDGE_URL . 'assets/admin-overlay.js',
+			[],
+			XPRESSUI_BRIDGE_VERSION,
+			true
+		);
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
