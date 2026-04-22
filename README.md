@@ -136,5 +136,7 @@ To request access, contact [hello@iakpress.com](mailto:hello@iakpress.com).
 ## Links
 
 - Base plugin: [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge)
-- Demo gallery: [xpressui.iakpress.com/#/demos](https://xpressui.iakpress.com/#/demos)
-- Contact: [hello@iakpress.com](mailto:hello@iakpress.com)
+- Product page: [XpressUI](https://iakpress.com/document-intake/xpressui)
+- Demo : [Document-Intake](https://iakpress.com/document-intake/)
+- Pro add-on: [XPressUI WordPress Bridge PRO](https://github.com/lybaba/xpressui-wordpress-bridge-pro)
+- Support: [Contact](https://iakpress.com/document-intake/contact)
