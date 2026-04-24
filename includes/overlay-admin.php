@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'admin_menu', 'xpressui_pro_register_customize_page' );
 add_action( 'admin_menu', 'xpressui_pro_register_console_link', 20 );
+add_action( 'xpressui_afile_metabox_after', 'xpressui_pro_render_afile_metabox_extension' );
+add_action( 'xpressui_save_submission_afile_meta', 'xpressui_pro_save_afile_metabox_extension', 10, 3 );
 
 function xpressui_pro_register_customize_page(): void {
 	add_submenu_page(
@@ -342,6 +344,7 @@ function xpressui_pro_render_customize_page(): void {
 	$ov_sections        = isset( $overlay['sections'] ) && is_array( $overlay['sections'] ) ? $overlay['sections'] : [];
 	$ov_fields          = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
 	$ov_theme           = isset( $overlay['theme'] ) && is_array( $overlay['theme'] ) ? $overlay['theme'] : [];
+	$ov_additional_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
 	$pack_theme         = isset( $template_context['theme'] ) && is_array( $template_context['theme'] ) ? $template_context['theme'] : [];
 
 	$pack_project_bg = (string) ( $template_context['project']['background_image_url'] ?? '' );
@@ -352,6 +355,7 @@ function xpressui_pro_render_customize_page(): void {
 		'field_count'          => 0,
 		'choice_count'         => 0,
 		'navigation_count'     => count( $ov_navigation ),
+		'additional_slot_count'=> count( $ov_additional_slots ),
 		'has_theme'            => ! empty( $ov_theme ) || $ov_project_bg !== '',
 		'has_project_settings' => $ov_project_name !== '' || $proj_settings['notifyEmail'] !== '' || $proj_settings['redirectUrl'] !== '' || $proj_settings['showProjectTitle'] === '1' || $proj_settings['showRequiredFieldsNote'] === '1' || $proj_settings['sectionLabelVisibility'] !== 'auto',
 		'has_submit_feedback'  => $ov_success_message !== '' || $ov_error_message !== '',
@@ -391,7 +395,7 @@ function xpressui_pro_render_customize_page(): void {
 	// -----------------------------------------------------------------------
 
 	echo '<div class="wrap xpressui-admin-wrap">';
-	xpressui_pro_render_overlay_header( $slug, $back_url, $summary_stats, $notice_class, $notice_messages );
+	xpressui_pro_render_overlay_header( $slug, $back_url, $summary_stats, $notice_class, $notice_messages, $original_title );
 
 	echo '<form method="post" action="">';
 	wp_nonce_field( 'xpressui_overlay_' . $slug, 'xpressui_overlay_nonce' );
@@ -418,6 +422,7 @@ function xpressui_pro_render_customize_page(): void {
 	xpressui_pro_render_card_appearance( $ov_theme, $pack_theme, $summary_stats, $ov_project_bg, $pack_project_bg );
 	xpressui_pro_render_card_project_settings( $proj_settings, $ov_project_name, $original_title, $summary_stats, $invalid_fields );
 	xpressui_pro_render_card_submit_feedback( $ov_success_message, $ov_error_message, $summary_stats );
+	xpressui_pro_render_card_additional_file_slots( $ov_additional_slots, $summary_stats );
 	xpressui_pro_render_card_navigation( $ov_navigation, $pack_nav );
 	xpressui_pro_render_card_sections( $sections, $ov_sections, $ov_fields, $invalid_fields );
 
@@ -490,6 +495,21 @@ function xpressui_pro_handle_overlay_submission( string $slug, array $pack_field
 		}
 		if ( ! empty( $nav ) ) {
 			$overlay['navigation'] = $nav;
+		}
+
+		$raw_additional_slot_labels = isset( $_POST['xpressui_overlay_additional_file_slots'] ) && is_array( $_POST['xpressui_overlay_additional_file_slots'] )
+			? wp_unslash( $_POST['xpressui_overlay_additional_file_slots'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			: [];
+		$additional_slots = xpressui_pro_normalize_additional_file_slots(
+			array_map(
+				static function ( $slot_label ) {
+					return [ 'label' => sanitize_text_field( (string) $slot_label ) ];
+				},
+				array_values( $raw_additional_slot_labels )
+			)
+		);
+		if ( ! empty( $additional_slots ) ) {
+			$overlay['additional_file_slots'] = $additional_slots;
 		}
 
 		$raw_sections = isset( $_POST['xpressui_overlay_sections'] ) && is_array( $_POST['xpressui_overlay_sections'] )
@@ -731,12 +751,15 @@ function xpressui_pro_handle_overlay_submission( string $slug, array $pack_field
 }
 
 
-function xpressui_pro_render_overlay_header( string $slug, string $back_url, array $summary_stats, string $notice_class, array $notice_messages ): void {
+function xpressui_pro_render_overlay_header( string $slug, string $back_url, array $summary_stats, string $notice_class, array $notice_messages, string $original_title = '' ): void {
+	$_title = $original_title !== '' ? $original_title : '';
+	$_name_badge = ( $_title !== '' && $_title !== $slug )
+		? ' <span style="font-weight:400;opacity:0.65;font-size:0.75em;">/ ' . esc_html( $_title ) . '</span>'
+		: '';
 	echo '<div class="xpressui-pro-header">';
 	echo '<div class="xpressui-pro-header-left">';
-	echo '<h1>' . esc_html__( 'Customize Workflow', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
-	echo '<p><strong style="color:rgba(255,255,255,.9)">' . esc_html( $slug ) . '</strong> &mdash; '
-			. esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<h1>' . esc_html( $slug ) . $_name_badge . '</h1>';
+	echo '<p>' . esc_html__( 'Override labels, section titles, field settings and navigation without rebuilding the pack.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 	echo '</div>';
 	echo '<div class="xpressui-pro-header-right">';
 	echo '<span class="xpressui-pro-badge">✦ &nbsp;XPressUI</span>';
@@ -758,6 +781,9 @@ function xpressui_pro_render_overlay_header( string $slug, string $back_url, arr
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['field_count'] ) . '</strong><span>' . esc_html__( 'Fields overridden', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['choice_count'] ) . '</strong><span>' . esc_html__( 'Choices customized', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['navigation_count'] ) . '</strong><span>' . esc_html__( 'Navigation labels', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
+	if ( ! empty( $summary_stats['additional_slot_count'] ) ) {
+		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html( (string) $summary_stats['additional_slot_count'] ) . '</strong><span>' . esc_html__( 'Additional slots', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
+	}
 	if ( $summary_stats['has_project_settings'] ) {
 		echo '<div class="xpressui-pro-summary-chip"><strong>' . esc_html__( 'Active', 'xpressui-wordpress-bridge-pro' ) . '</strong><span>' . esc_html__( 'Project settings', 'xpressui-wordpress-bridge-pro' ) . '</span></div>';
 	}
@@ -1000,6 +1026,138 @@ function xpressui_pro_render_card_submit_feedback( string $ov_success_message, s
 
 	echo '</tbody></table></div>';
 	echo '</details>';
+}
+
+function xpressui_pro_render_card_additional_file_slots( array $ov_additional_slots, array $summary_stats ): void {
+	$max_slots = 5;
+	$slot_rows = [];
+	for ( $i = 0; $i < $max_slots; $i++ ) {
+		$slot_rows[] = isset( $ov_additional_slots[ $i ]['label'] ) ? (string) $ov_additional_slots[ $i ]['label'] : '';
+	}
+
+	echo '<details class="xpressui-admin-card"' . ( ! empty( $ov_additional_slots ) ? ' open' : '' ) . ' data-xpressui-card-type="additional-file-slots" data-xpressui-customized="' . ( ! empty( $ov_additional_slots ) ? '1' : '0' ) . '" data-xpressui-search-text="additional document slots additional files upload slots pending info supporting documents contracts ids proofs" data-xpressui-reset-scope="additional-file-slots" id="xpressui-pro-card-additional-file-slots">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<summary class="xpressui-card-summary"><h2>' . esc_html__( 'Additional Document Slots', 'xpressui-wordpress-bridge-pro' ) . '</h2><span class="xpressui-card-meta">';
+	if ( ! empty( $ov_additional_slots ) ) {
+		echo '<span class="xpressui-card-badge is-customized">' . esc_html__( 'Customized', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+		echo '<button type="button" class="xpressui-reset-chip" data-xpressui-reset-trigger="additional-file-slots">' . esc_html__( 'Restore block', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+	}
+	echo '<span class="xpressui-card-badge">' . esc_html( (string) $max_slots ) . ' ' . esc_html__( 'Max slots', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+	echo '</span></summary>';
+	echo '<div class="xpressui-card-body"><table class="form-table"><tbody>';
+	echo '<tr><td colspan="2"><p class="description">' . esc_html__( 'Slot 1 maps to the base additional-file slot from the free plugin. Slots 2-5 are Pro-only extra uploads shown during pending-info resubmission when activated by the operator on a submission.', 'xpressui-wordpress-bridge-pro' ) . '</p></td></tr>';
+	for ( $i = 0; $i < $max_slots; $i++ ) {
+		$slot_number = $i + 1;
+		$placeholder = 1 === $slot_number
+			? __( 'e.g. Signed contract', 'xpressui-wordpress-bridge-pro' )
+			: sprintf( __( 'e.g. Supporting document %d', 'xpressui-wordpress-bridge-pro' ), $slot_number );
+		xpressui_pro_row(
+			'xpressui_overlay_additional_file_slots_' . $slot_number,
+			sprintf( __( 'Slot %d label', 'xpressui-wordpress-bridge-pro' ), $slot_number ),
+			'<input type="text" id="xpressui_overlay_additional_file_slots_' . esc_attr( (string) $slot_number ) . '" name="xpressui_overlay_additional_file_slots[' . esc_attr( (string) $i ) . ']" class="regular-text" value="' . esc_attr( $slot_rows[ $i ] ) . '" placeholder="' . esc_attr( $placeholder ) . '" />'
+		);
+	}
+	echo '</tbody></table></div>';
+	echo '</details>';
+}
+
+function xpressui_pro_render_afile_metabox_extension( $post ): void {
+	$project_slug = (string) get_post_meta( $post->ID, '_xpressui_project_slug', true );
+	$slots        = xpressui_get_additional_file_slots( $project_slug );
+	if ( count( $slots ) <= 1 ) {
+		return;
+	}
+
+	echo '<hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;">';
+	echo '<p style="margin:0 0 10px;font-size:12px;font-weight:600;">' . esc_html__( 'Pro additional document slots', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+
+	foreach ( $slots as $index => $slot ) {
+		if ( 0 === (int) $index ) {
+			continue;
+		}
+		$slot_id          = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		$slot_label       = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
+		$pending_active   = ! empty( get_post_meta( $post->ID, '_xpressui_afile_active_' . $slot_id, true ) );
+		$pending_ref_id   = xpressui_get_additional_file_ref_file_id( $post->ID, $slot_id );
+		$done_info_file_id = xpressui_get_additional_file_done_info_file_id( $post->ID, $slot_id );
+		$pending_ref_url  = $pending_ref_id > 0 ? (string) wp_get_attachment_url( $pending_ref_id ) : '';
+		$pending_ref_path = $pending_ref_id > 0 ? (string) get_attached_file( $pending_ref_id ) : '';
+		$pending_ref_name = $pending_ref_path !== '' ? basename( $pending_ref_path ) : ( $pending_ref_id > 0 ? (string) get_the_title( $pending_ref_id ) : '' );
+		$done_file_url    = $done_info_file_id > 0 ? (string) wp_get_attachment_url( $done_info_file_id ) : '';
+		$done_file_path   = $done_info_file_id > 0 ? (string) get_attached_file( $done_info_file_id ) : '';
+		$done_file_name   = $done_file_path !== '' ? basename( $done_file_path ) : ( $done_info_file_id > 0 ? (string) get_the_title( $done_info_file_id ) : '' );
+
+		echo '<div class="xpressui-pro-afile-slot" style="margin:0 0 14px;padding:12px;border:1px solid #e5edf8;border-radius:8px;background:#fbfdff;">';
+		echo '<p style="margin:0 0 8px;font-weight:600;">' . esc_html( $slot_label !== '' ? $slot_label : $slot_id ) . '</p>';
+		echo '<p style="margin:0 0 8px;"><label><input type="checkbox" name="xpressui_afile_extra_active[' . esc_attr( $slot_id ) . ']" value="1"' . checked( $pending_active, true, false ) . '> ' . esc_html__( 'Request this additional file in Pending info', 'xpressui-wordpress-bridge-pro' ) . '</label></p>';
+
+		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Pending info reference file (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<input type="hidden" name="xpressui_afile_ref_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $pending_ref_id ?: '' ) ) . '">';
+		echo '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">';
+		echo '<button type="button" class="button xpressui-ref-file-btn" data-field="__afile_pending__' . esc_attr( $slot_id ) . '">' . esc_html__( 'Attach reference file', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+		echo '<span class="xpressui-ref-file-preview" data-field="__afile_pending__' . esc_attr( $slot_id ) . '"' . ( $pending_ref_id > 0 ? '' : ' style="display:none;"' ) . '>';
+		if ( '' !== $pending_ref_url ) {
+			echo '<a href="' . esc_url( $pending_ref_url ) . '" target="_blank" rel="noreferrer">' . esc_html( $pending_ref_name ) . '</a>';
+		}
+		echo ' <button type="button" class="xpressui-ref-file-remove" data-field="__afile_pending__' . esc_attr( $slot_id ) . '" title="' . esc_attr__( 'Remove', 'xpressui-wordpress-bridge-pro' ) . '">✕</button>';
+		echo '</span>';
+		echo '</div>';
+
+		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Done informational document (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<input type="hidden" name="xpressui_done_info_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $done_info_file_id ?: '' ) ) . '">';
+		echo '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+		echo '<button type="button" class="button xpressui-ref-file-btn" data-field="__afile_done__' . esc_attr( $slot_id ) . '">' . esc_html__( 'Attach done document', 'xpressui-wordpress-bridge-pro' ) . '</button>';
+		echo '<span class="xpressui-ref-file-preview" data-field="__afile_done__' . esc_attr( $slot_id ) . '"' . ( $done_info_file_id > 0 ? '' : ' style="display:none;"' ) . '>';
+		if ( '' !== $done_file_url ) {
+			echo '<a href="' . esc_url( $done_file_url ) . '" target="_blank" rel="noreferrer">' . esc_html( $done_file_name ) . '</a>';
+		}
+		echo ' <button type="button" class="xpressui-ref-file-remove" data-field="__afile_done__' . esc_attr( $slot_id ) . '" title="' . esc_attr__( 'Remove', 'xpressui-wordpress-bridge-pro' ) . '">✕</button>';
+		echo '</span>';
+		echo '</div>';
+		echo '</div>';
+	}
+}
+
+function xpressui_pro_save_afile_metabox_extension( int $post_id, string $status, string $previous_status ): void {
+	unset( $status, $previous_status );
+
+	$project_slug = (string) get_post_meta( $post_id, '_xpressui_project_slug', true );
+	$slots        = xpressui_get_additional_file_slots( $project_slug );
+	foreach ( $slots as $index => $slot ) {
+		if ( 0 === (int) $index ) {
+			continue;
+		}
+		$slot_id = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		if ( '' === $slot_id ) {
+			continue;
+		}
+
+		$active_meta_key = '_xpressui_afile_active_' . $slot_id;
+		$pending_meta_key = '_xpressui_afile_ref_file_id_' . $slot_id;
+		$done_meta_key = '_xpressui_done_info_file_id_' . $slot_id;
+
+		$raw_extra_active = isset( $_POST['xpressui_afile_extra_active'] ) && is_array( $_POST['xpressui_afile_extra_active'] )
+			? wp_unslash( $_POST['xpressui_afile_extra_active'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			: [];
+		$pending_active = ! empty( $raw_extra_active[ $slot_id ] ) ? '1' : '';
+		$pending_ref_id = isset( $_POST[ 'xpressui_afile_ref_file_id_' . $slot_id ] ) ? absint( wp_unslash( (string) $_POST[ 'xpressui_afile_ref_file_id_' . $slot_id ] ) ) : 0;
+		$done_ref_id = isset( $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ? absint( wp_unslash( (string) $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ) : 0;
+
+		if ( '' !== $pending_active ) {
+			update_post_meta( $post_id, $active_meta_key, $pending_active );
+		} else {
+			delete_post_meta( $post_id, $active_meta_key );
+		}
+		if ( $pending_ref_id > 0 ) {
+			update_post_meta( $post_id, $pending_meta_key, $pending_ref_id );
+		} else {
+			delete_post_meta( $post_id, $pending_meta_key );
+		}
+		if ( $done_ref_id > 0 ) {
+			update_post_meta( $post_id, $done_meta_key, $done_ref_id );
+		} else {
+			delete_post_meta( $post_id, $done_meta_key );
+		}
+	}
 }
 
 function xpressui_pro_render_card_navigation( array $ov_navigation, array $pack_nav ): void {

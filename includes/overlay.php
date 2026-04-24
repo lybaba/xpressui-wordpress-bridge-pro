@@ -103,6 +103,53 @@ function xpressui_pro_normalize_choice_overlay_entry( $entry ): array {
 }
 
 /**
+ * Normalize the additional-file slot overlay into a stable array shape.
+ *
+ * @param mixed $raw_slots
+ * @return array<int,array{id:string,label:string}>
+ */
+function xpressui_pro_normalize_additional_file_slots( $raw_slots ): array {
+	$slots = is_array( $raw_slots ) ? array_values( $raw_slots ) : [];
+	if ( empty( $slots ) ) {
+		return [];
+	}
+
+	$max_slots      = 5;
+	$has_any_labels = false;
+	foreach ( $slots as $slot ) {
+		if ( is_array( $slot ) && '' !== sanitize_text_field( (string) ( $slot['label'] ?? '' ) ) ) {
+			$has_any_labels = true;
+			break;
+		}
+	}
+	if ( ! $has_any_labels ) {
+		return [];
+	}
+
+	$normalized = [
+		[
+			'id'    => 'xpressui_afile',
+			'label' => sanitize_text_field( (string) ( $slots[0]['label'] ?? '' ) ),
+		],
+	];
+	for ( $index = 1; $index < min( count( $slots ), $max_slots ); $index++ ) {
+		if ( ! is_array( $slots[ $index ] ) ) {
+			continue;
+		}
+		$label = sanitize_text_field( (string) ( $slots[ $index ]['label'] ?? '' ) );
+		if ( '' === $label ) {
+			continue;
+		}
+		$normalized[] = [
+			'id'    => 'xpressui_afile_' . $index,
+			'label' => $label,
+		];
+	}
+
+	return $normalized;
+}
+
+/**
  * Load the customization overlay for a workflow.
  *
  * @return array<string, mixed>
@@ -179,9 +226,13 @@ function xpressui_pro_patch_rendered_form( array $rendered_form, array $overlay 
 	$fields_overlay   = isset( $overlay['fields'] ) && is_array( $overlay['fields'] ) ? $overlay['fields'] : [];
 	$navigation       = isset( $overlay['navigation'] ) && is_array( $overlay['navigation'] ) ? $overlay['navigation'] : [];
 	$project_name     = isset( $overlay['project_name'] ) ? trim( (string) $overlay['project_name'] ) : '';
+	$additional_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
 
 	if ( $project_name !== '' ) {
 		$rendered_form['title'] = $project_name;
+	}
+	if ( ! empty( $additional_slots ) ) {
+		$rendered_form['additional_file_slots'] = $additional_slots;
 	}
 
 	// Navigation button labels (rendered by the PHP template — the web component reuses these DOM buttons).
@@ -541,6 +592,10 @@ function xpressui_pro_patch_form_config( array $cfg, array $overlay ): array {
 // ---------------------------------------------------------------------------
 
 add_filter( 'xpressui_template_context', 'xpressui_pro_filter_template_context', 10, 2 );
+add_filter( 'xpressui_additional_file_slots', 'xpressui_pro_filter_additional_file_slots', 10, 2 );
+add_filter( 'xpressui_additional_file_request', 'xpressui_pro_filter_additional_file_request', 10, 3 );
+add_filter( 'xpressui_resume_additional_files', 'xpressui_pro_filter_resume_additional_files', 10, 3 );
+add_filter( 'xpressui_done_reference_files', 'xpressui_pro_filter_done_reference_files', 10, 3 );
 
 function xpressui_pro_filter_template_context( array $context, string $slug ): array {
 	$overlay = xpressui_pro_load_workflow_overlay( $slug );
@@ -548,4 +603,75 @@ function xpressui_pro_filter_template_context( array $context, string $slug ): a
 		return $context;
 	}
 	return xpressui_pro_apply_workflow_overlay( $context, $overlay );
+}
+
+function xpressui_pro_filter_additional_file_slots( array $slots, string $slug ): array {
+	$overlay       = xpressui_pro_load_workflow_overlay( $slug );
+	$overlay_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
+
+	return ! empty( $overlay_slots ) ? $overlay_slots : $slots;
+}
+
+function xpressui_pro_filter_additional_file_request( array $request, int $post_id, string $project_slug ): array {
+	$overlay       = xpressui_pro_load_workflow_overlay( $project_slug );
+	$overlay_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
+
+	if ( ! empty( $overlay_slots[0]['label'] ) ) {
+		$request['label'] = (string) $overlay_slots[0]['label'];
+	}
+
+	return $request;
+}
+
+function xpressui_pro_filter_resume_additional_files( array $additional_files, int $post_id, string $project_slug ): array {
+	$slot_definitions = xpressui_get_additional_file_slots( $project_slug );
+	$base_request     = xpressui_get_additional_file_request( $post_id );
+	$resolved         = [];
+
+	foreach ( $slot_definitions as $index => $slot ) {
+		$slot_id    = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		$slot_label = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
+		if ( '' === $slot_id ) {
+			continue;
+		}
+
+		$ref_id   = xpressui_get_additional_file_ref_file_id( $post_id, $slot_id );
+		$ref_url  = $ref_id > 0 ? (string) wp_get_attachment_url( $ref_id ) : '';
+		$ref_path = $ref_id > 0 ? (string) get_attached_file( $ref_id ) : '';
+		$ref_name = $ref_path !== '' ? basename( $ref_path ) : ( $ref_id > 0 ? (string) get_the_title( $ref_id ) : '' );
+
+		$resolved[] = [
+			'id'      => $slot_id,
+			'label'   => 0 === (int) $index && ! empty( $base_request['label'] ) ? (string) $base_request['label'] : $slot_label,
+			'active'  => xpressui_is_additional_file_slot_active( $post_id, $slot_id ),
+			'refFile' => '' !== $ref_url ? [ 'url' => $ref_url, 'name' => $ref_name ] : null,
+		];
+	}
+
+	return ! empty( $resolved ) ? $resolved : $additional_files;
+}
+
+function xpressui_pro_filter_done_reference_files( array $reference_files, int $post_id, string $project_slug ): array {
+	foreach ( xpressui_get_additional_file_slots( $project_slug ) as $slot ) {
+		$slot_id = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		if ( '' === $slot_id || 'xpressui_afile' === $slot_id ) {
+			continue;
+		}
+		$ref_id = xpressui_get_additional_file_done_info_file_id( $post_id, $slot_id );
+		if ( $ref_id <= 0 ) {
+			continue;
+		}
+		$ref_url  = (string) wp_get_attachment_url( $ref_id );
+		$ref_path = (string) get_attached_file( $ref_id );
+		$ref_name = $ref_path !== '' ? basename( $ref_path ) : (string) get_the_title( $ref_id );
+		if ( '' === $ref_url ) {
+			continue;
+		}
+		$reference_files[] = [
+			'url'  => $ref_url,
+			'name' => $ref_name,
+		];
+	}
+
+	return $reference_files;
 }

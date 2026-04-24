@@ -12,7 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'XPRESSUI_PRO_VERSION', '1.0.57' );
-define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.12' );
+define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.13' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_URL', plugin_dir_url( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
