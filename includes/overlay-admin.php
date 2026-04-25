@@ -299,7 +299,7 @@ function xpressui_pro_render_customize_page(): void {
 	}
 
 	$back_url = add_query_arg(
-		[ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-wordpress-bridge-pro' ],
+		[ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-bridge' ],
 		admin_url( 'edit.php' )
 	);
 
@@ -421,8 +421,6 @@ function xpressui_pro_render_customize_page(): void {
 
 	xpressui_pro_render_card_appearance( $ov_theme, $pack_theme, $summary_stats, $ov_project_bg, $pack_project_bg );
 	xpressui_pro_render_card_project_settings( $proj_settings, $ov_project_name, $original_title, $summary_stats, $invalid_fields );
-	xpressui_pro_render_card_submit_feedback( $ov_success_message, $ov_error_message, $summary_stats );
-	xpressui_pro_render_card_additional_file_slots( $ov_additional_slots, $summary_stats );
 	xpressui_pro_render_card_navigation( $ov_navigation, $pack_nav );
 	xpressui_pro_render_card_sections( $sections, $ov_sections, $ov_fields, $invalid_fields );
 
@@ -1076,7 +1074,6 @@ function xpressui_pro_render_afile_metabox_extension( $post ): void {
 		}
 		$slot_id          = sanitize_key( (string) ( $slot['id'] ?? '' ) );
 		$slot_label       = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
-		$pending_active   = ! empty( get_post_meta( $post->ID, '_xpressui_afile_active_' . $slot_id, true ) );
 		$pending_ref_id   = xpressui_get_additional_file_ref_file_id( $post->ID, $slot_id );
 		$done_info_file_id = xpressui_get_additional_file_done_info_file_id( $post->ID, $slot_id );
 		$pending_ref_url  = $pending_ref_id > 0 ? (string) wp_get_attachment_url( $pending_ref_id ) : '';
@@ -1088,7 +1085,7 @@ function xpressui_pro_render_afile_metabox_extension( $post ): void {
 
 		echo '<div class="xpressui-pro-afile-slot" style="margin:0 0 14px;padding:12px;border:1px solid #e5edf8;border-radius:8px;background:#fbfdff;">';
 		echo '<p style="margin:0 0 8px;font-weight:600;">' . esc_html( $slot_label !== '' ? $slot_label : $slot_id ) . '</p>';
-		echo '<p style="margin:0 0 8px;"><label><input type="checkbox" name="xpressui_afile_extra_active[' . esc_attr( $slot_id ) . ']" value="1"' . checked( $pending_active, true, false ) . '> ' . esc_html__( 'Request this additional file in Pending info', 'xpressui-wordpress-bridge-pro' ) . '</label></p>';
+		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'This slot is active whenever its label is configured in Workflow Settings.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 
 		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Pending info reference file (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<input type="hidden" name="xpressui_afile_ref_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $pending_ref_id ?: '' ) ) . '">';
@@ -1131,22 +1128,10 @@ function xpressui_pro_save_afile_metabox_extension( int $post_id, string $status
 			continue;
 		}
 
-		$active_meta_key = '_xpressui_afile_active_' . $slot_id;
 		$pending_meta_key = '_xpressui_afile_ref_file_id_' . $slot_id;
 		$done_meta_key = '_xpressui_done_info_file_id_' . $slot_id;
-
-		$raw_extra_active = isset( $_POST['xpressui_afile_extra_active'] ) && is_array( $_POST['xpressui_afile_extra_active'] )
-			? wp_unslash( $_POST['xpressui_afile_extra_active'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			: [];
-		$pending_active = ! empty( $raw_extra_active[ $slot_id ] ) ? '1' : '';
 		$pending_ref_id = isset( $_POST[ 'xpressui_afile_ref_file_id_' . $slot_id ] ) ? absint( wp_unslash( (string) $_POST[ 'xpressui_afile_ref_file_id_' . $slot_id ] ) ) : 0;
 		$done_ref_id = isset( $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ? absint( wp_unslash( (string) $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ) : 0;
-
-		if ( '' !== $pending_active ) {
-			update_post_meta( $post_id, $active_meta_key, $pending_active );
-		} else {
-			delete_post_meta( $post_id, $active_meta_key );
-		}
 		if ( $pending_ref_id > 0 ) {
 			update_post_meta( $post_id, $pending_meta_key, $pending_ref_id );
 		} else {
