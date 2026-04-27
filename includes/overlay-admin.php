@@ -1060,33 +1060,29 @@ function xpressui_pro_render_card_additional_file_slots( array $ov_additional_sl
 
 function xpressui_pro_render_afile_metabox_extension( $post ): void {
 	$project_slug = (string) get_post_meta( $post->ID, '_xpressui_project_slug', true );
-	$slots        = xpressui_get_additional_file_slots( $project_slug );
-	if ( count( $slots ) <= 1 ) {
+	$pending_slots = xpressui_get_additional_file_slots( $project_slug );
+	$done_slots    = xpressui_get_done_additional_file_slots( $project_slug );
+	if ( count( $pending_slots ) <= 1 && count( $done_slots ) <= 1 ) {
 		return;
 	}
 
 	echo '<hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;">';
 	echo '<p style="margin:0 0 10px;font-size:12px;font-weight:600;">' . esc_html__( 'Pro additional document slots', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 
-	foreach ( $slots as $index => $slot ) {
+	foreach ( $pending_slots as $index => $slot ) {
 		if ( 0 === (int) $index ) {
 			continue;
 		}
 		$slot_id          = sanitize_key( (string) ( $slot['id'] ?? '' ) );
 		$slot_label       = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
 		$pending_ref_id   = xpressui_get_additional_file_ref_file_id( $post->ID, $slot_id );
-		$done_info_file_id = xpressui_get_additional_file_done_info_file_id( $post->ID, $slot_id );
 		$pending_ref_url  = $pending_ref_id > 0 ? (string) wp_get_attachment_url( $pending_ref_id ) : '';
 		$pending_ref_path = $pending_ref_id > 0 ? (string) get_attached_file( $pending_ref_id ) : '';
 		$pending_ref_name = $pending_ref_path !== '' ? basename( $pending_ref_path ) : ( $pending_ref_id > 0 ? (string) get_the_title( $pending_ref_id ) : '' );
-		$done_file_url    = $done_info_file_id > 0 ? (string) wp_get_attachment_url( $done_info_file_id ) : '';
-		$done_file_path   = $done_info_file_id > 0 ? (string) get_attached_file( $done_info_file_id ) : '';
-		$done_file_name   = $done_file_path !== '' ? basename( $done_file_path ) : ( $done_info_file_id > 0 ? (string) get_the_title( $done_info_file_id ) : '' );
 
 		echo '<div class="xpressui-pro-afile-slot" style="margin:0 0 14px;padding:12px;border:1px solid #e5edf8;border-radius:8px;background:#fbfdff;">';
 		echo '<p style="margin:0 0 8px;font-weight:600;">' . esc_html( $slot_label !== '' ? $slot_label : $slot_id ) . '</p>';
-		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'This slot is active whenever its label is configured in Workflow Settings.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
-
+		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'Pending info slot.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Pending info reference file (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<input type="hidden" name="xpressui_afile_ref_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $pending_ref_id ?: '' ) ) . '">';
 		echo '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">';
@@ -1098,7 +1094,22 @@ function xpressui_pro_render_afile_metabox_extension( $post ): void {
 		echo ' <button type="button" class="xpressui-ref-file-remove" data-field="__afile_pending__' . esc_attr( $slot_id ) . '" title="' . esc_attr__( 'Remove', 'xpressui-wordpress-bridge-pro' ) . '">✕</button>';
 		echo '</span>';
 		echo '</div>';
+	}
 
+	foreach ( $done_slots as $index => $slot ) {
+		if ( 0 === (int) $index ) {
+			continue;
+		}
+		$slot_id           = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		$slot_label        = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
+		$done_info_file_id = xpressui_get_additional_file_done_info_file_id( $post->ID, $slot_id );
+		$done_file_url     = $done_info_file_id > 0 ? (string) wp_get_attachment_url( $done_info_file_id ) : '';
+		$done_file_path    = $done_info_file_id > 0 ? (string) get_attached_file( $done_info_file_id ) : '';
+		$done_file_name    = $done_file_path !== '' ? basename( $done_file_path ) : ( $done_info_file_id > 0 ? (string) get_the_title( $done_info_file_id ) : '' );
+
+		echo '<div class="xpressui-pro-afile-slot" style="margin:0 0 14px;padding:12px;border:1px solid #e5edf8;border-radius:8px;background:#fbfdff;">';
+		echo '<p style="margin:0 0 8px;font-weight:600;">' . esc_html( $slot_label !== '' ? $slot_label : $slot_id ) . '</p>';
+		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'Done slot.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Done informational document (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<input type="hidden" name="xpressui_done_info_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $done_info_file_id ?: '' ) ) . '">';
 		echo '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
@@ -1118,8 +1129,8 @@ function xpressui_pro_save_afile_metabox_extension( int $post_id, string $status
 	unset( $status, $previous_status );
 
 	$project_slug = (string) get_post_meta( $post_id, '_xpressui_project_slug', true );
-	$slots        = xpressui_get_additional_file_slots( $project_slug );
-	foreach ( $slots as $index => $slot ) {
+	$pending_slots = xpressui_get_additional_file_slots( $project_slug );
+	foreach ( $pending_slots as $index => $slot ) {
 		if ( 0 === (int) $index ) {
 			continue;
 		}
@@ -1137,6 +1148,20 @@ function xpressui_pro_save_afile_metabox_extension( int $post_id, string $status
 		} else {
 			delete_post_meta( $post_id, $pending_meta_key );
 		}
+	}
+
+	$done_slots = xpressui_get_done_additional_file_slots( $project_slug );
+	foreach ( $done_slots as $index => $slot ) {
+		if ( 0 === (int) $index ) {
+			continue;
+		}
+		$slot_id = sanitize_key( (string) ( $slot['id'] ?? '' ) );
+		if ( '' === $slot_id ) {
+			continue;
+		}
+
+		$done_meta_key = '_xpressui_done_info_file_id_' . $slot_id;
+		$done_ref_id = isset( $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ? absint( wp_unslash( (string) $_POST[ 'xpressui_done_info_file_id_' . $slot_id ] ) ) : 0;
 		if ( $done_ref_id > 0 ) {
 			update_post_meta( $post_id, $done_meta_key, $done_ref_id );
 		} else {

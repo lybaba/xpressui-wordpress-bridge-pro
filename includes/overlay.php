@@ -593,6 +593,7 @@ function xpressui_pro_patch_form_config( array $cfg, array $overlay ): array {
 
 add_filter( 'xpressui_template_context', 'xpressui_pro_filter_template_context', 10, 2 );
 add_filter( 'xpressui_additional_file_slots', 'xpressui_pro_filter_additional_file_slots', 10, 2 );
+add_filter( 'xpressui_done_additional_file_slots', 'xpressui_pro_filter_done_additional_file_slots', 10, 2 );
 add_filter( 'xpressui_additional_file_request', 'xpressui_pro_filter_additional_file_request', 10, 3 );
 add_filter( 'xpressui_resume_additional_files', 'xpressui_pro_filter_resume_additional_files', 10, 3 );
 add_filter( 'xpressui_done_reference_files', 'xpressui_pro_filter_done_reference_files', 10, 3 );
@@ -608,6 +609,16 @@ function xpressui_pro_filter_template_context( array $context, string $slug ): a
 function xpressui_pro_filter_additional_file_slots( array $slots, string $slug ): array {
 	$overlay       = xpressui_pro_load_workflow_overlay( $slug );
 	$overlay_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
+
+	return ! empty( $overlay_slots ) ? $overlay_slots : $slots;
+}
+
+function xpressui_pro_filter_done_additional_file_slots( array $slots, string $slug ): array {
+	$overlay       = xpressui_pro_load_workflow_overlay( $slug );
+	$overlay_slots = xpressui_pro_normalize_additional_file_slots( $overlay['done_additional_file_slots'] ?? [] );
+	if ( empty( $overlay_slots ) ) {
+		$overlay_slots = xpressui_pro_normalize_additional_file_slots( $overlay['additional_file_slots'] ?? [] );
+	}
 
 	return ! empty( $overlay_slots ) ? $overlay_slots : $slots;
 }
@@ -652,7 +663,7 @@ function xpressui_pro_filter_resume_additional_files( array $additional_files, i
 }
 
 function xpressui_pro_filter_done_reference_files( array $reference_files, int $post_id, string $project_slug ): array {
-	foreach ( xpressui_get_additional_file_slots( $project_slug ) as $slot ) {
+	foreach ( xpressui_get_done_additional_file_slots( $project_slug ) as $slot ) {
 		$slot_id = sanitize_key( (string) ( $slot['id'] ?? '' ) );
 		if ( '' === $slot_id || 'xpressui_afile' === $slot_id ) {
 			continue;
@@ -663,7 +674,10 @@ function xpressui_pro_filter_done_reference_files( array $reference_files, int $
 		}
 		$ref_url  = (string) wp_get_attachment_url( $ref_id );
 		$ref_path = (string) get_attached_file( $ref_id );
-		$ref_name = $ref_path !== '' ? basename( $ref_path ) : (string) get_the_title( $ref_id );
+		$ref_name = sanitize_text_field( (string) ( $slot['label'] ?? '' ) );
+		if ( '' === $ref_name ) {
+			$ref_name = $ref_path !== '' ? basename( $ref_path ) : (string) get_the_title( $ref_id );
+		}
 		if ( '' === $ref_url ) {
 			continue;
 		}
