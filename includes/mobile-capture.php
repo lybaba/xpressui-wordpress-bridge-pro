@@ -60,7 +60,7 @@ function xpressui_pro_create_capture_session( WP_REST_Request $request ): WP_RES
 	$field_type   = $request->get_param( 'fieldType' );
 	$project_slug = $request->get_param( 'projectSlug' );
 
-	$allowed_types = [ 'signature', 'camera-photo' ];
+	$allowed_types = [ 'signature', 'camera-photo', 'qr-scan', 'document-scan' ];
 	if ( ! in_array( $field_type, $allowed_types, true ) ) {
 		return new WP_REST_Response( [ 'message' => 'Unsupported field type.' ], 400 );
 	}
@@ -187,9 +187,13 @@ function xpressui_pro_maybe_serve_capture_page(): void {
 	}
 
 	$relay_url  = rest_url( 'xpressui/v1/capture/relay/' . rawurlencode( $token ) );
-	$field_label = 'signature' === $field_type
-		? __( 'Draw your signature below', 'xpressui-wordpress-bridge-pro' )
-		: __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' );
+	$field_labels = [
+		'signature'     => __( 'Draw your signature below', 'xpressui-wordpress-bridge-pro' ),
+		'camera-photo'  => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
+		'document-scan' => __( 'Photograph your document', 'xpressui-wordpress-bridge-pro' ),
+		'qr-scan'       => __( 'Scan a QR code', 'xpressui-wordpress-bridge-pro' ),
+	];
+	$field_label = $field_labels[ $field_type ] ?? __( 'Capture on mobile', 'xpressui-wordpress-bridge-pro' );
 
 	xpressui_pro_output_capture_page( $token, $field_type, $relay_url, $field_label );
 	exit;
@@ -219,6 +223,8 @@ function xpressui_pro_output_capture_page(
 
 	if ( 'signature' === $field_type ) {
 		echo xpressui_pro_capture_signature_html();
+	} elseif ( 'qr-scan' === $field_type ) {
+		echo xpressui_pro_capture_qr_html();
 	} else {
 		echo xpressui_pro_capture_photo_html();
 	}
@@ -229,6 +235,8 @@ function xpressui_pro_output_capture_page(
 	echo 'var FIELD_TYPE = "' . $type_esc . '";';
 	if ( 'signature' === $field_type ) {
 		echo xpressui_pro_capture_signature_js();
+	} elseif ( 'qr-scan' === $field_type ) {
+		echo xpressui_pro_capture_qr_js();
 	} else {
 		echo xpressui_pro_capture_photo_js();
 	}
@@ -267,6 +275,54 @@ function xpressui_pro_capture_photo_html(): string {
 <button class="btn-primary" id="capture-btn" onclick="capturePhoto()">Take Photo</button>
 <canvas id="photo-canvas" style="display:none"></canvas>
 <div class="status" id="status-msg"></div>';
+}
+
+function xpressui_pro_capture_qr_html(): string {
+	return '<video id="video" autoplay playsinline></video>
+<canvas id="qr-canvas" style="display:none"></canvas>
+<div class="status" id="status-msg">Point your camera at a QR code…</div>';
+}
+
+function xpressui_pro_capture_qr_js(): string {
+	return <<<'JS'
+(function(){
+var video=document.getElementById('video');
+var canvas=document.getElementById('qr-canvas');
+var msg=document.getElementById('status-msg');
+var relayed=false;
+function stopCamera(){if(video.srcObject){video.srcObject.getTracks().forEach(function(t){t.stop();});}}
+function relayData(text){
+  if(relayed)return;relayed=true;
+  msg.textContent='Relaying QR code…';
+  fetch(RELAY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:text})})
+  .then(function(r){
+    if(r.ok){msg.className='status success';msg.textContent='✓ QR code sent! You can close this page.';stopCamera();}
+    else{msg.className='status error';msg.textContent='Relay error. Please try again.';relayed=false;}
+  }).catch(function(){msg.className='status error';msg.textContent='Network error.';relayed=false;});
+}
+if(!('BarcodeDetector' in window)){
+  msg.className='status error';
+  msg.textContent='QR scanning requires Chrome on Android or iOS 17+. Open this page in a supported browser.';
+  return;
+}
+var detector=new BarcodeDetector({formats:['qr_code']});
+navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+.then(function(stream){
+  video.srcObject=stream;video.play();
+  function tick(){
+    if(relayed||video.paused||video.ended)return;
+    detector.detect(video).then(function(codes){
+      if(codes.length>0&&codes[0].rawValue){relayData(codes[0].rawValue);}
+      else{requestAnimationFrame(tick);}
+    }).catch(function(){requestAnimationFrame(tick);});
+  }
+  video.addEventListener('playing',function(){requestAnimationFrame(tick);},{once:true});
+}).catch(function(){
+  msg.className='status error';
+  msg.textContent='Camera access denied. Please allow camera and reload.';
+});
+})();
+JS;
 }
 
 function xpressui_pro_capture_signature_js(): string {
