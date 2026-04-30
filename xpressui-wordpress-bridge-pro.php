@@ -40,9 +40,9 @@ function xpressui_pro_get_runtime_asset_url(): string {
 	return plugin_dir_url( __FILE__ ) . 'runtime/xpressui-' . XPRESSUI_PRO_RUNTIME_VERSION . '.umd.js';
 }
 
-register_activation_hook( __FILE__, 'xpressui_pro_check_dependencies' );
+register_activation_hook( __FILE__, 'xpressui_pro_on_activate' );
 
-function xpressui_pro_check_dependencies(): void {
+function xpressui_pro_on_activate(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
@@ -53,6 +53,10 @@ function xpressui_pro_check_dependencies(): void {
 	if ( function_exists( 'xpressui_maybe_install_bundled_workflows' ) ) {
 		xpressui_maybe_install_bundled_workflows();
 	}
+
+	// Register the status-page rewrite rule before flushing so the /xpressui-status/ route is live immediately.
+	add_rewrite_rule( '^xpressui-status/([a-f0-9]{32})/?$', 'index.php?xpressui_status_token=$matches[1]', 'top' );
+	flush_rewrite_rules();
 }
 
 add_action( 'admin_notices', 'xpressui_pro_dependency_notice' );

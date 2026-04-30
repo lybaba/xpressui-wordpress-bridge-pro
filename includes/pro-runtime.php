@@ -6,6 +6,7 @@ require_once XPRESSUI_PRO_DIR . 'includes/license-form.php';
 require_once XPRESSUI_PRO_DIR . 'includes/console-sync.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
+require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
 // update-checker.php is loaded unconditionally from the main plugin file.
 
 add_filter( 'xpressui_runtime_url', 'xpressui_pro_override_runtime_url', 10, 2 );
