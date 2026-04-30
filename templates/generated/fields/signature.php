@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
     throw new RuntimeException('Missing template context array.');
 }
+
 ?><div class="template-field" data-template-zone="field" data-field-name="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" data-field-type="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'type'))); ?>">
   <div class="template-field-label-row">
     <label class="template-field-label" for="sig-canvas-<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>">
@@ -44,35 +45,4 @@ data-signature-required="true"<?php endif; ?>
     <div class="template-field-help"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'desc'))); ?></div>
 <?php endif; ?>
 <?php xpressui_bridge_template_include_template('field-meta.php', $xpressui_ctx); ?>
-  <script>
-  (function(){
-    var _fn = '<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>';
-    function _init(){
-      var wrap=document.querySelector('[data-signature-field="'+_fn+'"]');
-      if(!wrap||wrap.dataset.sigReady){return;}
-      wrap.dataset.sigReady='1';
-      var canvas=wrap.querySelector('[data-signature-canvas="'+_fn+'"]');
-      var input=document.querySelector('input[data-name="'+_fn+'"]');
-      var clearBtn=wrap.querySelector('[data-signature-clear="'+_fn+'"]');
-      var hint=wrap.querySelector('[data-signature-hint="'+_fn+'"]');
-      if(!canvas||!input){return;}
-      var ctx=canvas.getContext('2d');
-      var drawing=false;
-      ctx.strokeStyle='#1a1a2e';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
-      function pos(e){var r=canvas.getBoundingClientRect();var s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(canvas.width/r.width),y:(s.clientY-r.top)*(canvas.height/r.height)};}
-      function start(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
-      function move(e){if(!drawing){return;}e.preventDefault();var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();if(hint){hint.style.display='none';}input.value=canvas.toDataURL('image/png');}
-      function end(){drawing=false;}
-      canvas.addEventListener('mousedown',start);
-      canvas.addEventListener('mousemove',move);
-      canvas.addEventListener('mouseup',end);
-      canvas.addEventListener('mouseleave',end);
-      canvas.addEventListener('touchstart',start,{passive:false});
-      canvas.addEventListener('touchmove',move,{passive:false});
-      canvas.addEventListener('touchend',end);
-      if(clearBtn){clearBtn.addEventListener('click',function(){ctx.clearRect(0,0,canvas.width,canvas.height);input.value='';if(hint){hint.style.display='';}});}
-    }
-    if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_init);}else{_init();}
-  })();
-  </script>
 </div>
