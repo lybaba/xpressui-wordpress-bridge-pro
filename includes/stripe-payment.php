@@ -123,6 +123,7 @@ function xpressui_pro_inject_stripe_globals( string $slug, array $template_conte
 	$inline     = 'window.XPRESSUI_STRIPE_PUBLISHABLE_KEY = ' . wp_json_encode( $publishable_key ) . ';';
 	$inline    .= 'window.XPRESSUI_STRIPE_PAYMENT_INTENT_URL = ' . wp_json_encode( $intent_url ) . ';';
 
+	wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', [], null, false );
 	wp_add_inline_script( 'xpressui-shell-init', $inline, 'before' );
 }
 

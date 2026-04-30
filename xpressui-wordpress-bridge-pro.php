@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'XPRESSUI_PRO_VERSION', '1.0.57' );
 define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.13' );
+define( 'XPRESSUI_PRO_CAPTURE_PAGE_RUNTIME_VERSION', '1.0.13' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_URL', plugin_dir_url( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
@@ -38,6 +39,10 @@ function xpressui_pro_has_bundled_runtime(): bool {
 
 function xpressui_pro_get_runtime_asset_url(): string {
 	return plugin_dir_url( __FILE__ ) . 'runtime/xpressui-' . XPRESSUI_PRO_RUNTIME_VERSION . '.umd.js';
+}
+
+function xpressui_pro_get_capture_page_runtime_url(): string {
+	return plugin_dir_url( __FILE__ ) . 'runtime/mobile-capture-page-' . XPRESSUI_PRO_CAPTURE_PAGE_RUNTIME_VERSION . '.umd.js';
 }
 
 register_activation_hook( __FILE__, 'xpressui_pro_on_activate' );

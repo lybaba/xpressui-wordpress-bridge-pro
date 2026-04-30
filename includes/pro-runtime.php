@@ -9,7 +9,7 @@ require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
 require_once XPRESSUI_PRO_DIR . 'includes/automated-reminders.php';
 require_once XPRESSUI_PRO_DIR . 'includes/stripe-payment.php';
-require_once XPRESSUI_PRO_DIR . 'includes/ai-document-verification.php';
+// require_once XPRESSUI_PRO_DIR . 'includes/ai-document-verification.php'; // disabled — not needed yet
 require_once XPRESSUI_PRO_DIR . 'includes/mobile-capture.php';
 // update-checker.php is loaded unconditionally from the main plugin file.
 
