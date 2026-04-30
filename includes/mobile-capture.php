@@ -252,35 +252,35 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;min-heigh
 .cp-wrap{display:flex;flex-direction:column;flex:1;max-width:480px;margin:0 auto;width:100%;padding:16px;}
 .cp-header h1{font-size:18px;font-weight:600;color:#0f172a;text-align:center;margin-bottom:16px;}
 .cp-body{display:flex;flex-direction:column;gap:12px;}
-canvas{border:2px solid #d1d5db;border-radius:8px;background:#fff;width:100%;touch-action:none;cursor:crosshair;}
-button{border:none;border-radius:8px;padding:14px 20px;font-size:16px;font-weight:600;cursor:pointer;width:100%;}
-.btn-primary{background:#2563eb;color:#fff;}
-.btn-secondary{background:#f1f5f9;color:#475569;}
-.status{text-align:center;font-size:14px;color:#64748b;padding:12px;}
-.status.success{color:#16a34a;font-weight:600;}
-.status.error{color:#ef4444;}
-video{width:100%;border-radius:8px;background:#000;}
+.cp-body canvas{border:2px solid #d1d5db;border-radius:8px;background:#fff;width:100%;touch-action:none;cursor:crosshair;}
+.cp-body button{border:none;border-radius:8px;padding:14px 20px;font-size:16px;font-weight:600;cursor:pointer;width:100%;}
+.cp-body .cp-btn-primary{background:#2563eb;color:#fff;}
+.cp-body .cp-btn-secondary{background:#f1f5f9;color:#475569;}
+.cp-body .cp-status{text-align:center;font-size:14px;color:#64748b;padding:12px;}
+.cp-body .cp-status.success{color:#16a34a;font-weight:600;}
+.cp-body .cp-status.error{color:#ef4444;}
+.cp-body video{width:100%;border-radius:8px;background:#000;}
 </style>';
 }
 
 function xpressui_pro_capture_signature_html(): string {
 	return '<canvas id="sig-canvas" height="200"></canvas>
-<button class="btn-secondary" onclick="clearCanvas()">Clear</button>
-<button class="btn-primary" id="submit-btn" onclick="submitSignature()">Submit Signature</button>
-<div class="status" id="status-msg"></div>';
+<button class="cp-btn-secondary" onclick="clearCanvas()">Clear</button>
+<button class="cp-btn-primary" id="submit-btn" onclick="submitSignature()">Submit Signature</button>
+<div class="cp-status" id="status-msg"></div>';
 }
 
 function xpressui_pro_capture_photo_html(): string {
 	return '<video id="video" autoplay playsinline></video>
-<button class="btn-primary" id="capture-btn" onclick="capturePhoto()">Take Photo</button>
+<button class="cp-btn-primary" id="capture-btn" onclick="capturePhoto()">Take Photo</button>
 <canvas id="photo-canvas" style="display:none"></canvas>
-<div class="status" id="status-msg"></div>';
+<div class="cp-status" id="status-msg"></div>';
 }
 
 function xpressui_pro_capture_qr_html(): string {
 	return '<video id="video" autoplay playsinline></video>
 <canvas id="qr-canvas" style="display:none"></canvas>
-<div class="status" id="status-msg">Point your camera at a QR code…</div>';
+<div class="cp-status" id="status-msg">Point your camera at a QR code…</div>';
 }
 
 function xpressui_pro_capture_qr_js(): string {
@@ -296,12 +296,12 @@ function relayData(text){
   msg.textContent='Relaying QR code…';
   fetch(RELAY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:text})})
   .then(function(r){
-    if(r.ok){msg.className='status success';msg.textContent='✓ QR code sent! You can close this page.';stopCamera();}
-    else{msg.className='status error';msg.textContent='Relay error. Please try again.';relayed=false;}
-  }).catch(function(){msg.className='status error';msg.textContent='Network error.';relayed=false;});
+    if(r.ok){msg.className='cp-status success';msg.textContent='✓ QR code sent! You can close this page.';stopCamera();}
+    else{msg.className='cp-status error';msg.textContent='Relay error. Please try again.';relayed=false;}
+  }).catch(function(){msg.className='cp-status error';msg.textContent='Network error.';relayed=false;});
 }
 if(!('BarcodeDetector' in window)){
-  msg.className='status error';
+  msg.className='cp-status error';
   msg.textContent='QR scanning requires Chrome on Android or iOS 17+. Open this page in a supported browser.';
   return;
 }
@@ -318,7 +318,7 @@ navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:fals
   }
   video.addEventListener('playing',function(){requestAnimationFrame(tick);},{once:true});
 }).catch(function(){
-  msg.className='status error';
+  msg.className='cp-status error';
   msg.textContent='Camera access denied. Please allow camera and reload.';
 });
 })();
@@ -350,9 +350,9 @@ window.submitSignature=function(){
   btn.disabled=true;
   fetch(RELAY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:data})})
   .then(function(r){
-    if(r.ok){msg.className='status success';msg.textContent='✓ Signature sent! You can close this page.';}
-    else{msg.className='status error';msg.textContent='Error. Please try again.';btn.disabled=false;}
-  }).catch(function(){msg.className='status error';msg.textContent='Network error.';btn.disabled=false;});
+    if(r.ok){msg.className='cp-status success';msg.textContent='✓ Signature sent! You can close this page.';}
+    else{msg.className='cp-status error';msg.textContent='Error. Please try again.';btn.disabled=false;}
+  }).catch(function(){msg.className='cp-status error';msg.textContent='Network error.';btn.disabled=false;});
 };
 })();
 JS;
@@ -368,7 +368,7 @@ navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:fals
 .then(function(stream){video.srcObject=stream;})
 .catch(function(){
   var msg=document.getElementById('status-msg');
-  msg.className='status error';
+  msg.className='cp-status error';
   msg.textContent='Camera access denied. Please allow camera and reload.';
   btn.disabled=true;
 });
@@ -385,16 +385,16 @@ window.capturePhoto=function(){
     fetch(RELAY_URL,{method:'POST',body:fd})
     .then(function(r){
       if(r.ok){
-        msg.className='status success';
+        msg.className='cp-status success';
         msg.textContent='✓ Photo sent! You can close this page.';
         if(video.srcObject){video.srcObject.getTracks().forEach(function(t){t.stop();});}
       }else{
-        msg.className='status error';
+        msg.className='cp-status error';
         msg.textContent='Upload error. Please try again.';
         btn.disabled=false;
       }
     }).catch(function(){
-      msg.className='status error';
+      msg.className='cp-status error';
       msg.textContent='Network error.';
       btn.disabled=false;
     });

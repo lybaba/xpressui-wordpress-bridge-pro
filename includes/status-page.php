@@ -198,25 +198,25 @@ function xpressui_pro_output_status_page( string $site_name, string $workflow_la
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:40px 36px;max-width:480px;width:100%;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.site{font-size:13px;color:#64748b;margin-bottom:24px;font-weight:500}
-.workflow{font-size:22px;font-weight:700;color:#0f172a;margin-bottom:20px;line-height:1.3}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-size:15px;font-weight:600;margin-bottom:20px}
-.note{font-size:14px;color:#475569;line-height:1.6;margin-bottom:24px}
-.updated{font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:16px}
+.xpsp-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:40px 36px;max-width:480px;width:100%;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.xpsp-card .xpsp-site{font-size:13px;color:#64748b;margin-bottom:24px;font-weight:500}
+.xpsp-card .xpsp-workflow{font-size:22px;font-weight:700;color:#0f172a;margin-bottom:20px;line-height:1.3}
+.xpsp-card .xpsp-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-size:15px;font-weight:600;margin-bottom:20px}
+.xpsp-card .xpsp-note{font-size:14px;color:#475569;line-height:1.6;margin-bottom:24px}
+.xpsp-card .xpsp-updated{font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9;padding-top:16px}
 </style>
 </head>
 <body>
-<div class="card">
-	<div class="site"><?php echo $site_esc; ?></div>
-	<div class="workflow"><?php echo $workflow; ?></div>
-	<div class="badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>">
+<div class="xpsp-card">
+	<div class="xpsp-site"><?php echo $site_esc; ?></div>
+	<div class="xpsp-workflow"><?php echo $workflow; ?></div>
+	<div class="xpsp-badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>">
 		<span aria-hidden="true"><?php echo $icon; ?></span>
 		<span><?php echo $label; ?></span>
 	</div>
-	<p class="note"><?php echo $note; ?></p>
+	<p class="xpsp-note"><?php echo $note; ?></p>
 	<?php if ( '' !== $updated ) : ?>
-	<div class="updated">
+	<div class="xpsp-updated">
 		<?php
 		printf(
 			/* translators: %s: date of last update */
