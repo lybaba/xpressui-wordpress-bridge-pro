@@ -597,7 +597,6 @@ add_filter( 'xpressui_done_additional_file_slots', 'xpressui_pro_filter_done_add
 add_filter( 'xpressui_additional_file_request', 'xpressui_pro_filter_additional_file_request', 10, 3 );
 add_filter( 'xpressui_resume_additional_files', 'xpressui_pro_filter_resume_additional_files', 10, 3 );
 add_filter( 'xpressui_done_reference_files', 'xpressui_pro_filter_done_reference_files', 10, 3 );
-
 function xpressui_pro_filter_template_context( array $context, string $slug ): array {
 	$overlay = xpressui_pro_load_workflow_overlay( $slug );
 	if ( empty( $overlay ) ) {
