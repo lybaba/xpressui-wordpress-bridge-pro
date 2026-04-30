@@ -207,10 +207,10 @@ function xpressui_pro_output_capture_page(
 ): void {
 	unset( $token );
 	$xpressui_ctx = [
-		'field_label'              => $field_label,
-		'field_type'               => $field_type,
-		'relay_url'                => $relay_url,
-		'capture_page_runtime_url' => xpressui_pro_get_capture_page_runtime_url(),
+		'field_label' => $field_label,
+		'field_type'  => $field_type,
+		'relay_url'   => $relay_url,
+		'runtime_url' => xpressui_pro_get_runtime_asset_url(),
 	];
 	include XPRESSUI_PRO_DIR . 'templates/generated/mobile-capture-page.html.php';
 }

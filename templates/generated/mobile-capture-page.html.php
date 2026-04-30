@@ -51,6 +51,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;min-heigh
   </div>
 </div>
 <script>window.XPRESSUI_CAPTURE_CONFIG={"relayUrl":"<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'relay_url'))); ?>","fieldType":"<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'field_type'))); ?>"};</script>
-<script src="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'capture_page_runtime_url'))); ?>"></script>
+<script src="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'runtime_url'))); ?>"></script>
 </body>
 </html>
