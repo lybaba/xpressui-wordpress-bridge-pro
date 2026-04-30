@@ -57,6 +57,11 @@ function xpressui_pro_on_activate(): void {
 	// Register the status-page rewrite rule before flushing so the /xpressui-status/ route is live immediately.
 	add_rewrite_rule( '^xpressui-status/([a-f0-9]{32})/?$', 'index.php?xpressui_status_token=$matches[1]', 'top' );
 	flush_rewrite_rules();
+
+	// Schedule the daily reminder cron if not already registered.
+	if ( ! wp_next_scheduled( 'xpressui_pro_process_reminders' ) ) {
+		wp_schedule_event( time(), 'daily', 'xpressui_pro_process_reminders' );
+	}
 }
 
 add_action( 'admin_notices', 'xpressui_pro_dependency_notice' );
