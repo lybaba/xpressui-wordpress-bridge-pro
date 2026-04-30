@@ -296,7 +296,8 @@ function xpressui_pro_render_afile_metabox_extension( $post ): void {
 	}
 
 	echo '<hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;">';
-	echo '<p style="margin:0 0 10px;font-size:12px;font-weight:600;">' . esc_html__( 'Pro additional document slots', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	$settings_url = add_query_arg( [ 'post_type' => 'xpressui_submission', 'page' => 'xpressui-bridge' ], admin_url( 'edit.php' ) );
+	echo '<p style="margin:0 0 10px;font-size:12px;font-weight:600;">' . esc_html__( 'Additional Document Slots', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 
 	foreach ( $pending_slots as $index => $slot ) {
 		if ( 0 === (int) $index ) {
@@ -311,7 +312,7 @@ function xpressui_pro_render_afile_metabox_extension( $post ): void {
 
 		echo '<div class="xpressui-pro-afile-slot" style="margin:0 0 14px;padding:12px;border:1px solid #e5edf8;border-radius:8px;background:#fbfdff;">';
 		echo '<p style="margin:0 0 8px;font-weight:600;">' . esc_html( $slot_label !== '' ? $slot_label : $slot_id ) . '</p>';
-		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'Pending info slot.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<p style="margin:0 0 8px;color:#4b5563;">' . esc_html__( 'This slot is active whenever its label is configured in Workflow Settings.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<p style="margin:0 0 6px;font-size:12px;font-weight:600;">' . esc_html__( 'Pending info reference file (optional)', 'xpressui-wordpress-bridge-pro' ) . '</p>';
 		echo '<input type="hidden" name="xpressui_afile_ref_file_id_' . esc_attr( $slot_id ) . '" value="' . esc_attr( (string) ( $pending_ref_id ?: '' ) ) . '">';
 		echo '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">';
