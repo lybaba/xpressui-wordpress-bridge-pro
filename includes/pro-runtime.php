@@ -25,6 +25,6 @@ function xpressui_pro_override_runtime_url( string $url, string $slug ): string 
 add_filter( 'xpressui_field_template_dirs', 'xpressui_pro_register_template_dirs' );
 
 function xpressui_pro_register_template_dirs( array $dirs ): array {
-	$dirs[] = XPRESSUI_PRO_DIR . 'templates/generated/fields/';
+	$dirs[] = XPRESSUI_PRO_DIR . 'templates/generated/';
 	return $dirs;
 }
