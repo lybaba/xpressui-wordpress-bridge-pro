@@ -28,6 +28,7 @@ if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
         <span class="template-field-pill"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'upload_accept_label'))); ?></span>
       </div>
 <?php endif; ?>
+    <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
     <input
       id="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"
       class="template-input"
@@ -73,5 +74,4 @@ required aria-required="true"<?php endif; ?>
     <div class="template-field-help"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'desc'))); ?></div>
 <?php endif; ?>
 <?php xpressui_bridge_template_include_template('field-meta.php', $xpressui_ctx); ?>
-  <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
 </div>

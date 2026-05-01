@@ -23,6 +23,7 @@ if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
     ></canvas>
     <div class="xpressui-signature-actions">
       <button type="button" class="template-field-pill" data-signature-clear="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>">Clear</button>
+      <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
       <span class="template-field-help xpressui-signature-hint" data-signature-hint="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"><?php if (xpressui_bridge_template_truthy(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'placeholder'))): ?><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'placeholder'))); ?><?php else: ?>Draw your signature above<?php endif; ?></span>
     </div>
   </div>
@@ -43,5 +44,4 @@ data-signature-required="true"<?php endif; ?>
     <div class="template-field-help"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'desc'))); ?></div>
 <?php endif; ?>
 <?php xpressui_bridge_template_include_template('field-meta.php', $xpressui_ctx); ?>
-  <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
 </div>
