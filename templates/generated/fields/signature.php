@@ -6,7 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
     throw new RuntimeException('Missing template context array.');
 }
-
 ?><div class="template-field" data-template-zone="field" data-field-name="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" data-field-type="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'type'))); ?>">
   <div class="template-field-label-row">
     <label class="template-field-label" for="sig-canvas-<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>">
@@ -14,16 +13,15 @@ if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
       <span class="template-required" aria-hidden="true"<?php if (xpressui_bridge_template_truthy((!xpressui_bridge_template_truthy(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'required'))))): ?> style="display:none"<?php endif; ?>>*</span>
     </label>
   </div>
-  <div class="xpressui-signature-wrap" data-signature-field="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" style="display:flex;flex-direction:column;gap:8px;">
+  <div class="xpressui-signature-wrap" data-signature-field="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>">
     <canvas
       id="sig-canvas-<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"
       class="xpressui-signature-canvas"
       data-signature-canvas="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"
       width="580"
       height="160"
-      style="border:1px solid #d1d5db;border-radius:6px;background:#ffffff;cursor:crosshair;touch-action:none;width:100%;max-width:580px;display:block;"
     ></canvas>
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div class="xpressui-signature-actions">
       <button type="button" class="template-field-pill" data-signature-clear="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>">Clear</button>
       <span class="template-field-help xpressui-signature-hint" data-signature-hint="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"><?php if (xpressui_bridge_template_truthy(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'placeholder'))): ?><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'placeholder'))); ?><?php else: ?>Draw your signature above<?php endif; ?></span>
     </div>
@@ -45,4 +43,5 @@ data-signature-required="true"<?php endif; ?>
     <div class="template-field-help"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'desc'))); ?></div>
 <?php endif; ?>
 <?php xpressui_bridge_template_include_template('field-meta.php', $xpressui_ctx); ?>
+  <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
 </div>

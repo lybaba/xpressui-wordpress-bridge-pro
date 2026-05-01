@@ -206,6 +206,8 @@ function xpressui_pro_output_capture_page(
 	string $field_label
 ): void {
 	unset( $token );
+	// The compiled PHP template uses xpressui_bridge_template_* helpers — load them if not already loaded.
+	require_once XPRESSUI_BRIDGE_DIR . 'templates/runtime.php';
 	$xpressui_ctx = [
 		'field_label' => $field_label,
 		'field_type'  => $field_type,
