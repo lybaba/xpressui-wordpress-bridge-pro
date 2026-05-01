@@ -44,7 +44,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;min-heigh
     <div class="cp-status" id="status-msg">Point your camera at a QR code…</div>
 <?php else: ?>
     <video id="video" autoplay playsinline></video>
-    <button class="cp-btn-primary" id="capture-btn" type="button">Take Photo</button>
+    <div style="display:flex;gap:8px;">
+      <button class="cp-btn-primary" id="capture-btn" type="button" style="flex:1;">Take Photo</button>
+      <button class="cp-btn-secondary" id="flip-btn" type="button" style="flex:0 0 auto;width:52px;">🔄</button>
+    </div>
     <canvas id="photo-canvas" style="display:none"></canvas>
     <div class="cp-status" id="status-msg"></div>
 <?php endif; ?>
