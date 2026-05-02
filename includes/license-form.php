@@ -129,9 +129,12 @@ function xpressui_pro_render_license_form(): void {
 	$license_key  = isset( $license_data['license_key'] ) ? (string) $license_data['license_key'] : '';
 	$masked_key   = xpressui_pro_get_masked_license_key( $license_key );
 	?>
-	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-xpressui-pro-license-form>
 		<?php wp_nonce_field( 'xpressui_pro_license_actions', 'xpressui_pro_license_nonce' ); ?>
 		<input type="hidden" name="action" value="xpressui_pro_license_actions" />
+		<div class="notice notice-error inline" data-xpressui-pro-license-error style="display:none;">
+			<p><?php esc_html_e( 'Please enter a license key.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+		</div>
 		<table class="form-table" role="presentation">
 			<tbody>
 				<tr>
@@ -141,7 +144,7 @@ function xpressui_pro_render_license_form(): void {
 							<code><?php echo esc_html( $masked_key ); ?></code>
 							<p class="description"><?php esc_html_e( 'Your current key is active on this site. Deactivate it before entering a different key.', 'xpressui-wordpress-bridge-pro' ); ?></p>
 						<?php else : ?>
-							<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="" autocomplete="off" placeholder="iakp_..." />
+							<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="" autocomplete="off" placeholder="iakp_..." required aria-required="true" />
 							<p class="description"><?php esc_html_e( 'Paste the Pro license key issued for this product.', 'xpressui-wordpress-bridge-pro' ); ?></p>
 						<?php endif; ?>
 					</td>
@@ -152,9 +155,41 @@ function xpressui_pro_render_license_form(): void {
 			<?php if ( $is_active ) : ?>
 				<input type="submit" name="xpressui_pro_deactivate" class="button" value="<?php esc_attr_e( 'Deactivate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php else : ?>
-				<input type="submit" name="xpressui_pro_activate" class="button button-primary" value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
+				<input type="submit" name="xpressui_pro_activate" class="button button-primary" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php endif; ?>
 		</p>
 	</form>
+	<script>
+	(function () {
+		var form = document.querySelector('[data-xpressui-pro-license-form]');
+		if (!form) {
+			return;
+		}
+		var keyInput = form.querySelector('#xpressui_pro_license_key');
+		var error = form.querySelector('[data-xpressui-pro-license-error]');
+		var activateButton = form.querySelector('[data-xpressui-pro-activate-button]');
+		form.addEventListener('submit', function (event) {
+			if (activateButton && keyInput && !String(keyInput.value || '').trim()) {
+				event.preventDefault();
+				if (error) {
+					error.style.display = '';
+				}
+				keyInput.focus();
+				return;
+			}
+			if (activateButton) {
+				activateButton.disabled = true;
+				activateButton.value = <?php echo wp_json_encode( __( 'Activating...', 'xpressui-wordpress-bridge-pro' ) ); ?>;
+			}
+		});
+		if (keyInput && error) {
+			keyInput.addEventListener('input', function () {
+				if (String(keyInput.value || '').trim()) {
+					error.style.display = 'none';
+				}
+			});
+		}
+	}());
+	</script>
 	<?php
 }

@@ -29,9 +29,35 @@ function xpressui_pro_register_console_link(): void {
 	);
 }
 
+function xpressui_pro_get_console_url(): string {
+	return 'https://xpressui.iakpress.com/console';
+}
+
 function xpressui_pro_redirect_to_console(): void {
-	wp_redirect( 'https://xpressui.iakpress.com/console' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- intentional external redirect to known URL
-	exit;
+	$console_url = xpressui_pro_get_console_url();
+	?>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'XPressUI Console', 'xpressui-wordpress-bridge-pro' ); ?></h1>
+		<p><?php esc_html_e( 'The Console opens in a new tab so this WordPress screen stays available.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+		<p>
+			<a class="button button-primary" href="<?php echo esc_url( $console_url ); ?>" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( 'Open Console', 'xpressui-wordpress-bridge-pro' ); ?>
+			</a>
+		</p>
+	</div>
+	<script>
+	(function () {
+		var consoleUrl = <?php echo wp_json_encode( $console_url ); ?>;
+		var opened = window.open(consoleUrl, '_blank', 'noopener,noreferrer');
+		if (!opened) {
+			var link = document.querySelector('.wrap a[target="_blank"]');
+			if (link) {
+				link.focus();
+			}
+		}
+	}());
+	</script>
+	<?php
 }
 
 // ---------------------------------------------------------------------------

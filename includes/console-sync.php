@@ -224,6 +224,33 @@ add_action( 'xpressui_workflows_page_sections', 'xpressui_pro_render_console_syn
 
 function xpressui_pro_render_console_sync_section(): void {
 	$nonce = wp_create_nonce( 'xpressui_console_sync_nonce' );
+	$is_license_active = function_exists( 'xpressui_pro_is_license_active' ) && xpressui_pro_is_license_active();
+
+	if ( ! $is_license_active ) {
+		$license_url = function_exists( 'xpressui_pro_get_license_page_url' )
+			? xpressui_pro_get_license_page_url()
+			: add_query_arg(
+				[
+					'post_type' => 'xpressui_submission',
+					'page'      => 'xpressui-pro-license',
+				],
+				admin_url( 'edit.php' )
+			);
+		?>
+		<div class="card xpressui-admin-card">
+			<h2><?php esc_html_e( 'Console Sync', 'xpressui-wordpress-bridge-pro' ); ?></h2>
+			<p class="description">
+				<?php esc_html_e( 'Console Sync is available after activating a Pro license.', 'xpressui-wordpress-bridge-pro' ); ?>
+			</p>
+			<p>
+				<a class="button button-primary" href="<?php echo esc_url( $license_url ); ?>">
+					<?php esc_html_e( 'Activate Pro License', 'xpressui-wordpress-bridge-pro' ); ?>
+				</a>
+			</p>
+		</div>
+		<?php
+		return;
+	}
 	?>
 	<div class="card xpressui-admin-card">
 		<h2><?php esc_html_e( 'Console Sync', 'xpressui-wordpress-bridge-pro' ); ?></h2>
