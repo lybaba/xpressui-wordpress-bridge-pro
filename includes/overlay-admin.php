@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 
 add_action( 'admin_menu', 'xpressui_pro_register_console_link', 20 );
+add_action( 'admin_footer', 'xpressui_pro_patch_console_menu_link' );
 add_action( 'xpressui_afile_metabox_after', 'xpressui_pro_render_afile_metabox_extension' );
 add_action( 'xpressui_save_submission_afile_meta', 'xpressui_pro_save_afile_metabox_extension', 10, 3 );
 add_action( 'xpressui_workflow_settings_extra_sections', 'xpressui_pro_render_extra_workflow_sections', 10, 3 );
@@ -29,32 +30,33 @@ function xpressui_pro_register_console_link(): void {
 	);
 }
 
+function xpressui_pro_patch_console_menu_link(): void {
+	$console_url = xpressui_pro_get_console_url();
+	?>
+	<script>
+	(function () {
+		document.querySelectorAll( '#adminmenu a[href*="xpressui-console-redirect"]' ).forEach( function ( link ) {
+			link.href = <?php echo wp_json_encode( $console_url ); ?>;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+		} );
+	}());
+	</script>
+	<?php
+}
+
 function xpressui_pro_get_console_url(): string {
 	return 'https://xpressui.iakpress.com/console';
 }
 
 function xpressui_pro_redirect_to_console(): void {
 	$console_url = xpressui_pro_get_console_url();
+	$back_url    = admin_url( 'edit.php?post_type=xpressui_submission' );
 	?>
-	<div class="wrap">
-		<h1><?php esc_html_e( 'XPressUI Console', 'xpressui-wordpress-bridge-pro' ); ?></h1>
-		<p><?php esc_html_e( 'The Console opens in a new tab so this WordPress screen stays available.', 'xpressui-wordpress-bridge-pro' ); ?></p>
-		<p>
-			<a class="button button-primary" href="<?php echo esc_url( $console_url ); ?>" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( 'Open Console', 'xpressui-wordpress-bridge-pro' ); ?>
-			</a>
-		</p>
-	</div>
 	<script>
 	(function () {
-		var consoleUrl = <?php echo wp_json_encode( $console_url ); ?>;
-		var opened = window.open(consoleUrl, '_blank', 'noopener,noreferrer');
-		if (!opened) {
-			var link = document.querySelector('.wrap a[target="_blank"]');
-			if (link) {
-				link.focus();
-			}
-		}
+		window.open( <?php echo wp_json_encode( $console_url ); ?>, '_blank', 'noopener,noreferrer' );
+		window.location.href = <?php echo wp_json_encode( $back_url ); ?>;
 	}());
 	</script>
 	<?php
