@@ -60,7 +60,7 @@ function xpressui_pro_create_capture_session( WP_REST_Request $request ): WP_RES
 	$field_type   = $request->get_param( 'fieldType' );
 	$project_slug = $request->get_param( 'projectSlug' );
 
-	$allowed_types = [ 'signature', 'camera-photo', 'qr-scan', 'document-scan' ];
+	$allowed_types = [ 'signature', 'camera-photo', 'camera-photo-list', 'qr-scan', 'document-scan' ];
 	if ( ! in_array( $field_type, $allowed_types, true ) ) {
 		return new WP_REST_Response( [ 'message' => 'Unsupported field type.' ], 400 );
 	}
@@ -188,10 +188,11 @@ function xpressui_pro_maybe_serve_capture_page(): void {
 
 	$relay_url  = rest_url( 'xpressui/v1/capture/relay/' . rawurlencode( $token ) );
 	$field_labels = [
-		'signature'     => __( 'Draw your signature below', 'xpressui-wordpress-bridge-pro' ),
-		'camera-photo'  => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
-		'document-scan' => __( 'Photograph your document', 'xpressui-wordpress-bridge-pro' ),
-		'qr-scan'       => __( 'Scan a QR code', 'xpressui-wordpress-bridge-pro' ),
+		'signature'          => __( 'Draw your signature below', 'xpressui-wordpress-bridge-pro' ),
+		'camera-photo'       => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
+		'camera-photo-list'  => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
+		'document-scan'      => __( 'Photograph your document', 'xpressui-wordpress-bridge-pro' ),
+		'qr-scan'            => __( 'Scan a QR code', 'xpressui-wordpress-bridge-pro' ),
 	];
 	$field_label = $field_labels[ $field_type ] ?? __( 'Capture on mobile', 'xpressui-wordpress-bridge-pro' );
 
