@@ -557,7 +557,7 @@ function xpressui_pro_render_card_sections( array $sections, array $ov_sections,
 			$text_validation_types = [ 'text', 'email', 'tel', 'url', 'search', 'slug', 'textarea', 'rich-editor' ];
 			$pattern_validation_types = [ 'text', 'email', 'tel', 'url', 'search', 'slug' ];
 			$numeric_validation_types = [ 'number', 'price', 'integer', 'age', 'tax', 'date', 'time', 'datetime' ];
-			$upload_validation_types = [ 'file', 'upload-image', 'camera-photo', 'qr-scan', 'document-scan' ];
+			$upload_validation_types = [ 'file', 'upload-image', 'camera-photo', 'camera-photo-list', 'payment-proof', 'qr-scan', 'document-scan' ];
 			$multi_choice_validation_types = [ 'select-multiple', 'checkboxes' ];
 			$supports_choice_limits = ! empty( $choices ) && ( ! empty( $field['multiple'] ) || in_array( $ftype, $multi_choice_validation_types, true ) );
 			$supports_choice_labels = xpressui_pro_field_has_choices( $field );
