@@ -151,11 +151,16 @@ function xpressui_pro_render_license_form(): void {
 				</tr>
 			</tbody>
 		</table>
+		<?php if ( $is_active ) : ?>
+			<input type="hidden" name="xpressui_pro_deactivate" value="1" />
+		<?php else : ?>
+			<input type="hidden" name="xpressui_pro_activate" value="1" />
+		<?php endif; ?>
 		<p class="submit">
 			<?php if ( $is_active ) : ?>
-				<input type="submit" name="xpressui_pro_deactivate" class="button" value="<?php esc_attr_e( 'Deactivate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
+				<input type="submit" class="button" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Deactivate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php else : ?>
-				<input type="submit" name="xpressui_pro_activate" class="button button-primary" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
+				<input type="submit" class="button button-primary" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
 			<?php endif; ?>
 		</p>
 	</form>
