@@ -19,6 +19,7 @@ add_action( 'admin_menu', 'xpressui_pro_register_cloud_link_page' );
 add_action( 'admin_post_xpressui_pro_cloud_link_save', 'xpressui_pro_handle_cloud_link_save' );
 add_action( 'admin_post_xpressui_pro_cloud_link_test', 'xpressui_pro_handle_cloud_link_test' );
 add_action( 'xpressui_submission_event_recorded', 'xpressui_pro_cloud_link_enqueue_submission_event', 10, 2 );
+add_action( 'xpressui_submission_first_created', 'xpressui_pro_cloud_link_dispatch_channels', 10, 3 );
 add_action( 'xpressui_pro_cloud_link_flush_events', 'xpressui_pro_cloud_link_flush_events' );
 
 function xpressui_pro_register_cloud_link_page(): void {
@@ -321,4 +322,75 @@ function xpressui_pro_cloud_link_flush_events(): void {
 	$settings['status'] = 'degraded';
 	$settings['last_error'] = 'Cloud event batch rejected (' . $code . ')';
 	xpressui_pro_save_cloud_link_settings( $settings );
+}
+
+/**
+ * Fire-and-forget cloud dispatch for first submission creation.
+ * Local delivery remains active in the free bridge; this call is additive.
+ *
+ * @param int    $post_id Submission post ID.
+ * @param string $project_slug Workflow slug.
+ * @param array  $payload Submission payload.
+ */
+function xpressui_pro_cloud_link_dispatch_channels( $post_id, $project_slug, $payload ): void {
+	$post_id = (int) $post_id;
+	if ( $post_id <= 0 ) {
+		return;
+	}
+	$settings = xpressui_pro_get_cloud_link_settings();
+	if ( empty( $settings['enabled'] ) || empty( $settings['site_id'] ) || empty( $settings['shared_secret'] ) ) {
+		return;
+	}
+
+	$channels = [];
+	if ( function_exists( 'xpressui_get_project_setting' ) ) {
+		$notify_email = (string) xpressui_get_project_setting( (string) $project_slug, 'notifyEmail' );
+		$webhook_url  = (string) xpressui_get_project_setting( (string) $project_slug, 'webhookUrl' );
+		if ( $notify_email !== '' ) {
+			$channels[] = 'email';
+		}
+		if ( $webhook_url !== '' ) {
+			$channels[] = 'webhook';
+		}
+	}
+
+	$submission_id = (string) get_post_meta( $post_id, '_xpressui_submission_id', true );
+	$payload       = is_array( $payload ) ? $payload : [];
+	foreach ( $channels as $channel ) {
+		$dispatch_payload = [
+			'submissionId' => $submission_id,
+			'projectSlug'  => (string) $project_slug,
+			'channel'      => $channel,
+			'payload'      => [
+				'postId' => $post_id,
+			],
+		];
+		$resp = xpressui_pro_cloud_link_api_request( 'POST', '/api/v1/bridge/dispatch', $dispatch_payload, $settings, true );
+		if ( is_wp_error( $resp ) ) {
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_status', 'cloud_failed_fallback_local' );
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_error', $resp->get_error_message() );
+			if ( function_exists( 'xpressui_record_submission_event' ) ) {
+				xpressui_record_submission_event(
+					$post_id,
+					'delivery.cloud_dispatch_failed_fallback_local',
+					'bridge',
+					[],
+					[
+						'channel' => (string) $channel,
+						'error'   => (string) $resp->get_error_message(),
+					]
+				);
+			}
+			continue;
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $resp );
+		if ( $code >= 200 && $code < 300 ) {
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_status', 'cloud_queued' );
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_error', '' );
+		} else {
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_status', 'cloud_failed_fallback_local' );
+			update_post_meta( $post_id, '_xpressui_cloud_dispatch_' . $channel . '_error', 'dispatch_http_' . $code );
+		}
+	}
 }
