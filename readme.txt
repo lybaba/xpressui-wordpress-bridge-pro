@@ -4,7 +4,7 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.59
+Stable tag: 1.0.60
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,9 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 4. Upload your workflow pack ZIP via XPressUI > Workflows.
 
 == Changelog ==
+
+= 1.0.60 =
+* Update plugin site URL to https://iakpress.com/.
 
 = 1.0.59 =
 * Rename .xpressui-version to xpressui-version.txt for consistency with the free plugin.
