@@ -33,6 +33,8 @@ rm -f "${STAGE_DIR:?}/${DIST_SLUG}/.gitignore" \
       "${STAGE_DIR:?}/${DIST_SLUG}/xpressui-version.txt" \
       "${STAGE_DIR:?}/${DIST_SLUG}/README.md"
 
+find "${STAGE_DIR:?}/${DIST_SLUG}/runtime" -name "*.map" -delete
+
 cd "${STAGE_DIR}"
 zip -rq "${OUTPUT_PATH}" "${DIST_SLUG}"
 

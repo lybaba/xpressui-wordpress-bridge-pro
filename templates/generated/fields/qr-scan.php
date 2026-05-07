@@ -23,11 +23,6 @@ if (!isset($xpressui_ctx) || !is_array($xpressui_ctx)) {
         Use the camera or upload an image containing a QR code.
 <?php endif; ?>
     </div>
-<?php if (xpressui_bridge_template_truthy(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'upload_accept_label'))): ?>
-      <div class="template-upload-pills">
-        <span class="template-field-pill"><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'upload_accept_label'))); ?></span>
-      </div>
-<?php endif; ?>
     <button type="button" class="template-field-pill" data-mobile-capture-btn="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>" hidden>📱 Capture on mobile</button>
     <input
       id="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'field'), 'name'))); ?>"
