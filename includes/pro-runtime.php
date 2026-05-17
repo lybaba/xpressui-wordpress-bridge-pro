@@ -12,6 +12,7 @@ require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
 // require_once XPRESSUI_PRO_DIR . 'includes/ai-document-verification.php'; // disabled — not needed yet
 require_once XPRESSUI_PRO_DIR . 'includes/mobile-capture.php';
 require_once XPRESSUI_PRO_DIR . 'includes/cloud-link.php';
+require_once XPRESSUI_PRO_DIR . 'includes/catalog-embed.php';
 // update-checker.php is loaded unconditionally from the main plugin file.
 
 add_filter( 'xpressui_runtime_url', 'xpressui_pro_override_runtime_url', 10, 2 );
