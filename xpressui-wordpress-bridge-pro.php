@@ -3,7 +3,7 @@
  * Plugin Name: XPressUI Bridge PRO
  * Plugin URI:  https://iakpress.com/
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
- * Version:     1.0.62
+ * Version:     1.0.63
  * Author:      IAKPress
  * License:     GPL-2.0-or-later
  * Text Domain:        xpressui-bridge-pro
@@ -11,8 +11,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_VERSION', '1.0.62' );
-define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.15' );
+define( 'XPRESSUI_PRO_VERSION', '1.0.63' );
+define( 'XPRESSUI_PRO_RUNTIME_VERSION', '1.0.16' );
 define( 'XPRESSUI_PRO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'XPRESSUI_PRO_URL', plugin_dir_url( __FILE__ ) );
 define( 'XPRESSUI_PRO_BUNDLED_WORKFLOWS_DIR', XPRESSUI_PRO_DIR . 'default-workflows/' );
