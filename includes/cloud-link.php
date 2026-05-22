@@ -26,8 +26,8 @@ add_action( 'xpressui_pro_cloud_link_dispatch_channel', 'xpressui_pro_cloud_link
 function xpressui_pro_register_cloud_link_page(): void {
 	add_submenu_page(
 		'edit.php?post_type=xpressui_submission',
-		__( 'Cloud Link', 'xpressui-wordpress-bridge-pro' ),
-		__( 'Cloud Link', 'xpressui-wordpress-bridge-pro' ),
+		__( 'Cloud Link', 'xpressui-bridge-pro' ),
+		__( 'Cloud Link', 'xpressui-bridge-pro' ),
 		'manage_options',
 		'xpressui-pro-cloud-link',
 		'xpressui_pro_render_cloud_link_page'
@@ -69,7 +69,7 @@ function xpressui_pro_cloud_link_sign_payload( string $method, string $path, str
 function xpressui_pro_cloud_link_api_request( string $method, string $path, array $payload, array $settings, bool $signed = false, array $extra_headers = [] ) {
 	$base_url = rtrim( (string) ( $settings['api_base_url'] ?? '' ), '/' );
 	if ( $base_url === '' ) {
-		return new WP_Error( 'xpressui_pro_cloud_link_missing_base_url', __( 'Cloud Link base URL is missing.', 'xpressui-wordpress-bridge-pro' ) );
+		return new WP_Error( 'xpressui_pro_cloud_link_missing_base_url', __( 'Cloud Link base URL is missing.', 'xpressui-bridge-pro' ) );
 	}
 
 	$url     = $base_url . $path;
@@ -84,7 +84,7 @@ function xpressui_pro_cloud_link_api_request( string $method, string $path, arra
 		$site_id       = (string) ( $settings['site_id'] ?? '' );
 		$shared_secret = (string) ( $settings['shared_secret'] ?? '' );
 		if ( $site_id === '' || $shared_secret === '' ) {
-			return new WP_Error( 'xpressui_pro_cloud_link_missing_signature_setup', __( 'Cloud Link site identity is not configured.', 'xpressui-wordpress-bridge-pro' ) );
+			return new WP_Error( 'xpressui_pro_cloud_link_missing_signature_setup', __( 'Cloud Link site identity is not configured.', 'xpressui-bridge-pro' ) );
 		}
 		$timestamp                    = (string) time();
 		$headers['X-Bridge-Site-Id']  = $site_id;
@@ -93,7 +93,7 @@ function xpressui_pro_cloud_link_api_request( string $method, string $path, arra
 	} else {
 		$api_token = trim( (string) ( $settings['api_token'] ?? '' ) );
 		if ( $api_token === '' ) {
-			return new WP_Error( 'xpressui_pro_cloud_link_missing_api_token', __( 'Cloud Link API token is required.', 'xpressui-wordpress-bridge-pro' ) );
+			return new WP_Error( 'xpressui_pro_cloud_link_missing_api_token', __( 'Cloud Link API token is required.', 'xpressui-bridge-pro' ) );
 		}
 		$headers['X-Api-Token'] = $api_token;
 	}
@@ -128,7 +128,7 @@ function xpressui_pro_cloud_link_register( array &$settings ) {
 	$code = (int) wp_remote_retrieve_response_code( $response );
 	$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 	if ( $code < 200 || $code >= 300 || ! is_array( $data ) ) {
-		return new WP_Error( 'xpressui_pro_cloud_link_register_failed', __( 'Cloud Link registration failed.', 'xpressui-wordpress-bridge-pro' ) );
+		return new WP_Error( 'xpressui_pro_cloud_link_register_failed', __( 'Cloud Link registration failed.', 'xpressui-bridge-pro' ) );
 	}
 	$settings['site_id'] = sanitize_text_field( (string) ( $data['siteId'] ?? '' ) );
 	$settings['shared_secret'] = sanitize_text_field( (string) ( $data['sharedSecret'] ?? '' ) );
@@ -141,7 +141,7 @@ function xpressui_pro_cloud_link_register( array &$settings ) {
 function xpressui_pro_handle_cloud_link_save(): void {
 	check_admin_referer( 'xpressui_pro_cloud_link_save', 'xpressui_pro_cloud_link_nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-bridge-pro' ) );
 	}
 	$settings = xpressui_pro_get_cloud_link_settings();
 	$settings['enabled'] = isset( $_POST['xpressui_pro_cloud_link_enabled'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -153,9 +153,10 @@ function xpressui_pro_handle_cloud_link_save(): void {
 	wp_safe_redirect(
 		add_query_arg(
 			[
-				'post_type' => 'xpressui_submission',
-				'page'      => 'xpressui-pro-cloud-link',
-				'updated'   => '1',
+					'post_type' => 'xpressui_submission',
+					'page'      => 'xpressui-pro-cloud-link',
+					'updated'   => '1',
+					'_wpnonce'  => wp_create_nonce( 'xpressui_pro_cloud_link_notice' ),
 			],
 			admin_url( 'edit.php' )
 		)
@@ -166,7 +167,7 @@ function xpressui_pro_handle_cloud_link_save(): void {
 function xpressui_pro_handle_cloud_link_test(): void {
 	check_admin_referer( 'xpressui_pro_cloud_link_test', 'xpressui_pro_cloud_link_test_nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-bridge-pro' ) );
 	}
 	$settings = xpressui_pro_get_cloud_link_settings();
 	$register = xpressui_pro_cloud_link_register( $settings );
@@ -177,9 +178,10 @@ function xpressui_pro_handle_cloud_link_test(): void {
 		wp_safe_redirect(
 			add_query_arg(
 				[
-					'post_type' => 'xpressui_submission',
-					'page'      => 'xpressui-pro-cloud-link',
-					'error'     => rawurlencode( $register->get_error_message() ),
+						'post_type' => 'xpressui_submission',
+						'page'      => 'xpressui-pro-cloud-link',
+						'error'     => rawurlencode( $register->get_error_message() ),
+						'_wpnonce'  => wp_create_nonce( 'xpressui_pro_cloud_link_notice' ),
 				],
 				admin_url( 'edit.php' )
 			)
@@ -201,9 +203,10 @@ function xpressui_pro_handle_cloud_link_test(): void {
 	wp_safe_redirect(
 		add_query_arg(
 			[
-				'post_type' => 'xpressui_submission',
-				'page'      => 'xpressui-pro-cloud-link',
-				'connected' => '1',
+					'post_type' => 'xpressui_submission',
+					'page'      => 'xpressui-pro-cloud-link',
+					'connected' => '1',
+					'_wpnonce'  => wp_create_nonce( 'xpressui_pro_cloud_link_notice' ),
 			],
 			admin_url( 'edit.php' )
 		)
@@ -213,40 +216,41 @@ function xpressui_pro_handle_cloud_link_test(): void {
 
 function xpressui_pro_render_cloud_link_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-bridge-pro' ) );
 	}
 	$settings = xpressui_pro_get_cloud_link_settings();
-	echo '<div class="wrap"><h1>' . esc_html__( 'Cloud Link (PRO)', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
-	if ( isset( $_GET['updated'] ) ) {
-		echo '<div class="notice notice-success"><p>' . esc_html__( 'Cloud Link settings saved.', 'xpressui-wordpress-bridge-pro' ) . '</p></div>';
-	}
-	if ( isset( $_GET['connected'] ) ) {
-		echo '<div class="notice notice-success"><p>' . esc_html__( 'Cloud Link connection succeeded.', 'xpressui-wordpress-bridge-pro' ) . '</p></div>';
-	}
-	if ( isset( $_GET['error'] ) ) {
-		echo '<div class="notice notice-error"><p>' . esc_html( sanitize_text_field( wp_unslash( (string) $_GET['error'] ) ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-	echo '<p>' . esc_html__( 'Optional cloud services for dispatch and telemetry. Local standalone mode remains available when disabled.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<div class="wrap"><h1>' . esc_html__( 'Cloud Link (PRO)', 'xpressui-bridge-pro' ) . '</h1>';
+		$notice_nonce_valid = isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) ), 'xpressui_pro_cloud_link_notice' );
+		if ( $notice_nonce_valid && isset( $_GET['updated'] ) ) {
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Cloud Link settings saved.', 'xpressui-bridge-pro' ) . '</p></div>';
+		}
+		if ( $notice_nonce_valid && isset( $_GET['connected'] ) ) {
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Cloud Link connection succeeded.', 'xpressui-bridge-pro' ) . '</p></div>';
+		}
+		if ( $notice_nonce_valid && isset( $_GET['error'] ) ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( sanitize_text_field( wp_unslash( (string) $_GET['error'] ) ) ) . '</p></div>';
+		}
+	echo '<p>' . esc_html__( 'Optional cloud services for dispatch and telemetry. Local standalone mode remains available when disabled.', 'xpressui-bridge-pro' ) . '</p>';
 
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'xpressui_pro_cloud_link_save', 'xpressui_pro_cloud_link_nonce' );
 	echo '<input type="hidden" name="action" value="xpressui_pro_cloud_link_save" />';
 	echo '<table class="form-table"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Enable Cloud Link', 'xpressui-wordpress-bridge-pro' ) . '</th><td><label><input type="checkbox" name="xpressui_pro_cloud_link_enabled" value="1" ' . checked( ! empty( $settings['enabled'] ), true, false ) . ' /> ' . esc_html__( 'Enable (opt-in)', 'xpressui-wordpress-bridge-pro' ) . '</label></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'API base URL', 'xpressui-wordpress-bridge-pro' ) . '</th><td><input type="url" class="regular-text" name="xpressui_pro_cloud_link_api_base_url" value="' . esc_attr( (string) $settings['api_base_url'] ) . '" /></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Workspace ID', 'xpressui-wordpress-bridge-pro' ) . '</th><td><input type="text" class="regular-text" name="xpressui_pro_cloud_link_workspace_id" value="' . esc_attr( (string) $settings['workspace_id'] ) . '" /></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'API token', 'xpressui-wordpress-bridge-pro' ) . '</th><td><input type="password" class="regular-text" name="xpressui_pro_cloud_link_api_token" value="' . esc_attr( (string) $settings['api_token'] ) . '" autocomplete="off" /></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Status', 'xpressui-wordpress-bridge-pro' ) . '</th><td><code>' . esc_html( (string) $settings['status'] ) . '</code></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Last error', 'xpressui-wordpress-bridge-pro' ) . '</th><td>' . esc_html( (string) $settings['last_error'] ) . '</td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Last seen', 'xpressui-wordpress-bridge-pro' ) . '</th><td>' . esc_html( (string) $settings['last_seen_at'] ) . '</td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Enable Cloud Link', 'xpressui-bridge-pro' ) . '</th><td><label><input type="checkbox" name="xpressui_pro_cloud_link_enabled" value="1" ' . checked( ! empty( $settings['enabled'] ), true, false ) . ' /> ' . esc_html__( 'Enable (opt-in)', 'xpressui-bridge-pro' ) . '</label></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'API base URL', 'xpressui-bridge-pro' ) . '</th><td><input type="url" class="regular-text" name="xpressui_pro_cloud_link_api_base_url" value="' . esc_attr( (string) $settings['api_base_url'] ) . '" /></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Workspace ID', 'xpressui-bridge-pro' ) . '</th><td><input type="text" class="regular-text" name="xpressui_pro_cloud_link_workspace_id" value="' . esc_attr( (string) $settings['workspace_id'] ) . '" /></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'API token', 'xpressui-bridge-pro' ) . '</th><td><input type="password" class="regular-text" name="xpressui_pro_cloud_link_api_token" value="' . esc_attr( (string) $settings['api_token'] ) . '" autocomplete="off" /></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Status', 'xpressui-bridge-pro' ) . '</th><td><code>' . esc_html( (string) $settings['status'] ) . '</code></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Last error', 'xpressui-bridge-pro' ) . '</th><td>' . esc_html( (string) $settings['last_error'] ) . '</td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Last seen', 'xpressui-bridge-pro' ) . '</th><td>' . esc_html( (string) $settings['last_seen_at'] ) . '</td></tr>';
 	echo '</tbody></table>';
-	submit_button( __( 'Save Cloud Link settings', 'xpressui-wordpress-bridge-pro' ) );
+	submit_button( __( 'Save Cloud Link settings', 'xpressui-bridge-pro' ) );
 	echo '</form>';
 
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
 	wp_nonce_field( 'xpressui_pro_cloud_link_test', 'xpressui_pro_cloud_link_test_nonce' );
 	echo '<input type="hidden" name="action" value="xpressui_pro_cloud_link_test" />';
-	submit_button( __( 'Test connection', 'xpressui-wordpress-bridge-pro' ), 'secondary', 'submit', false );
+	submit_button( __( 'Test connection', 'xpressui-bridge-pro' ), 'secondary', 'submit', false );
 	echo '</form></div>';
 }
 

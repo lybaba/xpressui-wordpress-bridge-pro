@@ -55,7 +55,20 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;min-heigh
 <?php endif; ?>
   </div>
 </div>
-<script>window.XPRESSUI_CAPTURE_CONFIG={"relayUrl":"<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'relay_url'))); ?>","fieldType":"<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'field_type'))); ?>"};</script>
-<script src="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_context_get($xpressui_ctx, 'runtime_url'))); ?>"></script>
+<?php
+wp_print_inline_script_tag(
+	'window.XPRESSUI_CAPTURE_CONFIG=' . wp_json_encode(
+		[
+			'relayUrl'  => xpressui_bridge_template_stringify( xpressui_bridge_template_context_get( $xpressui_ctx, 'relay_url' ) ),
+			'fieldType' => xpressui_bridge_template_stringify( xpressui_bridge_template_context_get( $xpressui_ctx, 'field_type' ) ),
+		]
+	) . ';'
+);
+wp_print_script_tag(
+	[
+		'src' => esc_url( xpressui_bridge_template_stringify( xpressui_bridge_template_context_get( $xpressui_ctx, 'runtime_url' ) ) ),
+	]
+);
+?>
 </body>
 </html>

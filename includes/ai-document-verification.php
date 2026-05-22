@@ -209,7 +209,7 @@ function xpressui_pro_register_ai_verify_metabox( string $post_type, $post ): vo
 
 	add_meta_box(
 		'xpressui_pro_ai_verify_mb',
-		__( 'AI Document Verification', 'xpressui-wordpress-bridge-pro' ),
+		__( 'AI Document Verification', 'xpressui-bridge-pro' ),
 		'xpressui_pro_render_ai_verify_metabox',
 		'xpressui_submission',
 		'side',
@@ -223,17 +223,17 @@ function xpressui_pro_render_ai_verify_metabox( WP_Post $post ): void {
 	$results     = is_string( $results_raw ) ? json_decode( $results_raw, true ) : null;
 
 	if ( '' === $status || 'running' === $status ) {
-		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'Verification in progress…', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'Verification in progress…', 'xpressui-bridge-pro' ) . '</p>';
 		return;
 	}
 
 	if ( 'no_files' === $status ) {
-		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'No uploaded files to verify.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'No uploaded files to verify.', 'xpressui-bridge-pro' ) . '</p>';
 		return;
 	}
 
 	if ( ! is_array( $results ) || empty( $results ) ) {
-		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'No verification results.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+		echo '<p style="color:#64748b;font-size:12px;">' . esc_html__( 'No verification results.', 'xpressui-bridge-pro' ) . '</p>';
 		return;
 	}
 
@@ -246,7 +246,7 @@ function xpressui_pro_render_ai_verify_metabox( WP_Post $post ): void {
 		if ( ! is_array( $result ) ) {
 			echo '<span style="color:#94a3b8;font-size:11px;">—</span>';
 		} elseif ( isset( $result['skipped'] ) ) {
-			echo '<span style="color:#94a3b8;font-size:11px;">' . esc_html__( '⏭ File type not supported', 'xpressui-wordpress-bridge-pro' ) . '</span>';
+			echo '<span style="color:#94a3b8;font-size:11px;">' . esc_html__( '⏭ File type not supported', 'xpressui-bridge-pro' ) . '</span>';
 		} elseif ( isset( $result['error'] ) ) {
 			echo '<span style="color:#ef4444;font-size:11px;">⚠ ' . esc_html( (string) $result['error'] ) . '</span>';
 		} else {
@@ -269,7 +269,7 @@ function xpressui_pro_render_ai_verify_metabox( WP_Post $post ): void {
 				. esc_html( $icon . ' ' . $detected )
 				. '</span>';
 			echo '<span style="color:#64748b;font-size:11px;margin-left:5px;">'
-				. esc_html( $confidence . ' ' . __( 'confidence', 'xpressui-wordpress-bridge-pro' ) )
+				. esc_html( $confidence . ' ' . __( 'confidence', 'xpressui-bridge-pro' ) )
 				. '</span>';
 		}
 
@@ -288,17 +288,17 @@ function xpressui_pro_render_ai_verify_section( string $slug, array $s, $overlay
 	$api_key = (string) ( $s['proAiVerifyApiKey'] ?? '' );
 
 	echo '<div class="card xpressui-admin-card">';
-	echo '<details><summary><h2>' . esc_html__( 'AI Document Verification', 'xpressui-wordpress-bridge-pro' ) . '</h2><span class="xpressui-toggle-icon" aria-hidden="true">▾</span></summary>';
-	echo '<p>' . esc_html__( 'Automatically classify uploaded documents using Anthropic Claude. Results appear in the submission detail page. Images and PDFs only. Each analysis costs approximately $0.001.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<details><summary><h2>' . esc_html__( 'AI Document Verification', 'xpressui-bridge-pro' ) . '</h2><span class="xpressui-toggle-icon" aria-hidden="true">▾</span></summary>';
+	echo '<p>' . esc_html__( 'Automatically classify uploaded documents using Anthropic Claude. Results appear in the submission detail page. Images and PDFs only. Each analysis costs approximately $0.001.', 'xpressui-bridge-pro' ) . '</p>';
 	echo '<table class="form-table"><tbody>';
 
-	echo '<tr><th><label for="xpressui_ai_verify_enabled">' . esc_html__( 'Enable AI verification', 'xpressui-wordpress-bridge-pro' ) . '</label></th>';
+	echo '<tr><th><label for="xpressui_ai_verify_enabled">' . esc_html__( 'Enable AI verification', 'xpressui-bridge-pro' ) . '</label></th>';
 	echo '<td><input type="checkbox" id="xpressui_ai_verify_enabled" name="xpressui_ai_verify_enabled" value="1"' . checked( $enabled, true, false ) . '>';
-	echo '<p class="description">' . esc_html__( 'Classify each uploaded image or PDF when a new submission arrives.', 'xpressui-wordpress-bridge-pro' ) . '</p></td></tr>';
+	echo '<p class="description">' . esc_html__( 'Classify each uploaded image or PDF when a new submission arrives.', 'xpressui-bridge-pro' ) . '</p></td></tr>';
 
-	echo '<tr><th><label for="xpressui_ai_verify_api_key">' . esc_html__( 'Anthropic API key', 'xpressui-wordpress-bridge-pro' ) . '</label></th>';
+	echo '<tr><th><label for="xpressui_ai_verify_api_key">' . esc_html__( 'Anthropic API key', 'xpressui-bridge-pro' ) . '</label></th>';
 	echo '<td><input type="password" id="xpressui_ai_verify_api_key" name="xpressui_ai_verify_api_key" class="regular-text" value="' . esc_attr( $api_key ) . '" placeholder="sk-ant-…" autocomplete="new-password">';
-	echo '<p class="description">' . esc_html__( 'Used server-side only. Never exposed to the browser. Obtain your key at console.anthropic.com.', 'xpressui-wordpress-bridge-pro' ) . '</p></td></tr>';
+	echo '<p class="description">' . esc_html__( 'Used server-side only. Never exposed to the browser. Obtain your key at console.anthropic.com.', 'xpressui-bridge-pro' ) . '</p></td></tr>';
 
 	echo '</tbody></table>';
 	echo '</details>';

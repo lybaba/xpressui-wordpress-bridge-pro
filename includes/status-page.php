@@ -45,13 +45,16 @@ function xpressui_pro_get_post_id_by_status_token( string $token ): int {
 	$q = new WP_Query( [
 		'post_type'      => 'xpressui_submission',
 		'post_status'    => 'any',
-		'meta_key'       => '_xpressui_status_token',
-		'meta_value'     => $token,
-		'posts_per_page' => 1,
+		'posts_per_page' => -1,
 		'fields'         => 'ids',
 		'no_found_rows'  => true,
 	] );
-	return ! empty( $q->posts ) ? (int) $q->posts[0] : 0;
+	foreach ( $q->posts as $post_id ) {
+		if ( hash_equals( $token, (string) get_post_meta( (int) $post_id, '_xpressui_status_token', true ) ) ) {
+			return (int) $post_id;
+		}
+	}
+	return 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -68,10 +71,10 @@ function xpressui_pro_status_link_email_html( string $html, int $post_id, string
 	return $html
 		. '<div style="margin:24px 0 0;text-align:center;">'
 		. '<a href="' . esc_url( $url ) . '" style="display:inline-block;padding:10px 20px;background:#f0f4ff;color:#1e3a8a;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600;border:1px solid #bfdbfe;">'
-		. esc_html__( 'Track your submission', 'xpressui-wordpress-bridge-pro' )
+		. esc_html__( 'Track your submission', 'xpressui-bridge-pro' )
 		. '</a>'
 		. '<p style="margin:8px 0 0;font-size:12px;color:#6b7280;">'
-		. esc_html__( 'This link is private and unique to your submission. Bookmark it to follow up at any time.', 'xpressui-wordpress-bridge-pro' )
+		. esc_html__( 'This link is private and unique to your submission. Bookmark it to follow up at any time.', 'xpressui-bridge-pro' )
 		. '</p>'
 		. '</div>';
 }
@@ -140,52 +143,50 @@ function xpressui_pro_handle_status_route(): void {
 function xpressui_pro_status_display_map(): array {
 	return [
 		'new'          => [
-			'label' => __( 'Received', 'xpressui-wordpress-bridge-pro' ),
+			'label' => __( 'Received', 'xpressui-bridge-pro' ),
 			'color' => '#374151',
 			'bg'    => '#f3f4f6',
 			'icon'  => '📬',
-			'note'  => __( 'Your file has been received and is waiting for review.', 'xpressui-wordpress-bridge-pro' ),
+			'note'  => __( 'Your file has been received and is waiting for review.', 'xpressui-bridge-pro' ),
 		],
 		'in-review'    => [
-			'label' => __( 'In Review', 'xpressui-wordpress-bridge-pro' ),
+			'label' => __( 'In Review', 'xpressui-bridge-pro' ),
 			'color' => '#1e40af',
 			'bg'    => '#dbeafe',
 			'icon'  => '🔍',
-			'note'  => __( 'Our team is currently reviewing your file.', 'xpressui-wordpress-bridge-pro' ),
+			'note'  => __( 'Our team is currently reviewing your file.', 'xpressui-bridge-pro' ),
 		],
 		'pending_info' => [
-			'label' => __( 'Action Required', 'xpressui-wordpress-bridge-pro' ),
+			'label' => __( 'Action Required', 'xpressui-bridge-pro' ),
 			'color' => '#92400e',
 			'bg'    => '#fef3c7',
 			'icon'  => '📋',
-			'note'  => __( 'Additional information or documents have been requested. Please check your email.', 'xpressui-wordpress-bridge-pro' ),
+			'note'  => __( 'Additional information or documents have been requested. Please check your email.', 'xpressui-bridge-pro' ),
 		],
 		'done'         => [
-			'label' => __( 'Completed', 'xpressui-wordpress-bridge-pro' ),
+			'label' => __( 'Completed', 'xpressui-bridge-pro' ),
 			'color' => '#14532d',
 			'bg'    => '#dcfce7',
 			'icon'  => '✅',
-			'note'  => __( 'Your file has been processed successfully.', 'xpressui-wordpress-bridge-pro' ),
+			'note'  => __( 'Your file has been processed successfully.', 'xpressui-bridge-pro' ),
 		],
 		'rejected'     => [
-			'label' => __( 'Rejected', 'xpressui-wordpress-bridge-pro' ),
+			'label' => __( 'Rejected', 'xpressui-bridge-pro' ),
 			'color' => '#7f1d1d',
 			'bg'    => '#fee2e2',
 			'icon'  => '❌',
-			'note'  => __( 'Your file could not be processed. Please check your email for details.', 'xpressui-wordpress-bridge-pro' ),
+			'note'  => __( 'Your file could not be processed. Please check your email for details.', 'xpressui-bridge-pro' ),
 		],
 	];
 }
 
 function xpressui_pro_output_status_page( string $site_name, string $workflow_label, array $status_info, string $updated_at ): void {
-	$label      = esc_html( (string) ( $status_info['label'] ?? '' ) );
-	$color      = esc_attr( (string) ( $status_info['color'] ?? '#374151' ) );
-	$bg         = esc_attr( (string) ( $status_info['bg'] ?? '#f3f4f6' ) );
-	$icon       = esc_html( (string) ( $status_info['icon'] ?? '' ) );
-	$note       = esc_html( (string) ( $status_info['note'] ?? '' ) );
-	$site_esc   = esc_html( $site_name );
-	$workflow   = esc_html( $workflow_label );
-	$updated    = esc_html( $updated_at );
+		$label    = (string) ( $status_info['label'] ?? '' );
+		$color    = (string) ( $status_info['color'] ?? '#374151' );
+		$bg       = (string) ( $status_info['bg'] ?? '#f3f4f6' );
+		$icon     = (string) ( $status_info['icon'] ?? '' );
+		$note     = (string) ( $status_info['note'] ?? '' );
+		$updated  = $updated_at;
 
 	?>
 <!DOCTYPE html>
@@ -193,7 +194,13 @@ function xpressui_pro_output_status_page( string $site_name, string $workflow_la
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php printf( esc_html__( 'Submission Status — %s', 'xpressui-wordpress-bridge-pro' ), esc_html( $site_name ) ); ?></title>
+	<title><?php
+	printf(
+		/* translators: %s: site name */
+		esc_html__( 'Submission Status — %s', 'xpressui-bridge-pro' ),
+		esc_html( $site_name )
+	);
+	?></title>
 <meta name="robots" content="noindex,nofollow">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -208,21 +215,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 </head>
 <body>
 <div class="xpsp-card">
-	<div class="xpsp-site"><?php echo $site_esc; ?></div>
-	<div class="xpsp-workflow"><?php echo $workflow; ?></div>
-	<div class="xpsp-badge" style="background:<?php echo $bg; ?>;color:<?php echo $color; ?>">
-		<span aria-hidden="true"><?php echo $icon; ?></span>
-		<span><?php echo $label; ?></span>
+		<div class="xpsp-site"><?php echo esc_html( $site_name ); ?></div>
+		<div class="xpsp-workflow"><?php echo esc_html( $workflow_label ); ?></div>
+		<div class="xpsp-badge" style="background:<?php echo esc_attr( $bg ); ?>;color:<?php echo esc_attr( $color ); ?>">
+			<span aria-hidden="true"><?php echo esc_html( $icon ); ?></span>
+			<span><?php echo esc_html( $label ); ?></span>
 	</div>
-	<p class="xpsp-note"><?php echo $note; ?></p>
-	<?php if ( '' !== $updated ) : ?>
+		<p class="xpsp-note"><?php echo esc_html( $note ); ?></p>
+		<?php if ( '' !== $updated ) : ?>
 	<div class="xpsp-updated">
 		<?php
 		printf(
-			/* translators: %s: date of last update */
-			esc_html__( 'Last updated: %s', 'xpressui-wordpress-bridge-pro' ),
-			$updated
-		);
+				/* translators: %s: date of last update */
+				esc_html__( 'Last updated: %s', 'xpressui-bridge-pro' ),
+				esc_html( $updated )
+			);
 		?>
 	</div>
 	<?php endif; ?>

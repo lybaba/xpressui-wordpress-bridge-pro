@@ -34,7 +34,7 @@ function xpressui_pro_catalog_shortcode( $atts ): string {
 		[
 			'url'    => '',
 			'height' => '700px',
-			'title'  => __( 'Product catalog', 'xpressui-bridge-pro' ),
+				'title'  => __( 'Product catalog', 'xpressui-bridge-pro' ),
 		],
 		$atts,
 		'xpressui_catalog'
@@ -44,7 +44,7 @@ function xpressui_pro_catalog_shortcode( $atts ): string {
 
 	if ( $url === '' ) {
 		return '<p class="xpressui-embed-error">'
-			. esc_html__( '[xpressui_catalog] error: the "url" attribute is required.', 'xpressui-bridge-pro' )
+				. esc_html__( '[xpressui_catalog] error: the "url" attribute is required.', 'xpressui-bridge-pro' )
 			. '</p>';
 	}
 
@@ -52,7 +52,7 @@ function xpressui_pro_catalog_shortcode( $atts ): string {
 	$safe_url = esc_url( $url, [ 'http', 'https' ] );
 	if ( $safe_url === '' ) {
 		return '<p class="xpressui-embed-error">'
-			. esc_html__( '[xpressui_catalog] error: invalid URL.', 'xpressui-bridge-pro' )
+				. esc_html__( '[xpressui_catalog] error: invalid URL.', 'xpressui-bridge-pro' )
 			. '</p>';
 	}
 
@@ -78,7 +78,7 @@ function xpressui_pro_catalog_shortcode( $atts ): string {
 	style="width:100%;overflow:hidden;"
 >
 	<iframe
-		src="<?php echo $safe_url; // Already escaped via esc_url. ?>"
+			src="<?php echo esc_url( $safe_url ); ?>"
 		title="<?php echo esc_attr( $title ); ?>"
 		style="width:100%;height:<?php echo esc_attr( $height ); ?>;border:none;display:block;"
 		loading="lazy"

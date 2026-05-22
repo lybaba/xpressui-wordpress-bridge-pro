@@ -1,8 +1,8 @@
-=== XPressUI WordPress Bridge PRO ===
+=== XPressUI Bridge PRO ===
 Contributors: iakpressteam
 Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 8.0
 Stable tag: 1.0.61
 License: GPL-2.0-or-later
@@ -26,7 +26,7 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 == Installation ==
 
 1. Install and activate the free XPressUI Bridge plugin first.
-2. Upload and activate this plugin (xpressui-wordpress-bridge-pro.zip).
+2. Upload and activate this plugin (xpressui-bridge-pro.zip).
 3. Go to XPressUI > Pro License and enter your license key.
 4. Upload your workflow pack ZIP via XPressUI > Workflows.
 

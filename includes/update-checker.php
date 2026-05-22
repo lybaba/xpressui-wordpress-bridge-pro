@@ -12,10 +12,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-wordpress-bridge-pro/update-check' );
-define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-wordpress-bridge-pro/download' );
+define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-bridge-pro/update-check' );
+define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-bridge-pro/download' );
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
-define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-wordpress-bridge-pro/xpressui-wordpress-bridge-pro.php' );
+define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-bridge-pro/xpressui-bridge-pro.php' );
 define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-XPressUI-License-Key' );
 
 // The license option key is also defined in license-handler.php; guard against double-define
@@ -47,7 +47,7 @@ function xpressui_pro_inject_update_info( $transient ) {
 
 	if ( is_array( $update_info ) && ! empty( $update_info['version'] ) ) {
 		$transient->response[ XPRESSUI_PRO_PLUGIN_FILE ] = (object) [
-			'slug'        => 'xpressui-wordpress-bridge-pro',
+			'slug'        => 'xpressui-bridge-pro',
 			'plugin'      => XPRESSUI_PRO_PLUGIN_FILE,
 			'new_version' => $update_info['version'],
 			'url'         => 'https://xpressui.iakpress.com/',
@@ -73,7 +73,7 @@ add_filter( 'plugins_api', 'xpressui_pro_plugin_info', 10, 3 );
  * @return false|object
  */
 function xpressui_pro_plugin_info( $result, $action, $args ) {
-	if ( 'plugin_information' !== $action || 'xpressui-wordpress-bridge-pro' !== ( $args->slug ?? '' ) ) {
+	if ( 'plugin_information' !== $action || 'xpressui-bridge-pro' !== ( $args->slug ?? '' ) ) {
 		return $result;
 	}
 
@@ -87,7 +87,7 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 
 	return (object) [
 		'name'          => 'XPressUI WordPress Bridge PRO',
-		'slug'          => 'xpressui-wordpress-bridge-pro',
+		'slug'          => 'xpressui-bridge-pro',
 		'version'       => $update_info['version'],
 		'author'        => '<a href="https://iakpress.com">IAKPress</a>',
 		'requires'      => $update_info['requires'] ?? '6.0',
@@ -189,24 +189,25 @@ function xpressui_pro_update_available_notice(): void {
 		return;
 	}
 
-	$new_version = esc_html( $update_info['version'] );
-	$update_url  = esc_url(
-		wp_nonce_url(
-			admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( XPRESSUI_PRO_PLUGIN_FILE ) ),
-			'upgrade-plugin_' . XPRESSUI_PRO_PLUGIN_FILE
-		)
+	$new_version = (string) $update_info['version'];
+	$update_url  = (string) wp_nonce_url(
+		admin_url( 'update.php?action=upgrade-plugin&plugin=' . rawurlencode( XPRESSUI_PRO_PLUGIN_FILE ) ),
+		'upgrade-plugin_' . XPRESSUI_PRO_PLUGIN_FILE
 	);
-
 	echo '<div class="notice notice-warning is-dismissible">';
 	echo '<p>';
 	printf(
-		/* translators: 1: new version number, 2: update URL */
-		wp_kses(
-			__( '<strong>XPressUI WordPress Bridge PRO %1$s</strong> is available. <a href="%2$s">Update now</a>.', 'xpressui-wordpress-bridge-pro' ),
-			[ 'strong' => [], 'a' => [ 'href' => [] ] ]
+		'<strong>%s</strong> %s <a href="%s">%s</a>.',
+		esc_html(
+			sprintf(
+				/* translators: %s: new version number. */
+				__( 'XPressUI WordPress Bridge PRO %s', 'xpressui-bridge-pro' ),
+				$new_version
+			)
 		),
-		$new_version,
-		$update_url
+		esc_html__( 'is available.', 'xpressui-bridge-pro' ),
+		esc_url( $update_url ),
+		esc_html__( 'Update now', 'xpressui-bridge-pro' )
 	);
 	echo '</p>';
 	echo '</div>';

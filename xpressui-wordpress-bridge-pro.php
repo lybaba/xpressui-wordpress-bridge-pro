@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: XPressUI WordPress Bridge PRO
+ * Plugin Name: XPressUI Bridge PRO
  * Plugin URI:  https://iakpress.com/
  * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
  * Version:     1.0.61
  * Author:      IAKPress
  * License:     GPL-2.0-or-later
- * Text Domain:        xpressui-wordpress-bridge-pro
+ * Text Domain:        xpressui-bridge-pro
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -46,7 +46,7 @@ function xpressui_pro_on_activate(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-wordpress-bridge-pro' )
+			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-bridge-pro' )
 		);
 	}
 
@@ -70,7 +70,7 @@ add_action( 'admin_notices', 'xpressui_pro_runtime_notice' );
 function xpressui_pro_dependency_notice(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		echo '<div class="notice notice-error"><p>' .
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin.', 'xpressui-wordpress-bridge-pro' ) .
+			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin.', 'xpressui-bridge-pro' ) .
 			'</p></div>';
 	}
 }
@@ -81,12 +81,14 @@ function xpressui_pro_runtime_notice(): void {
 	}
 
 	echo '<div class="notice notice-warning"><p>' .
-		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-wordpress-bridge-pro' ) .
+		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-bridge-pro' ) .
 		'</p></div>';
 }
 
 // Update checker runs unconditionally — does not depend on the free plugin being active.
-require_once XPRESSUI_PRO_DIR . 'includes/update-checker.php';
+if ( file_exists( XPRESSUI_PRO_DIR . 'includes/update-checker.php' ) ) {
+	require_once XPRESSUI_PRO_DIR . 'includes/update-checker.php';
+}
 
 // Load runtime integrations after all plugins are loaded so XPRESSUI_BRIDGE_VERSION is defined.
 add_action( 'plugins_loaded', 'xpressui_pro_load_runtime' );

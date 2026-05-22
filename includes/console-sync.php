@@ -25,27 +25,27 @@ function xpressui_render_console_connection_form(): void {
 		<input type="hidden" name="xpressui_save_console_connection" value="1">
 		<table class="form-table" role="presentation">
 			<tr>
-				<th><label for="xpressui_console_api_url"><?php esc_html_e( 'Console API URL', 'xpressui-wordpress-bridge-pro' ); ?></label></th>
+				<th><label for="xpressui_console_api_url"><?php esc_html_e( 'Console API URL', 'xpressui-bridge-pro' ); ?></label></th>
 				<td>
 					<input type="url" id="xpressui_console_api_url" name="xpressui_console_api_url"
 						value="<?php echo esc_attr( $conn['apiUrl'] ); ?>"
 						class="regular-text" placeholder="https://your-console.example.com">
-					<p class="description"><?php esc_html_e( 'Base URL of your XPressUI Console instance (no trailing slash).', 'xpressui-wordpress-bridge-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Base URL of your XPressUI Console instance (no trailing slash).', 'xpressui-bridge-pro' ); ?></p>
 				</td>
 			</tr>
 			<tr>
-				<th><label for="xpressui_console_api_token"><?php esc_html_e( 'API Token', 'xpressui-wordpress-bridge-pro' ); ?></label></th>
+				<th><label for="xpressui_console_api_token"><?php esc_html_e( 'API Token', 'xpressui-bridge-pro' ); ?></label></th>
 				<td>
 					<input type="password" id="xpressui_console_api_token" name="xpressui_console_api_token"
 						value="<?php echo esc_attr( $conn['apiToken'] ); ?>"
 						class="regular-text" autocomplete="off">
 					<p class="description">
-						<?php esc_html_e( 'Generate a token in the Console under Profile → API Tokens.', 'xpressui-wordpress-bridge-pro' ); ?>
+						<?php esc_html_e( 'Generate a token in the Console under Profile → API Tokens.', 'xpressui-bridge-pro' ); ?>
 					</p>
 				</td>
 			</tr>
 		</table>
-		<?php submit_button( __( 'Save Connection', 'xpressui-wordpress-bridge-pro' ), 'secondary', 'submit', false ); ?>
+		<?php submit_button( __( 'Save Connection', 'xpressui-bridge-pro' ), 'secondary', 'submit', false ); ?>
 		<span class="xpressui-ajax-status" style="margin-left:1rem;vertical-align:middle"></span>
 	</form>
 	<?php
@@ -60,12 +60,12 @@ add_action( 'wp_ajax_xpressui_save_console_connection', 'xpressui_ajax_save_cons
 function xpressui_ajax_save_console_connection(): void {
 	check_ajax_referer( 'xpressui_console_connection_action', 'xpressui_console_connection_nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-wordpress-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-bridge-pro' ) ], 403 );
 	}
-	$api_url   = esc_url_raw( trim( wp_unslash( (string) ( $_POST['xpressui_console_api_url'] ?? '' ) ) ) );
+		$api_url   = isset( $_POST['xpressui_console_api_url'] ) ? esc_url_raw( trim( sanitize_text_field( wp_unslash( (string) $_POST['xpressui_console_api_url'] ) ) ) ) : '';
 	$api_token = sanitize_text_field( wp_unslash( (string) ( $_POST['xpressui_console_api_token'] ?? '' ) ) );
 	update_option( 'xpressui_console_connection', [ 'apiUrl' => $api_url, 'apiToken' => $api_token ] );
-	wp_send_json_success( [ 'message' => __( 'Console connection saved.', 'xpressui-wordpress-bridge-pro' ) ] );
+	wp_send_json_success( [ 'message' => __( 'Console connection saved.', 'xpressui-bridge-pro' ) ] );
 }
 
 // ---------------------------------------------------------------------------
@@ -78,16 +78,16 @@ function xpressui_ajax_console_list_projects(): void {
 	check_ajax_referer( 'xpressui_console_sync_nonce', 'nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-wordpress-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	if ( ! xpressui_pro_is_license_active() ) {
-		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-wordpress-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	$conn = xpressui_get_console_connection();
 	if ( empty( $conn['apiUrl'] ) || empty( $conn['apiToken'] ) ) {
-		wp_send_json_error( [ 'message' => __( 'Console connection not configured. Save your API URL and token first.', 'xpressui-wordpress-bridge-pro' ) ] );
+		wp_send_json_error( [ 'message' => __( 'Console connection not configured. Save your API URL and token first.', 'xpressui-bridge-pro' ) ] );
 	}
 
 	$response = wp_remote_get(
@@ -108,7 +108,7 @@ function xpressui_ajax_console_list_projects(): void {
 	$code = wp_remote_retrieve_response_code( $response );
 	if ( 200 !== $code ) {
 		/* translators: %d: HTTP status code returned by the Console API */
-		wp_send_json_error( [ 'message' => sprintf( __( 'Console API returned status %d. Check your API URL and token.', 'xpressui-wordpress-bridge-pro' ), $code ) ] );
+		wp_send_json_error( [ 'message' => sprintf( __( 'Console API returned status %d. Check your API URL and token.', 'xpressui-bridge-pro' ), $code ) ] );
 	}
 
 	$body = json_decode( wp_remote_retrieve_body( $response ), true );
@@ -125,21 +125,21 @@ function xpressui_ajax_console_sync_project(): void {
 	check_ajax_referer( 'xpressui_console_sync_nonce', 'nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-wordpress-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Insufficient permissions.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	if ( ! xpressui_pro_is_license_active() ) {
-		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-wordpress-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	$project_id = sanitize_text_field( wp_unslash( (string) ( $_POST['project_id'] ?? '' ) ) );
 	if ( '' === $project_id ) {
-		wp_send_json_error( [ 'message' => __( 'Missing project_id.', 'xpressui-wordpress-bridge-pro' ) ] );
+		wp_send_json_error( [ 'message' => __( 'Missing project_id.', 'xpressui-bridge-pro' ) ] );
 	}
 
 	$conn = xpressui_get_console_connection();
 	if ( empty( $conn['apiUrl'] ) || empty( $conn['apiToken'] ) ) {
-		wp_send_json_error( [ 'message' => __( 'Console connection not configured.', 'xpressui-wordpress-bridge-pro' ) ] );
+		wp_send_json_error( [ 'message' => __( 'Console connection not configured.', 'xpressui-bridge-pro' ) ] );
 	}
 
 	$response = wp_remote_get(
@@ -159,14 +159,14 @@ function xpressui_ajax_console_sync_project(): void {
 	$code = wp_remote_retrieve_response_code( $response );
 	if ( 200 !== $code ) {
 		/* translators: %d: HTTP status code returned by the Console API */
-		wp_send_json_error( [ 'message' => sprintf( __( 'Download failed (status %d).', 'xpressui-wordpress-bridge-pro' ), $code ) ] );
+		wp_send_json_error( [ 'message' => sprintf( __( 'Download failed (status %d).', 'xpressui-bridge-pro' ), $code ) ] );
 	}
 
 	$zip_content = wp_remote_retrieve_body( $response );
 	$tmp_zip     = wp_tempnam( 'xpressui-sync' ) . '.zip';
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 	if ( false === file_put_contents( $tmp_zip, $zip_content ) ) {
-		wp_send_json_error( [ 'message' => __( 'Could not write temporary ZIP file.', 'xpressui-wordpress-bridge-pro' ) ] );
+		wp_send_json_error( [ 'message' => __( 'Could not write temporary ZIP file.', 'xpressui-bridge-pro' ) ] );
 	}
 
 	$content_disp  = wp_remote_retrieve_header( $response, 'content-disposition' );
@@ -185,7 +185,7 @@ function xpressui_ajax_console_sync_project(): void {
 	$target_dir = xpressui_get_workflows_base_dir();
 	if ( '' === $target_dir ) {
 		wp_delete_file( $tmp_zip );
-		wp_send_json_error( [ 'message' => __( 'The uploads directory is not available.', 'xpressui-wordpress-bridge-pro' ) ] );
+		wp_send_json_error( [ 'message' => __( 'The uploads directory is not available.', 'xpressui-bridge-pro' ) ] );
 	}
 
 	if ( ! file_exists( $target_dir ) ) {
@@ -209,11 +209,11 @@ function xpressui_ajax_console_sync_project(): void {
 		wp_send_json_error( [ 'message' => $unzip_result->get_error_message() ] );
 	}
 
-	/* translators: %s: installed workflow slug */
-	wp_send_json_success( [
-		'slug'    => $slug,
-		'message' => sprintf( __( 'Synced! Embed with: [xpressui id="%s"]', 'xpressui-wordpress-bridge-pro' ), $slug ),
-	] );
+		wp_send_json_success( [
+			'slug'    => $slug,
+			/* translators: %s: installed workflow slug */
+			'message' => sprintf( __( 'Synced! Embed with: [xpressui id="%s"]', 'xpressui-bridge-pro' ), $slug ),
+		] );
 }
 
 // ---------------------------------------------------------------------------
@@ -238,13 +238,13 @@ function xpressui_pro_render_console_sync_section(): void {
 			);
 		?>
 		<div class="card xpressui-admin-card">
-			<h2><?php esc_html_e( 'Console Sync', 'xpressui-wordpress-bridge-pro' ); ?></h2>
+			<h2><?php esc_html_e( 'Console Sync', 'xpressui-bridge-pro' ); ?></h2>
 			<p class="description">
-				<?php esc_html_e( 'Console Sync is available after activating a Pro license.', 'xpressui-wordpress-bridge-pro' ); ?>
+				<?php esc_html_e( 'Console Sync is available after activating a Pro license.', 'xpressui-bridge-pro' ); ?>
 			</p>
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $license_url ); ?>">
-					<?php esc_html_e( 'Activate Pro License', 'xpressui-wordpress-bridge-pro' ); ?>
+					<?php esc_html_e( 'Activate Pro License', 'xpressui-bridge-pro' ); ?>
 				</a>
 			</p>
 		</div>
@@ -253,107 +253,137 @@ function xpressui_pro_render_console_sync_section(): void {
 	}
 	?>
 	<div class="card xpressui-admin-card">
-		<h2><?php esc_html_e( 'Console Sync', 'xpressui-wordpress-bridge-pro' ); ?></h2>
+		<h2><?php esc_html_e( 'Console Sync', 'xpressui-bridge-pro' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( 'Pull workflow packs directly from your XPressUI Console — no ZIP download required.', 'xpressui-wordpress-bridge-pro' ); ?>
+			<?php esc_html_e( 'Pull workflow packs directly from your XPressUI Console — no ZIP download required.', 'xpressui-bridge-pro' ); ?>
 		</p>
 
-		<h3 style="margin-top:1rem"><?php esc_html_e( 'Connection', 'xpressui-wordpress-bridge-pro' ); ?></h3>
+		<h3 style="margin-top:1rem"><?php esc_html_e( 'Connection', 'xpressui-bridge-pro' ); ?></h3>
 		<?php xpressui_render_console_connection_form(); ?>
 
-		<h3 style="margin-top:1.5rem"><?php esc_html_e( 'Your Workflows', 'xpressui-wordpress-bridge-pro' ); ?></h3>
+		<h3 style="margin-top:1.5rem"><?php esc_html_e( 'Your Workflows', 'xpressui-bridge-pro' ); ?></h3>
 		<p>
 			<button type="button" id="xpressui-load-projects" class="button button-secondary">
-				<?php esc_html_e( 'Load from Console', 'xpressui-wordpress-bridge-pro' ); ?>
+				<?php esc_html_e( 'Load from Console', 'xpressui-bridge-pro' ); ?>
 			</button>
 		</p>
 		<div id="xpressui-projects-list"></div>
 
-		<script>
-		(function () {
-			var nonce   = <?php echo wp_json_encode( $nonce ); ?>;
-			var ajaxUrl = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
+			<?php
+			$console_sync_script = sprintf(
+				<<<'JS'
+(function () {
+	var nonce = %1$s;
+	var ajaxUrl = %2$s;
+	var labels = %3$s;
 
-			function setStatus(el, msg, isError) {
-				el.innerHTML = '<p style="color:' + (isError ? '#c00' : '#3a3') + '">' + msg + '</p>';
-			}
+	function escapeHtml(value) {
+		return String(value || '').replace(/[&<>"']/g, function (char) {
+			return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char];
+		});
+	}
 
-			document.getElementById('xpressui-load-projects').addEventListener('click', function () {
-				var list = document.getElementById('xpressui-projects-list');
-				list.innerHTML = '<p><?php echo esc_js( __( 'Loading…', 'xpressui-wordpress-bridge-pro' ) ); ?></p>';
+	function setStatus(el, msg, isError) {
+		el.innerHTML = '<p style="color:' + (isError ? '#c00' : '#3a3') + '">' + escapeHtml(msg) + '</p>';
+	}
 
-				var data = new URLSearchParams();
-				data.set('action', 'xpressui_console_list_projects');
-				data.set('nonce', nonce);
+	document.getElementById('xpressui-load-projects').addEventListener('click', function () {
+		var list = document.getElementById('xpressui-projects-list');
+		list.innerHTML = '<p>' + escapeHtml(labels.loading) + '</p>';
 
-				fetch(ajaxUrl, { method: 'POST', body: data, credentials: 'same-origin' })
-					.then(function (r) { return r.json(); })
-					.then(function (res) {
-						if (!res.success) {
-							setStatus(list, res.data.message, true);
-							return;
-						}
-						var projects = res.data.projects;
-						if (!projects.length) {
-							list.innerHTML = '<p><?php echo esc_js( __( 'No projects found in your Console.', 'xpressui-wordpress-bridge-pro' ) ); ?></p>';
-							return;
-						}
-						var html = '<table class="widefat striped"><thead><tr>'
-							+ '<th><?php echo esc_js( __( 'Name', 'xpressui-wordpress-bridge-pro' ) ); ?></th>'
-							+ '<th><?php echo esc_js( __( 'Slug', 'xpressui-wordpress-bridge-pro' ) ); ?></th>'
-							+ '<th><?php echo esc_js( __( 'Updated', 'xpressui-wordpress-bridge-pro' ) ); ?></th>'
-							+ '<th></th></tr></thead><tbody>';
-						projects.forEach(function (p) {
-							var date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '—';
-							html += '<tr id="xpressui-row-' + p.id + '">'
-								+ '<td>' + p.name + '</td>'
-								+ '<td><code>' + p.slug + '</code></td>'
-								+ '<td>' + date + '</td>'
-								+ '<td><button type="button" class="button button-primary xpressui-sync-btn" data-id="' + p.id + '">'
-								+ '<?php echo esc_js( __( 'Sync', 'xpressui-wordpress-bridge-pro' ) ); ?></button></td>'
-								+ '</tr>';
-						});
-						html += '</tbody></table>';
-						list.innerHTML = html;
+		var data = new URLSearchParams();
+		data.set('action', 'xpressui_console_list_projects');
+		data.set('nonce', nonce);
 
-						list.querySelectorAll('.xpressui-sync-btn').forEach(function (btn) {
-							btn.addEventListener('click', function () {
-								var projectId = this.dataset.id;
-								var row = document.getElementById('xpressui-row-' + projectId);
-								this.disabled = true;
-								this.textContent = '<?php echo esc_js( __( 'Syncing…', 'xpressui-wordpress-bridge-pro' ) ); ?>';
+		fetch(ajaxUrl, { method: 'POST', body: data, credentials: 'same-origin' })
+			.then(function (r) { return r.json(); })
+			.then(function (res) {
+				if (!res.success) {
+					setStatus(list, res.data.message, true);
+					return;
+				}
+				var projects = res.data.projects;
+				if (!projects.length) {
+					list.innerHTML = '<p>' + escapeHtml(labels.noProjects) + '</p>';
+					return;
+				}
+				var html = '<table class="widefat striped"><thead><tr>'
+					+ '<th>' + escapeHtml(labels.name) + '</th>'
+					+ '<th>' + escapeHtml(labels.slug) + '</th>'
+					+ '<th>' + escapeHtml(labels.updated) + '</th>'
+					+ '<th></th></tr></thead><tbody>';
+				projects.forEach(function (p) {
+					var id = escapeHtml(p.id);
+					var date = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '-';
+					html += '<tr id="xpressui-row-' + id + '">'
+						+ '<td>' + escapeHtml(p.name) + '</td>'
+						+ '<td><code>' + escapeHtml(p.slug) + '</code></td>'
+						+ '<td>' + escapeHtml(date) + '</td>'
+						+ '<td><button type="button" class="button button-primary xpressui-sync-btn" data-id="' + id + '">'
+						+ escapeHtml(labels.sync) + '</button></td>'
+						+ '</tr>';
+				});
+				html += '</tbody></table>';
+				list.innerHTML = html;
 
-								var syncData = new URLSearchParams();
-								syncData.set('action', 'xpressui_console_sync_project');
-								syncData.set('nonce', nonce);
-								syncData.set('project_id', projectId);
+				list.querySelectorAll('.xpressui-sync-btn').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var projectId = this.dataset.id;
+						var row = document.getElementById('xpressui-row-' + projectId);
+						this.disabled = true;
+						this.textContent = labels.syncing;
 
-								fetch(ajaxUrl, { method: 'POST', body: syncData, credentials: 'same-origin' })
-									.then(function (r) { return r.json(); })
-									.then(function (res) {
-										if (!res.success) {
-											row.querySelector('td:last-child').innerHTML =
-												'<span style="color:#c00">' + res.data.message + '</span>';
-										} else {
-											row.querySelector('td:last-child').innerHTML =
-												'<span style="color:#3a3">✓ ' + res.data.message + ' — Reloading…</span>';
-											sessionStorage.setItem('xpressui_synced_slug', res.data.slug || '');
-											setTimeout(function () { window.location.reload(); }, 1200);
-										}
-									})
-									.catch(function () {
-										row.querySelector('td:last-child').innerHTML =
-											'<span style="color:#c00"><?php echo esc_js( __( 'Network error.', 'xpressui-wordpress-bridge-pro' ) ); ?></span>';
-									});
+						var syncData = new URLSearchParams();
+						syncData.set('action', 'xpressui_console_sync_project');
+						syncData.set('nonce', nonce);
+						syncData.set('project_id', projectId);
+
+						fetch(ajaxUrl, { method: 'POST', body: syncData, credentials: 'same-origin' })
+							.then(function (r) { return r.json(); })
+							.then(function (res) {
+								if (!res.success) {
+									row.querySelector('td:last-child').innerHTML =
+										'<span style="color:#c00">' + escapeHtml(res.data.message) + '</span>';
+								} else {
+									row.querySelector('td:last-child').innerHTML =
+										'<span style="color:#3a3">' + escapeHtml(labels.syncedPrefix + ' ' + res.data.message + ' - ' + labels.reloading) + '</span>';
+									sessionStorage.setItem('xpressui_synced_slug', res.data.slug || '');
+									setTimeout(function () { window.location.reload(); }, 1200);
+								}
+							})
+							.catch(function () {
+								row.querySelector('td:last-child').innerHTML =
+									'<span style="color:#c00">' + escapeHtml(labels.networkError) + '</span>';
 							});
-						});
-					})
-					.catch(function () {
-						setStatus(list, '<?php echo esc_js( __( 'Network error. Check your connection.', 'xpressui-wordpress-bridge-pro' ) ); ?>', true);
 					});
+				});
+			})
+			.catch(function () {
+				setStatus(list, labels.networkConnectionError, true);
 			});
-		}());
-		</script>
+	});
+}());
+JS,
+				wp_json_encode( $nonce ),
+				wp_json_encode( admin_url( 'admin-ajax.php' ) ),
+				wp_json_encode(
+					[
+						'loading'                => __( 'Loading...', 'xpressui-bridge-pro' ),
+						'noProjects'             => __( 'No projects found in your Console.', 'xpressui-bridge-pro' ),
+						'name'                   => __( 'Name', 'xpressui-bridge-pro' ),
+						'slug'                   => __( 'Slug', 'xpressui-bridge-pro' ),
+						'updated'                => __( 'Updated', 'xpressui-bridge-pro' ),
+						'sync'                   => __( 'Sync', 'xpressui-bridge-pro' ),
+						'syncing'                => __( 'Syncing...', 'xpressui-bridge-pro' ),
+						'syncedPrefix'           => __( 'Synced:', 'xpressui-bridge-pro' ),
+						'reloading'              => __( 'Reloading...', 'xpressui-bridge-pro' ),
+						'networkError'           => __( 'Network error.', 'xpressui-bridge-pro' ),
+						'networkConnectionError' => __( 'Network error. Check your connection.', 'xpressui-bridge-pro' ),
+					]
+				)
+			);
+			wp_print_inline_script_tag( $console_sync_script );
+			?>
 	</div>
 	<?php
 }

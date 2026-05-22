@@ -15,8 +15,8 @@ add_action( 'admin_menu', 'xpressui_pro_register_license_page' );
 function xpressui_pro_register_license_page(): void {
 	add_submenu_page(
 		'edit.php?post_type=xpressui_submission',
-		__( 'Pro License', 'xpressui-wordpress-bridge-pro' ),
-		__( 'Pro License', 'xpressui-wordpress-bridge-pro' ),
+		__( 'Pro License', 'xpressui-bridge-pro' ),
+		__( 'Pro License', 'xpressui-bridge-pro' ),
 		'manage_options',
 		'xpressui-pro-license',
 		'xpressui_pro_render_license_page'
@@ -57,7 +57,7 @@ function xpressui_pro_get_masked_license_key( string $license_key ): string {
  */
 function xpressui_pro_render_license_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-wordpress-bridge-pro' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'xpressui-bridge-pro' ) );
 	}
 
 	$license_data = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
@@ -73,46 +73,47 @@ function xpressui_pro_render_license_page(): void {
 
 	$notice_message = '';
 	$notice_class   = 'notice-success';
-	if ( isset( $_GET['xpressui_notice'] ) ) {
-		$notice_message = sanitize_text_field( wp_unslash( (string) $_GET['xpressui_notice'] ) );
-	}
-	if ( isset( $_GET['xpressui_notice_type'] ) && 'error' === sanitize_key( wp_unslash( (string) $_GET['xpressui_notice_type'] ) ) ) {
-		$notice_class = 'notice-error';
-	}
+		$notice_nonce_valid = isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( (string) $_GET['_wpnonce'] ) ), 'xpressui_pro_license_notice' );
+		if ( $notice_nonce_valid && isset( $_GET['xpressui_notice'] ) ) {
+			$notice_message = sanitize_text_field( wp_unslash( (string) $_GET['xpressui_notice'] ) );
+		}
+		if ( $notice_nonce_valid && isset( $_GET['xpressui_notice_type'] ) && 'error' === sanitize_key( wp_unslash( (string) $_GET['xpressui_notice_type'] ) ) ) {
+			$notice_class = 'notice-error';
+		}
 
 	echo '<div class="wrap">';
-	echo '<h1>' . esc_html__( 'XPressUI Pro License', 'xpressui-wordpress-bridge-pro' ) . '</h1>';
-	echo '<p>' . esc_html__( 'Activate your commercial Pro license to receive updates and enable Pro-only capabilities shipped by the Pro add-on.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<h1>' . esc_html__( 'XPressUI Pro License', 'xpressui-bridge-pro' ) . '</h1>';
+	echo '<p>' . esc_html__( 'Activate your commercial Pro license to receive updates and enable Pro-only capabilities shipped by the Pro add-on.', 'xpressui-bridge-pro' ) . '</p>';
 
 	if ( '' !== $notice_message ) {
 		echo '<div class="notice ' . esc_attr( $notice_class ) . ' is-dismissible"><p>' . esc_html( $notice_message ) . '</p></div>';
 	}
 
 	echo '<div class="card" style="max-width:900px;">';
-	echo '<h2>' . esc_html__( 'License Status', 'xpressui-wordpress-bridge-pro' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'License Status', 'xpressui-bridge-pro' ) . '</h2>';
 	echo '<table class="widefat striped"><tbody>';
-	echo '<tr><td><strong>' . esc_html__( 'Current status', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( $is_active ? __( 'Active', 'xpressui-wordpress-bridge-pro' ) : __( 'Inactive', 'xpressui-wordpress-bridge-pro' ) ) . '</td></tr>';
+	echo '<tr><td><strong>' . esc_html__( 'Current status', 'xpressui-bridge-pro' ) . '</strong></td><td>' . esc_html( $is_active ? __( 'Active', 'xpressui-bridge-pro' ) : __( 'Inactive', 'xpressui-bridge-pro' ) ) . '</td></tr>';
 	if ( '' !== $status ) {
-		echo '<tr><td><strong>' . esc_html__( 'Signed status', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( xpressui_pro_get_license_error_message( $status ) ) . '</td></tr>';
+		echo '<tr><td><strong>' . esc_html__( 'Signed status', 'xpressui-bridge-pro' ) . '</strong></td><td>' . esc_html( xpressui_pro_get_license_error_message( $status ) ) . '</td></tr>';
 	}
 	if ( '' !== $masked_key ) {
-		echo '<tr><td><strong>' . esc_html__( 'Stored key', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td><code>' . esc_html( $masked_key ) . '</code></td></tr>';
+		echo '<tr><td><strong>' . esc_html__( 'Stored key', 'xpressui-bridge-pro' ) . '</strong></td><td><code>' . esc_html( $masked_key ) . '</code></td></tr>';
 	}
 	if ( '' !== $site_url ) {
-		echo '<tr><td><strong>' . esc_html__( 'Licensed site', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td><code>' . esc_html( $site_url ) . '</code></td></tr>';
+		echo '<tr><td><strong>' . esc_html__( 'Licensed site', 'xpressui-bridge-pro' ) . '</strong></td><td><code>' . esc_html( $site_url ) . '</code></td></tr>';
 	}
 	if ( '' !== $issued_at ) {
-		echo '<tr><td><strong>' . esc_html__( 'Issued at', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( $issued_at ) . '</td></tr>';
+		echo '<tr><td><strong>' . esc_html__( 'Issued at', 'xpressui-bridge-pro' ) . '</strong></td><td>' . esc_html( $issued_at ) . '</td></tr>';
 	}
 	if ( $last_check > 0 ) {
-		echo '<tr><td><strong>' . esc_html__( 'Last verification', 'xpressui-wordpress-bridge-pro' ) . '</strong></td><td>' . esc_html( wp_date( 'Y-m-d H:i:s', $last_check ) ) . '</td></tr>';
+		echo '<tr><td><strong>' . esc_html__( 'Last verification', 'xpressui-bridge-pro' ) . '</strong></td><td>' . esc_html( wp_date( 'Y-m-d H:i:s', $last_check ) ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 	echo '</div>';
 
 	echo '<div class="card" style="max-width:900px;">';
-	echo '<h2>' . esc_html__( 'Manage License', 'xpressui-wordpress-bridge-pro' ) . '</h2>';
-	echo '<p>' . esc_html__( 'Use your Pro license key from your purchase email or customer account.', 'xpressui-wordpress-bridge-pro' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Manage License', 'xpressui-bridge-pro' ) . '</h2>';
+	echo '<p>' . esc_html__( 'Use your Pro license key from your purchase email or customer account.', 'xpressui-bridge-pro' ) . '</p>';
 	xpressui_pro_render_license_form();
 	echo '</div>';
 
@@ -133,19 +134,19 @@ function xpressui_pro_render_license_form(): void {
 		<?php wp_nonce_field( 'xpressui_pro_license_actions', 'xpressui_pro_license_nonce' ); ?>
 		<input type="hidden" name="action" value="xpressui_pro_license_actions" />
 		<div class="notice notice-error inline" data-xpressui-pro-license-error style="display:none;">
-			<p><?php esc_html_e( 'Please enter a license key.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+			<p><?php esc_html_e( 'Please enter a license key.', 'xpressui-bridge-pro' ); ?></p>
 		</div>
 		<table class="form-table" role="presentation">
 			<tbody>
 				<tr>
-					<th><label for="xpressui_pro_license_key"><?php esc_html_e( 'License key', 'xpressui-wordpress-bridge-pro' ); ?></label></th>
+					<th><label for="xpressui_pro_license_key"><?php esc_html_e( 'License key', 'xpressui-bridge-pro' ); ?></label></th>
 					<td>
 						<?php if ( $is_active && '' !== $masked_key ) : ?>
 							<code><?php echo esc_html( $masked_key ); ?></code>
-							<p class="description"><?php esc_html_e( 'Your current key is active on this site. Deactivate it before entering a different key.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Your current key is active on this site. Deactivate it before entering a different key.', 'xpressui-bridge-pro' ); ?></p>
 						<?php else : ?>
 							<input type="text" id="xpressui_pro_license_key" name="xpressui_pro_license_key" class="regular-text" value="" autocomplete="off" placeholder="iakp_..." required aria-required="true" />
-							<p class="description"><?php esc_html_e( 'Paste the Pro license key issued for this product.', 'xpressui-wordpress-bridge-pro' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Paste the Pro license key issued for this product.', 'xpressui-bridge-pro' ); ?></p>
 						<?php endif; ?>
 					</td>
 				</tr>
@@ -158,43 +159,46 @@ function xpressui_pro_render_license_form(): void {
 		<?php endif; ?>
 		<p class="submit">
 			<?php if ( $is_active ) : ?>
-				<input type="submit" class="button" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Deactivate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
+				<input type="submit" class="button" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Deactivate License', 'xpressui-bridge-pro' ); ?>" />
 			<?php else : ?>
-				<input type="submit" class="button button-primary" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Activate License', 'xpressui-wordpress-bridge-pro' ); ?>" />
+				<input type="submit" class="button button-primary" data-xpressui-pro-activate-button value="<?php esc_attr_e( 'Activate License', 'xpressui-bridge-pro' ); ?>" />
 			<?php endif; ?>
 		</p>
 	</form>
-	<script>
-	(function () {
-		var form = document.querySelector('[data-xpressui-pro-license-form]');
-		if (!form) {
-			return;
-		}
-		var keyInput = form.querySelector('#xpressui_pro_license_key');
-		var error = form.querySelector('[data-xpressui-pro-license-error]');
-		var activateButton = form.querySelector('[data-xpressui-pro-activate-button]');
-		form.addEventListener('submit', function (event) {
-			if (activateButton && keyInput && !String(keyInput.value || '').trim()) {
-				event.preventDefault();
-				if (error) {
-					error.style.display = '';
+		<?php
+		$activating_label = (string) wp_json_encode( __( 'Activating...', 'xpressui-bridge-pro' ) );
+		wp_print_inline_script_tag(
+			"(function () {
+				var form = document.querySelector('[data-xpressui-pro-license-form]');
+				if (!form) {
+					return;
 				}
-				keyInput.focus();
-				return;
-			}
-			if (activateButton) {
-				activateButton.disabled = true;
-				activateButton.value = <?php echo wp_json_encode( __( 'Activating...', 'xpressui-wordpress-bridge-pro' ) ); ?>;
-			}
-		});
-		if (keyInput && error) {
-			keyInput.addEventListener('input', function () {
-				if (String(keyInput.value || '').trim()) {
-					error.style.display = 'none';
+				var keyInput = form.querySelector('#xpressui_pro_license_key');
+				var error = form.querySelector('[data-xpressui-pro-license-error]');
+				var activateButton = form.querySelector('[data-xpressui-pro-activate-button]');
+				form.addEventListener('submit', function (event) {
+					if (activateButton && keyInput && !String(keyInput.value || '').trim()) {
+						event.preventDefault();
+						if (error) {
+							error.style.display = '';
+						}
+						keyInput.focus();
+						return;
+					}
+					if (activateButton) {
+						activateButton.disabled = true;
+						activateButton.value = {$activating_label};
+					}
+				});
+				if (keyInput && error) {
+					keyInput.addEventListener('input', function () {
+						if (String(keyInput.value || '').trim()) {
+							error.style.display = 'none';
+						}
+					});
 				}
-			});
-		}
-	}());
-	</script>
+			}());"
+		);
+		?>
 	<?php
 }

@@ -77,7 +77,13 @@ function xpressui_pro_create_capture_session( WP_REST_Request $request ): WP_RES
 
 	set_transient( 'xpressui_capture_' . $token, $session, XPRESSUI_CAPTURE_TTL );
 
-	$capture_url = add_query_arg( 'xpressui_capture', $token, home_url( '/' ) );
+	$capture_url = add_query_arg(
+		[
+			'xpressui_capture'       => $token,
+			'xpressui_capture_nonce' => wp_create_nonce( 'xpressui_capture_' . $token ),
+		],
+		home_url( '/' )
+	);
 
 	return new WP_REST_Response( [
 		'token'      => $token,
@@ -171,14 +177,26 @@ function xpressui_pro_poll_capture_session( WP_REST_Request $request ): WP_REST_
 // Capture page — served by WordPress for ?xpressui_capture={token}
 // ---------------------------------------------------------------------------
 
+add_filter( 'query_vars', 'xpressui_pro_register_capture_query_vars' );
 add_action( 'template_redirect', 'xpressui_pro_maybe_serve_capture_page', 1 );
 
+function xpressui_pro_register_capture_query_vars( array $vars ): array {
+	$vars[] = 'xpressui_capture';
+	$vars[] = 'xpressui_capture_nonce';
+	return $vars;
+}
+
 function xpressui_pro_maybe_serve_capture_page(): void {
-	if ( ! isset( $_GET['xpressui_capture'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$capture_params = xpressui_pro_get_capture_query_params();
+	if ( '' === $capture_params['token'] ) {
 		return;
 	}
 
-	$token   = preg_replace( '/[^a-f0-9]/i', '', (string) wp_unslash( $_GET['xpressui_capture'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$token = $capture_params['token'];
+	if ( ! wp_verify_nonce( $capture_params['nonce'], 'xpressui_capture_' . $token ) ) {
+		status_header( 403 );
+		exit;
+	}
 	$session = get_transient( 'xpressui_capture_' . $token );
 
 	$field_type = 'signature';
@@ -188,13 +206,13 @@ function xpressui_pro_maybe_serve_capture_page(): void {
 
 	$relay_url  = rest_url( 'xpressui/v1/capture/relay/' . rawurlencode( $token ) );
 	$field_labels = [
-		'signature'          => __( 'Draw your signature below', 'xpressui-wordpress-bridge-pro' ),
-		'camera-photo'       => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
-		'camera-photo-list'  => __( 'Take a photo below', 'xpressui-wordpress-bridge-pro' ),
-		'document-scan'      => __( 'Photograph your document', 'xpressui-wordpress-bridge-pro' ),
-		'qr-scan'            => __( 'Scan a QR code', 'xpressui-wordpress-bridge-pro' ),
+		'signature'          => __( 'Draw your signature below', 'xpressui-bridge-pro' ),
+		'camera-photo'       => __( 'Take a photo below', 'xpressui-bridge-pro' ),
+		'camera-photo-list'  => __( 'Take a photo below', 'xpressui-bridge-pro' ),
+		'document-scan'      => __( 'Photograph your document', 'xpressui-bridge-pro' ),
+		'qr-scan'            => __( 'Scan a QR code', 'xpressui-bridge-pro' ),
 	];
-	$field_label = $field_labels[ $field_type ] ?? __( 'Capture on mobile', 'xpressui-wordpress-bridge-pro' );
+	$field_label = $field_labels[ $field_type ] ?? __( 'Capture on mobile', 'xpressui-bridge-pro' );
 
 	xpressui_pro_output_capture_page( $token, $field_type, $relay_url, $field_label );
 	exit;
@@ -216,4 +234,23 @@ function xpressui_pro_output_capture_page(
 		'runtime_url' => xpressui_pro_get_runtime_asset_url(),
 	];
 	include XPRESSUI_PRO_DIR . 'templates/generated/mobile-capture-page.html.php';
+}
+
+function xpressui_pro_get_capture_query_params(): array {
+	$raw_capture_token = (string) get_query_var( 'xpressui_capture', '' );
+	if ( '' === $raw_capture_token ) {
+		return [
+			'token' => '',
+			'nonce' => '',
+		];
+	}
+
+	$raw_capture_token = sanitize_text_field( $raw_capture_token );
+	$token             = preg_replace( '/[^a-f0-9]/i', '', $raw_capture_token );
+	$nonce             = sanitize_text_field( (string) get_query_var( 'xpressui_capture_nonce', '' ) );
+
+	return [
+		'token' => is_string( $token ) ? $token : '',
+		'nonce' => $nonce,
+	];
 }
