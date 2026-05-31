@@ -125,11 +125,11 @@ foreach ($xpressui_loop_items_9 as $xpressui_loop_index_11 => $xpressui_loop_val
         'last'   => ($xpressui_loop_index_11 + 1) === count($xpressui_loop_items_9),
     ];
 ?>
-                <a class="template-time-slot-week-day" href="#time-slot-date-<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'date'))); ?>" data-time-slot-date="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'date'))); ?>" data-time-slot-window-day>
+                <div class="template-time-slot-week-day" data-time-slot-date="<?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'date'))); ?>" data-time-slot-window-day>
                   <span><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'weekday'))); ?></span>
                   <strong><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'day'))); ?></strong>
                   <small><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_attr(xpressui_bridge_template_context_get($xpressui_ctx, 'day'), 'month'))); ?></small>
-                </a>
+                </div>
 <?php endforeach; $xpressui_ctx = $xpressui_loop_parent_ctx_10; ?>
             </div>
             <div class="template-time-slot-week-slots">
@@ -233,7 +233,7 @@ aria-disabled="true" disabled<?php endif; ?>
         </div>
         <div class="template-time-slot-empty-state-copy">
           <h2><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_wp_text("No services are available yet", 'xpressui-bridge'))); ?></h2>
-          <p><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_wp_text("This workspace has not published any bookable slots for now. Please check back later or use the available links from the portal.", 'xpressui-bridge'))); ?></p>
+          <p><?php echo esc_attr(xpressui_bridge_template_stringify(xpressui_bridge_template_wp_text("No bookable slots are available right now. Please check back later.", 'xpressui-bridge'))); ?></p>
         </div>
       </section>
 <?php endif; ?>
