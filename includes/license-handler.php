@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles the logic for the XPressUI Pro license activation and validation.
+ * Handles the logic for the IntakeFlow Pro license activation and validation.
  *
  * Security model:
  * - The API signs license validation responses with a private key.

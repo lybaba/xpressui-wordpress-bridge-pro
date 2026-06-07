@@ -21,7 +21,7 @@ add_action( 'xpressui_workflow_settings_extra_save', 'xpressui_pro_extra_workflo
 function xpressui_pro_register_console_link(): void {
 	add_submenu_page(
 		'edit.php?post_type=xpressui_submission',
-		__( 'XPressUI Console', 'xpressui-bridge-pro' ),
+		__( 'IntakeFlow Console', 'xpressui-bridge-pro' ),
 		__( '↗ Console', 'xpressui-bridge-pro' ),
 		'manage_options',
 		'xpressui-console-redirect',

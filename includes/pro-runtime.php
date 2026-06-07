@@ -7,9 +7,6 @@ require_once XPRESSUI_PRO_DIR . 'includes/console-sync.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
-// automated-reminders.php removed — feature moved to cloud offering.
-// stripe-payment.php removed — feature moved to cloud offering.
-// require_once XPRESSUI_PRO_DIR . 'includes/ai-document-verification.php'; // disabled — not needed yet
 require_once XPRESSUI_PRO_DIR . 'includes/mobile-capture.php';
 require_once XPRESSUI_PRO_DIR . 'includes/cloud-link.php';
 require_once XPRESSUI_PRO_DIR . 'includes/catalog-embed.php';

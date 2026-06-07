@@ -3,7 +3,7 @@
  * [xpressui_catalog] shortcode — embeds a hosted XPressUI catalog page.
  *
  * The product catalog is a SaaS cloud feature: all data, cart logic, checkout
- * and member-gate logic run on the XPressUI console. This shortcode creates a
+ * and member-gate logic run on the IntakeFlow console. This shortcode creates a
  * responsive iframe pointing to the public hosted-catalog URL so the catalog
  * renders seamlessly inside any WordPress page or post.
  *
