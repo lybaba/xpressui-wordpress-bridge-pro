@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: XPressUI Bridge PRO
+ * Plugin Name: IntakeFlow Bridge PRO
  * Plugin URI:  https://iakpress.com/
- * Description: PRO extension for XPressUI WordPress Bridge — full runtime and advanced field types.
+ * Description: PRO extension for IntakeFlow WordPress Bridge — full runtime and advanced field types.
  * Version:     1.0.63
  * Author:      IAKPress
  * License:     GPL-2.0-or-later
@@ -41,12 +41,18 @@ function xpressui_pro_get_runtime_asset_url(): string {
 }
 
 register_activation_hook( __FILE__, 'xpressui_pro_on_activate' );
+register_deactivation_hook( __FILE__, 'xpressui_pro_on_deactivate' );
+
+function xpressui_pro_on_deactivate(): void {
+	// The reminders feature moved to the cloud; clear any cron left on older installs.
+	wp_clear_scheduled_hook( 'xpressui_pro_process_reminders' );
+}
 
 function xpressui_pro_on_activate(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin to be installed and active.', 'xpressui-bridge-pro' )
+			esc_html__( 'IntakeFlow Bridge PRO requires the IntakeFlow WordPress Bridge plugin to be installed and active.', 'xpressui-bridge-pro' )
 		);
 	}
 
@@ -58,10 +64,8 @@ function xpressui_pro_on_activate(): void {
 	add_rewrite_rule( '^xpressui-status/([a-f0-9]{32})/?$', 'index.php?xpressui_status_token=$matches[1]', 'top' );
 	flush_rewrite_rules();
 
-	// Schedule the daily reminder cron if not already registered.
-	if ( ! wp_next_scheduled( 'xpressui_pro_process_reminders' ) ) {
-		wp_schedule_event( time(), 'daily', 'xpressui_pro_process_reminders' );
-	}
+	// The reminders feature moved to the cloud; clear any legacy cron from older installs.
+	wp_clear_scheduled_hook( 'xpressui_pro_process_reminders' );
 }
 
 add_action( 'admin_notices', 'xpressui_pro_dependency_notice' );
@@ -70,7 +74,7 @@ add_action( 'admin_notices', 'xpressui_pro_runtime_notice' );
 function xpressui_pro_dependency_notice(): void {
 	if ( ! defined( 'XPRESSUI_BRIDGE_VERSION' ) ) {
 		echo '<div class="notice notice-error"><p>' .
-			esc_html__( 'XPressUI Bridge PRO requires the XPressUI WordPress Bridge plugin.', 'xpressui-bridge-pro' ) .
+			esc_html__( 'IntakeFlow Bridge PRO requires the IntakeFlow WordPress Bridge plugin.', 'xpressui-bridge-pro' ) .
 			'</p></div>';
 	}
 }
@@ -81,7 +85,7 @@ function xpressui_pro_runtime_notice(): void {
 	}
 
 	echo '<div class="notice notice-warning"><p>' .
-		esc_html__( 'XPressUI Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-bridge-pro' ) .
+		esc_html__( 'IntakeFlow Bridge PRO is active but its bundled runtime file is missing. Advanced field types will fall back to the base runtime until the PRO package is reinstalled.', 'xpressui-bridge-pro' ) .
 		'</p></div>';
 }
 

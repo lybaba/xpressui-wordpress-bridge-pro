@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'admin_menu', 'xpressui_pro_register_license_page' );
 
 /**
- * Registers the dedicated Pro license page under the XPressUI menu.
+ * Registers the dedicated Pro license page under the IntakeFlow menu.
  */
 function xpressui_pro_register_license_page(): void {
 	add_submenu_page(
@@ -82,7 +82,7 @@ function xpressui_pro_render_license_page(): void {
 		}
 
 	echo '<div class="wrap">';
-	echo '<h1>' . esc_html__( 'XPressUI Pro License', 'xpressui-bridge-pro' ) . '</h1>';
+	echo '<h1>' . esc_html__( 'IntakeFlow Pro License', 'xpressui-bridge-pro' ) . '</h1>';
 	echo '<p>' . esc_html__( 'Activate your commercial Pro license to receive updates and enable Pro-only capabilities shipped by the Pro add-on.', 'xpressui-bridge-pro' ) . '</p>';
 
 	if ( '' !== $notice_message ) {

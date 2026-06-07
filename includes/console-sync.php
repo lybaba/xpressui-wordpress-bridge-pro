@@ -1,6 +1,6 @@
 <?php
 /**
- * Console Sync — pull workflow packs directly from the XPressUI Console.
+ * Console Sync — pull workflow packs directly from the IntakeFlow Console.
  *
  * @package XPressUI_Bridge_Pro
  */
@@ -30,7 +30,7 @@ function xpressui_render_console_connection_form(): void {
 					<input type="url" id="xpressui_console_api_url" name="xpressui_console_api_url"
 						value="<?php echo esc_attr( $conn['apiUrl'] ); ?>"
 						class="regular-text" placeholder="https://your-console.example.com">
-					<p class="description"><?php esc_html_e( 'Base URL of your XPressUI Console instance (no trailing slash).', 'xpressui-bridge-pro' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Base URL of your IntakeFlow Console instance (no trailing slash).', 'xpressui-bridge-pro' ); ?></p>
 				</td>
 			</tr>
 			<tr>
@@ -82,7 +82,7 @@ function xpressui_ajax_console_list_projects(): void {
 	}
 
 	if ( ! xpressui_pro_is_license_active() ) {
-		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active IntakeFlow Pro license.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	$conn = xpressui_get_console_connection();
@@ -129,7 +129,7 @@ function xpressui_ajax_console_sync_project(): void {
 	}
 
 	if ( ! xpressui_pro_is_license_active() ) {
-		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active XPressUI Pro license.', 'xpressui-bridge-pro' ) ], 403 );
+		wp_send_json_error( [ 'message' => __( 'Console Sync requires an active IntakeFlow Pro license.', 'xpressui-bridge-pro' ) ], 403 );
 	}
 
 	$project_id = sanitize_text_field( wp_unslash( (string) ( $_POST['project_id'] ?? '' ) ) );
@@ -255,7 +255,7 @@ function xpressui_pro_render_console_sync_section(): void {
 	<div class="card xpressui-admin-card">
 		<h2><?php esc_html_e( 'Console Sync', 'xpressui-bridge-pro' ); ?></h2>
 		<p class="description">
-			<?php esc_html_e( 'Pull workflow packs directly from your XPressUI Console — no ZIP download required.', 'xpressui-bridge-pro' ); ?>
+			<?php esc_html_e( 'Pull workflow packs directly from your IntakeFlow Console — no ZIP download required.', 'xpressui-bridge-pro' ); ?>
 		</p>
 
 		<h3 style="margin-top:1rem"><?php esc_html_e( 'Connection', 'xpressui-bridge-pro' ); ?></h3>
