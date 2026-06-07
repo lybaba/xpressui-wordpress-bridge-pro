@@ -4,7 +4,7 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.63
+Stable tag: 1.0.64
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,10 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 4. Upload your workflow pack ZIP via XPressUI > Workflows.
 
 == Changelog ==
+
+= 1.0.64 =
+* Remove dead Pro modules (AI document verification, automated reminders, Stripe payment) and fix an orphaned reminder cron.
+* Rename the product from XPressUI to IntakeFlow in metadata and the admin UI.
 
 = 1.0.63 =
 * Update the bundled XPressUI runtime pin to 1.0.16 for print/download-only workflow support.
