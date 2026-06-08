@@ -1,6 +1,6 @@
 <?php
 /**
- * Automatic update checker for IntakeFlow WordPress Bridge PRO.
+ * Automatic update checker for XPressUI Bridge PRO.
  *
  * Hooks into the WordPress update system so wp-admin shows the standard
  * "Update available" badge and allows one-click plugin updates.
@@ -86,7 +86,7 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 	$wp_ver   = get_bloginfo( 'version' );
 
 	return (object) [
-		'name'          => 'IntakeFlow WordPress Bridge PRO',
+		'name'          => 'XPressUI Bridge PRO',
 		'slug'          => 'xpressui-bridge-pro',
 		'version'       => $update_info['version'],
 		'author'        => '<a href="https://iakpress.com">IAKPress</a>',
@@ -94,7 +94,7 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 		'tested'        => $wp_ver, // always match the running WP version to avoid the "not tested" warning
 		'download_link' => $update_info['download_url'],
 		'sections'      => [
-			'description' => $readme['description'] ?? 'PRO extension for IntakeFlow WordPress Bridge — full runtime and advanced field types.',
+			'description' => $readme['description'] ?? 'PRO extension for XPressUI Bridge — full runtime and advanced field types.',
 			'changelog'   => $readme['changelog'] ?? ( $update_info['changelog'] ?? '' ),
 		],
 	];
@@ -176,7 +176,7 @@ function xpressui_pro_clear_update_transient_on_force_check(): void {
 add_action( 'admin_notices', 'xpressui_pro_update_available_notice' );
 
 /**
- * Shows an update-available notice on the IntakeFlow Workflows page.
+ * Shows an update-available notice on the XPressUI Workflows page.
  */
 function xpressui_pro_update_available_notice(): void {
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
@@ -201,7 +201,7 @@ function xpressui_pro_update_available_notice(): void {
 		esc_html(
 			sprintf(
 				/* translators: %s: new version number. */
-				__( 'IntakeFlow WordPress Bridge PRO %s', 'xpressui-bridge-pro' ),
+				__( 'XPressUI Bridge PRO %s', 'xpressui-bridge-pro' ),
 				$new_version
 			)
 		),
