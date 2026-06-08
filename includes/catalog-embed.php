@@ -67,24 +67,56 @@ function xpressui_pro_catalog_shortcode( $atts ): string {
 		$title = __( 'Product catalog', 'xpressui-bridge-pro' );
 	}
 
-	// Unique wrapper ID to scope the resize-observer script.
+	// Unique wrapper ID to scope the auto-resize script.
 	$wrapper_id = 'xpressui-cat-' . wp_unique_id();
+
+	// Derive the iframe origin so the resize listener only trusts messages from
+	// the catalog host (cross-origin postMessage security).
+	$parts  = wp_parse_url( $safe_url );
+	$origin = '';
+	if ( is_array( $parts ) && ! empty( $parts['scheme'] ) && ! empty( $parts['host'] ) ) {
+		$origin = $parts['scheme'] . '://' . $parts['host'];
+		if ( ! empty( $parts['port'] ) ) {
+			$origin .= ':' . (int) $parts['port'];
+		}
+	}
 
 	ob_start();
 	?>
 <div
 	id="<?php echo esc_attr( $wrapper_id ); ?>"
 	class="xpressui-catalog-embed"
-	style="width:100%;overflow:hidden;"
+	style="width:100%;min-height:<?php echo esc_attr( $height ); ?>;overflow:hidden;background:#f6f8fb;border-radius:8px;transition:height .2s ease;"
 >
 	<iframe
 			src="<?php echo esc_url( $safe_url ); ?>"
 		title="<?php echo esc_attr( $title ); ?>"
-		style="width:100%;height:<?php echo esc_attr( $height ); ?>;border:none;display:block;"
+		style="width:100%;height:<?php echo esc_attr( $height ); ?>;border:none;display:block;opacity:0;transition:opacity .25s ease;"
 		loading="lazy"
 		referrerpolicy="strict-origin-when-cross-origin"
 	></iframe>
 </div>
+<script>
+(function(){
+	var wrap = document.getElementById(<?php echo wp_json_encode( $wrapper_id ); ?>);
+	if ( ! wrap ) { return; }
+	var frame = wrap.querySelector('iframe');
+	if ( ! frame ) { return; }
+	var origin = <?php echo wp_json_encode( $origin ); ?>;
+	frame.addEventListener('load', function(){ frame.style.opacity = '1'; });
+	// Auto-resize: the hosted catalog page may post its content height so the
+	// iframe grows to fit (no inner scrollbar). Only messages from the catalog
+	// origin are trusted. No-op until the cloud page sends the message.
+	window.addEventListener('message', function(e){
+		if ( ! origin || e.origin !== origin ) { return; }
+		var d = e.data || {};
+		if ( d && d.type === 'xpressui-catalog-height' ) {
+			var h = parseInt( d.height, 10 );
+			if ( h > 0 && h < 20000 ) { frame.style.height = h + 'px'; }
+		}
+	});
+})();
+</script>
 	<?php
 	return (string) ob_get_clean();
 }
