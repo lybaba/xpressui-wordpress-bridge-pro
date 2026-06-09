@@ -80,7 +80,7 @@ function xpressui_pro_create_capture_session( WP_REST_Request $request ): WP_RES
 	$capture_url = add_query_arg(
 		[
 			'xpressui_capture'       => $token,
-			'xpressui_capture_nonce' => wp_create_nonce( 'xpressui_capture_' . $token ),
+			'xpressui_capture_nonce' => hash_hmac( 'sha256', $token, wp_salt( 'nonce' ) ),
 		],
 		home_url( '/' )
 	);
@@ -193,7 +193,8 @@ function xpressui_pro_maybe_serve_capture_page(): void {
 	}
 
 	$token = $capture_params['token'];
-	if ( ! wp_verify_nonce( $capture_params['nonce'], 'xpressui_capture_' . $token ) ) {
+	$expected_signature = hash_hmac( 'sha256', $token, wp_salt( 'nonce' ) );
+	if ( ! hash_equals( $expected_signature, $capture_params['nonce'] ) ) {
 		status_header( 403 );
 		exit;
 	}
