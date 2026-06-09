@@ -281,7 +281,7 @@ function xpressui_pro_render_resubmission_metabox( $post ): void {
 			$checked = in_array( $item['name'], $flagged, true );
 			echo '<label style="display:block;margin:4px 0;">';
 			echo '<input type="checkbox" name="xpressui_flagged_fields[]" value="' . esc_attr( $item['name'] ) . '" ' . checked( $checked, true, false ) . ' /> ';
-			echo esc_html( $item['label'] );
+			echo esc_html( function_exists( 'xpressui_clean_field_label' ) ? xpressui_clean_field_label( $item['label'] ) : $item['label'] );
 			echo '</label>';
 		}
 	}
