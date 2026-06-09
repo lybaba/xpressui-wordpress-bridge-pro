@@ -430,6 +430,13 @@
         "maxLen": 1000,
         "placeholder": "Anything else we should know?",
         "choices": null
+      },
+      {
+        "type": "checkbox",
+        "label": "Email me a copy of this submission (exactly as the team receives it)",
+        "name": "emailMeCopy",
+        "checkedLabel": "Yes, send me the notification email",
+        "uncheckedLabel": "No thanks"
       }
     ],
     "btngroup": [
