@@ -43,7 +43,7 @@ function xpressui_pro_patch_console_menu_link(): void {
 }
 
 function xpressui_pro_get_console_url(): string {
-	return 'https://xpressui.iakpress.com/console';
+	return 'https://app.intakeflow.dev';
 }
 
 function xpressui_pro_redirect_to_console(): void {
