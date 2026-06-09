@@ -133,7 +133,7 @@ function xpressui_pro_send_status_notification( $post_id, $status ): void {
 	$project_slug = (string) get_post_meta( $post_id, '_xpressui_project_slug', true );
 	$note         = (string) get_post_meta( $post_id, '_xpressui_review_note', true );
 
-	$subject = xpressui_pro_build_status_subject( $status, $project_slug );
+	$subject = xpressui_pro_build_status_subject( $status, $project_slug, $post_id );
 	$body    = xpressui_pro_build_status_body( $post_id, $status, $project_slug, $note );
 
 	wp_mail( $to_email, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
@@ -151,21 +151,42 @@ function xpressui_pro_get_submitter_email( int $post_id ): string {
 
 /**
  * Builds the subject line for a given status.
+ *
+ * A per-submission reference is appended so mailbox clients do not group
+ * unrelated submissions into the same conversation thread.
  */
-function xpressui_pro_build_status_subject( string $status, string $project_slug ): string {
+function xpressui_pro_build_status_subject( string $status, string $project_slug, int $post_id = 0 ): string {
 	$site = get_bloginfo( 'name' );
+	$ref  = xpressui_pro_status_subject_reference( $post_id );
 	switch ( $status ) {
 		case 'done':
-			/* translators: 1: site name, 2: workflow slug */
-			return sprintf( __( '[%1$s] Your submission for %2$s has been processed', 'xpressui-bridge-pro' ), $site, $project_slug );
+			/* translators: 1: site name, 2: workflow slug, 3: submission reference */
+			return sprintf( __( '[%1$s] Your submission for %2$s has been processed%3$s', 'xpressui-bridge-pro' ), $site, $project_slug, $ref );
 		case 'rejected':
-			/* translators: 1: site name, 2: workflow slug */
-			return sprintf( __( '[%1$s] Update on your submission for %2$s', 'xpressui-bridge-pro' ), $site, $project_slug );
+			/* translators: 1: site name, 2: workflow slug, 3: submission reference */
+			return sprintf( __( '[%1$s] Update on your submission for %2$s%3$s', 'xpressui-bridge-pro' ), $site, $project_slug, $ref );
 		case 'pending_info':
 		default:
-			/* translators: 1: site name, 2: workflow slug */
-			return sprintf( __( '[%1$s] Your submission for %2$s needs additional information', 'xpressui-bridge-pro' ), $site, $project_slug );
+			/* translators: 1: site name, 2: workflow slug, 3: submission reference */
+			return sprintf( __( '[%1$s] Your submission for %2$s needs additional information%3$s', 'xpressui-bridge-pro' ), $site, $project_slug, $ref );
 	}
+}
+
+/**
+ * Returns a short " - <ref>" suffix uniquely identifying a submission, or '' when
+ * no reference is available. Reuses the free plugin helper when present.
+ */
+function xpressui_pro_status_subject_reference( int $post_id ): string {
+	$reference = '';
+	if ( $post_id > 0 && function_exists( 'xpressui_build_notification_subject_reference' ) ) {
+		$json    = (string) get_post_meta( $post_id, '_xpressui_payload_json', true );
+		$payload = '' !== $json ? json_decode( $json, true ) : array();
+		$reference = (string) xpressui_build_notification_subject_reference( $post_id, is_array( $payload ) ? $payload : array() );
+	}
+	if ( '' === $reference && $post_id > 0 ) {
+		$reference = '#' . $post_id;
+	}
+	return '' !== $reference ? ' - ' . $reference : '';
 }
 
 /**
