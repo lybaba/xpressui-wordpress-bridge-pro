@@ -12,8 +12,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-bridge-pro/update-check' );
-define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-bridge-pro/download' );
+define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-wordpress-bridge-pro/update-check' );
+define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-wordpress-bridge-pro/download' );
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
 define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-bridge-pro/xpressui-bridge-pro.php' );
 define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-XPressUI-License-Key' );
