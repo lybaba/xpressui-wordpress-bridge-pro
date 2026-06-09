@@ -2,6 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once XPRESSUI_PRO_DIR . 'includes/license-handler.php';
+require_once XPRESSUI_PRO_DIR . 'includes/submission-gate.php';
 require_once XPRESSUI_PRO_DIR . 'includes/license-form.php';
 require_once XPRESSUI_PRO_DIR . 'includes/console-sync.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';

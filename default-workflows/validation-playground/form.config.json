@@ -47,8 +47,8 @@
       {
         "type": "section",
         "subType": "section",
-        "label": "Scan & verify",
-        "adminLabel": "Scan & verify",
+        "label": "Camera capture",
+        "adminLabel": "Camera capture",
         "name": "captureStep"
       },
       {
