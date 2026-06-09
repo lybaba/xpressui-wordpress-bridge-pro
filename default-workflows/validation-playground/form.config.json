@@ -11,7 +11,7 @@
     "resumeSupport": "disabled",
     "documentHandling": "basic-upload",
     "submissionEndpoint": "/wp-json/xpressui/v1/submit",
-    "successMessage": "Your validation test submission was sent successfully.",
+    "successMessage": "Thanks! Your details are in — our team will reach out shortly.",
     "errorMessage": "Unable to send this validation test to WordPress right now. Please try again."
   },
   "sections": {
@@ -19,50 +19,50 @@
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 1: Text & contact",
-        "adminLabel": "Step 1: Text & contact",
+        "label": "Contact details",
+        "adminLabel": "Contact details",
         "name": "textStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 2: Numbers & dates",
-        "adminLabel": "Step 2: Numbers & dates",
+        "label": "Numbers & dates",
+        "adminLabel": "Numbers & dates",
         "name": "numbersStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 3: Choices & toggles",
-        "adminLabel": "Step 3: Choices & toggles",
+        "label": "Choices & toggles",
+        "adminLabel": "Choices & toggles",
         "name": "choicesStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 4: File uploads",
-        "adminLabel": "Step 4: File uploads",
+        "label": "File uploads",
+        "adminLabel": "File uploads",
         "name": "filesStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 5: Scan & verify",
-        "adminLabel": "Step 5: Scan & verify",
+        "label": "Scan & verify",
+        "adminLabel": "Scan & verify",
         "name": "captureStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 6: Advanced fields",
-        "adminLabel": "Step 6: Advanced fields",
+        "label": "Advanced fields",
+        "adminLabel": "Advanced fields",
         "name": "advancedStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 7: Review & submit",
-        "adminLabel": "Step 7: Review & submit",
+        "label": "Review & submit",
+        "adminLabel": "Review & submit",
         "name": "reviewStep"
       }
     ],
@@ -202,9 +202,18 @@
         "name": "experienceLevel",
         "required": true,
         "choices": [
-          { "label": "Junior", "value": "junior" },
-          { "label": "Senior", "value": "senior" },
-          { "label": "Expert", "value": "expert" }
+          {
+            "label": "Junior",
+            "value": "junior"
+          },
+          {
+            "label": "Senior",
+            "value": "senior"
+          },
+          {
+            "label": "Expert",
+            "value": "expert"
+          }
         ]
       },
       {
@@ -214,11 +223,26 @@
         "minNumOfChoices": 1,
         "maxNumOfChoices": 3,
         "choices": [
-          { "label": "WordPress", "value": "wordpress" },
-          { "label": "PHP", "value": "php" },
-          { "label": "TypeScript", "value": "typescript" },
-          { "label": "React", "value": "react" },
-          { "label": "Python", "value": "python" }
+          {
+            "label": "WordPress",
+            "value": "wordpress"
+          },
+          {
+            "label": "PHP",
+            "value": "php"
+          },
+          {
+            "label": "TypeScript",
+            "value": "typescript"
+          },
+          {
+            "label": "React",
+            "value": "react"
+          },
+          {
+            "label": "Python",
+            "value": "python"
+          }
         ]
       },
       {
@@ -227,8 +251,14 @@
         "name": "remoteOnly",
         "required": true,
         "choices": [
-          { "label": "No", "value": "no" },
-          { "label": "Yes", "value": "yes" }
+          {
+            "label": "No",
+            "value": "no"
+          },
+          {
+            "label": "Yes",
+            "value": "yes"
+          }
         ]
       },
       {
@@ -238,11 +268,26 @@
         "minNumOfChoices": 2,
         "maxNumOfChoices": 4,
         "choices": [
-          { "label": "Monday", "value": "monday" },
-          { "label": "Tuesday", "value": "tuesday" },
-          { "label": "Wednesday", "value": "wednesday" },
-          { "label": "Thursday", "value": "thursday" },
-          { "label": "Friday", "value": "friday" }
+          {
+            "label": "Monday",
+            "value": "monday"
+          },
+          {
+            "label": "Tuesday",
+            "value": "tuesday"
+          },
+          {
+            "label": "Wednesday",
+            "value": "wednesday"
+          },
+          {
+            "label": "Thursday",
+            "value": "thursday"
+          },
+          {
+            "label": "Friday",
+            "value": "friday"
+          }
         ]
       },
       {
@@ -313,9 +358,18 @@
         "label": "Quick quiz: which is a CSS preprocessor?",
         "name": "quizAnswer",
         "choices": [
-          { "label": "SASS", "value": "sass" },
-          { "label": "Django", "value": "django" },
-          { "label": "Redis", "value": "redis" }
+          {
+            "label": "SASS",
+            "value": "sass"
+          },
+          {
+            "label": "Django",
+            "value": "django"
+          },
+          {
+            "label": "Redis",
+            "value": "redis"
+          }
         ]
       },
       {
@@ -350,9 +404,18 @@
             "label": "Role",
             "name": "role",
             "choices": [
-              { "label": "Engineer", "value": "engineer" },
-              { "label": "Designer", "value": "designer" },
-              { "label": "Manager", "value": "manager" }
+              {
+                "label": "Engineer",
+                "value": "engineer"
+              },
+              {
+                "label": "Designer",
+                "value": "designer"
+              },
+              {
+                "label": "Manager",
+                "value": "manager"
+              }
             ]
           }
         ]
@@ -406,9 +469,12 @@
     "title": "Submission status",
     "idle_message": "Submission feedback will appear here after the runtime handles the form.",
     "loading_message": "Submitting...",
-    "success_title": "Validation test received",
-    "success_message": "Your validation test submission was sent successfully.",
+    "success_title": "Thanks — we got your details",
+    "success_message": "We've received your submission. Want a form like this on your own site? Our team will be in touch shortly.",
     "error_title": "Submission failed",
     "error_message": "Unable to send this validation test to WordPress right now. Please try again."
+  },
+  "themeConfig": {
+    "stepLayout": "timeline"
   }
 }
