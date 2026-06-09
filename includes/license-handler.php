@@ -17,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The API endpoint for license verification.
  */
-defined( 'XPRESSUI_PRO_LICENSE_API_URL' )             || define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://xpressui.iakpress.com/api/v1/licenses/verify' );
+defined( 'XPRESSUI_PRO_LICENSE_API_URL' )             || define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://app.intakeflow.dev/api/v1/licenses/verify' );
 defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' )          || define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
-defined( 'XPRESSUI_PRO_PRODUCT_ID' )                  || define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-bridge-pro' );
+defined( 'XPRESSUI_PRO_PRODUCT_ID' )                  || define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-wordpress-bridge-pro' );
 defined( 'XPRESSUI_PRO_PUBLIC_KEY_PATH' )             || define( 'XPRESSUI_PRO_PUBLIC_KEY_PATH', dirname( __DIR__ ) . '/keys/license_signing_public.pem' );
 defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT' )    || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT', 'xpressui_pro_license_status' );
 defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL' ) || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL', 6 * HOUR_IN_SECONDS );

@@ -2,14 +2,15 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once XPRESSUI_PRO_DIR . 'includes/license-handler.php';
+require_once XPRESSUI_PRO_DIR . 'includes/submission-gate.php';
 require_once XPRESSUI_PRO_DIR . 'includes/license-form.php';
 require_once XPRESSUI_PRO_DIR . 'includes/console-sync.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
 require_once XPRESSUI_PRO_DIR . 'includes/mobile-capture.php';
-require_once XPRESSUI_PRO_DIR . 'includes/cloud-link.php';
-require_once XPRESSUI_PRO_DIR . 'includes/catalog-embed.php';
+require_once XPRESSUI_PRO_DIR . 'includes/resubmission.php';
+require_once XPRESSUI_PRO_DIR . 'includes/status-notifications.php';
 // update-checker.php is loaded unconditionally from the main plugin file.
 
 add_filter( 'xpressui_runtime_url', 'xpressui_pro_override_runtime_url', 10, 2 );
