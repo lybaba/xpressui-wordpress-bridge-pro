@@ -384,41 +384,6 @@
         "name": "coverLetter",
         "placeholder": "Write your cover letter…",
         "choices": null
-      },
-      {
-        "type": "repeater",
-        "label": "Previous roles (repeater)",
-        "name": "previousRoles",
-        "minNumOfChoices": 1,
-        "maxNumOfChoices": 5,
-        "fields": [
-          {
-            "type": "text",
-            "label": "Company",
-            "name": "company",
-            "required": true,
-            "choices": null
-          },
-          {
-            "type": "select-one",
-            "label": "Role",
-            "name": "role",
-            "choices": [
-              {
-                "label": "Engineer",
-                "value": "engineer"
-              },
-              {
-                "label": "Designer",
-                "value": "designer"
-              },
-              {
-                "label": "Manager",
-                "value": "manager"
-              }
-            ]
-          }
-        ]
       }
     ],
     "reviewStep": [
