@@ -19,41 +19,73 @@
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 1: Contact",
-        "adminLabel": "Step 1: Contact",
-        "name": "contactStep"
+        "label": "Step 1: Text & contact",
+        "adminLabel": "Step 1: Text & contact",
+        "name": "textStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 2: Validation",
-        "adminLabel": "Step 2: Validation",
-        "name": "validationStep"
+        "label": "Step 2: Numbers & dates",
+        "adminLabel": "Step 2: Numbers & dates",
+        "name": "numbersStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 3: Documents",
-        "adminLabel": "Step 3: Documents",
-        "name": "documentsStep"
+        "label": "Step 3: Choices & toggles",
+        "adminLabel": "Step 3: Choices & toggles",
+        "name": "choicesStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 4: Review",
-        "adminLabel": "Step 4: Review",
+        "label": "Step 4: File uploads",
+        "adminLabel": "Step 4: File uploads",
+        "name": "filesStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 5: Scan & verify",
+        "adminLabel": "Step 5: Scan & verify",
+        "name": "captureStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 6: Advanced fields",
+        "adminLabel": "Step 6: Advanced fields",
+        "name": "advancedStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Step 7: Review & submit",
+        "adminLabel": "Step 7: Review & submit",
         "name": "reviewStep"
       }
     ],
-    "contactStep": [
+    "textStep": [
       {
         "type": "text",
-        "label": "First name",
-        "name": "firstName",
+        "label": "Full name (text, 4-40 chars)",
+        "name": "fullName",
+        "required": true,
+        "minLen": 4,
+        "maxLen": 40,
+        "placeholder": "Ada Lovelace",
+        "choices": null
+      },
+      {
+        "type": "text",
+        "label": "Username (pattern: letters only, 4-8)",
+        "name": "username",
         "required": true,
         "minLen": 4,
         "maxLen": 8,
         "pattern": "^[A-Za-z]{4,8}$",
+        "placeholder": "ada",
         "choices": null
       },
       {
@@ -62,65 +94,72 @@
         "name": "email",
         "required": true,
         "maxLen": 120,
+        "placeholder": "you@example.com",
+        "choices": null
+      },
+      {
+        "type": "password",
+        "label": "Password",
+        "name": "password",
+        "minLen": 8,
+        "maxLen": 64,
+        "placeholder": "••••••••",
         "choices": null
       },
       {
         "type": "tel",
         "label": "Phone number",
         "name": "phoneNumber",
-        "required": true,
         "minLen": 7,
         "maxLen": 20,
+        "placeholder": "+33 6 12 34 56 78",
         "choices": null
       },
       {
-        "type": "radio-buttons",
-        "label": "Experience level",
-        "name": "experienceLevel",
-        "required": true,
-        "choices": [
-          {
-            "label": "Junior",
-            "value": "junior"
-          },
-          {
-            "label": "Senior",
-            "value": "senior"
-          },
-          {
-            "label": "Expert",
-            "value": "expert"
-          }
-        ]
+        "type": "url",
+        "label": "Website / portfolio URL",
+        "name": "portfolioUrl",
+        "placeholder": "https://example.com",
+        "choices": null
       },
       {
-        "type": "radio-buttons",
-        "label": "Remote only",
-        "name": "remoteOnly",
-        "choices": [
-          {
-            "label": "No",
-            "value": "no"
-          },
-          {
-            "label": "Yes",
-            "value": "yes"
-          }
-        ]
+        "type": "slug",
+        "label": "Project slug",
+        "name": "projectSlug",
+        "maxLen": 60,
+        "placeholder": "my-project",
+        "choices": null
+      },
+      {
+        "type": "textarea",
+        "label": "Short bio (textarea, 20-500 chars)",
+        "name": "shortBio",
+        "minLen": 20,
+        "maxLen": 500,
+        "placeholder": "Tell us about yourself…",
+        "choices": null
       }
     ],
-    "validationStep": [
+    "numbersStep": [
       {
         "type": "number",
-        "label": "Years of experience",
+        "label": "Years of experience (number 0-40)",
         "name": "yearsExperience",
         "min": 0,
         "max": 40,
         "choices": null
       },
       {
+        "type": "integer",
+        "label": "Team size (positive integer)",
+        "name": "teamSize",
+        "min": 1,
+        "max": 500,
+        "choices": null
+      },
+      {
         "type": "price",
-        "label": "Daily rate",
+        "label": "Daily rate (price, step 25)",
         "name": "dailyRate",
         "min": 50,
         "max": 5000,
@@ -128,102 +167,195 @@
         "choices": null
       },
       {
+        "type": "tax",
+        "label": "Tax rate (0 to 1)",
+        "name": "taxRate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "choices": null
+      },
+      {
         "type": "date",
-        "label": "Available from",
+        "label": "Available from (date)",
         "name": "availableFrom",
         "required": true,
         "choices": null
       },
       {
         "type": "time",
-        "label": "Preferred call time",
+        "label": "Preferred call time (time)",
         "name": "preferredCallTime",
-        "required": true,
         "choices": null
       },
       {
-        "type": "checkboxes",
-        "label": "Available days",
-        "name": "availableDays",
+        "type": "datetime",
+        "label": "Kick-off date & time (datetime)",
+        "name": "kickoffAt",
+        "choices": null
+      }
+    ],
+    "choicesStep": [
+      {
+        "type": "select-one",
+        "label": "Experience level (single select)",
+        "name": "experienceLevel",
         "required": true,
-        "minNumOfChoices": 2,
-        "maxNumOfChoices": 4,
         "choices": [
-          {
-            "label": "Monday",
-            "value": "monday"
-          },
-          {
-            "label": "Tuesday",
-            "value": "tuesday"
-          },
-          {
-            "label": "Wednesday",
-            "value": "wednesday"
-          },
-          {
-            "label": "Thursday",
-            "value": "thursday"
-          },
-          {
-            "label": "Friday",
-            "value": "friday"
-          }
+          { "label": "Junior", "value": "junior" },
+          { "label": "Senior", "value": "senior" },
+          { "label": "Expert", "value": "expert" }
         ]
       },
       {
         "type": "select-multiple",
-        "label": "Skills",
+        "label": "Skills (multi select, 1-3)",
         "name": "skills",
         "minNumOfChoices": 1,
         "maxNumOfChoices": 3,
         "choices": [
-          {
-            "label": "WordPress",
-            "value": "wordpress"
-          },
-          {
-            "label": "PHP",
-            "value": "php"
-          },
-          {
-            "label": "TypeScript",
-            "value": "typescript"
-          },
-          {
-            "label": "React",
-            "value": "react"
-          },
-          {
-            "label": "Python",
-            "value": "python"
-          }
+          { "label": "WordPress", "value": "wordpress" },
+          { "label": "PHP", "value": "php" },
+          { "label": "TypeScript", "value": "typescript" },
+          { "label": "React", "value": "react" },
+          { "label": "Python", "value": "python" }
         ]
       },
       {
-        "type": "url",
-        "label": "Portfolio URL",
-        "name": "portfolioUrl",
-        "choices": null
+        "type": "radio-buttons",
+        "label": "Remote only (radio)",
+        "name": "remoteOnly",
+        "required": true,
+        "choices": [
+          { "label": "No", "value": "no" },
+          { "label": "Yes", "value": "yes" }
+        ]
+      },
+      {
+        "type": "checkboxes",
+        "label": "Available days (checkboxes, 2-4)",
+        "name": "availableDays",
+        "minNumOfChoices": 2,
+        "maxNumOfChoices": 4,
+        "choices": [
+          { "label": "Monday", "value": "monday" },
+          { "label": "Tuesday", "value": "tuesday" },
+          { "label": "Wednesday", "value": "wednesday" },
+          { "label": "Thursday", "value": "thursday" },
+          { "label": "Friday", "value": "friday" }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "label": "I accept the terms (single checkbox)",
+        "name": "acceptTerms",
+        "required": true,
+        "checkedLabel": "Accepted",
+        "uncheckedLabel": "Not accepted"
+      },
+      {
+        "type": "switch",
+        "label": "Subscribe to the newsletter (switch)",
+        "name": "newsletter",
+        "checkedStatusLabel": "On",
+        "uncheckedStatusLabel": "Off"
       }
     ],
-    "documentsStep": [
+    "filesStep": [
       {
         "type": "upload-image",
-        "label": "Profile photo",
+        "label": "Profile photo (image upload)",
         "name": "profilePhoto",
-        "required": true,
         "accept": "image/*",
-        "maxFileSizeMb": 2,
+        "maxFileSizeMb": 5,
         "choices": null
       },
       {
         "type": "file",
-        "label": "Resume / CV",
+        "label": "Resume / CV (file upload)",
         "name": "resumeFile",
         "accept": ".pdf,.doc,.docx,.odt,.rtf,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,text/plain,application/rtf",
-        "maxFileSizeMb": 5,
+        "maxFileSizeMb": 10,
         "choices": null
+      },
+      {
+        "type": "payment-proof",
+        "label": "Payment proof (PDF / image)",
+        "name": "paymentProof",
+        "accept": ".pdf,application/pdf,.jpg,.jpeg,image/jpeg,.png,image/png",
+        "maxFileSizeMb": 10,
+        "choices": null
+      }
+    ],
+    "captureStep": [
+      {
+        "type": "qr-scan",
+        "label": "QR code scan",
+        "name": "qrScan",
+        "accept": "image/*",
+        "capture": "environment",
+        "choices": null
+      },
+      {
+        "type": "document-scan",
+        "label": "ID document scan",
+        "name": "idDocumentScan",
+        "documentScanMode": "single",
+        "enableDocumentOcr": false,
+        "accept": "image/*",
+        "capture": "environment",
+        "choices": null
+      }
+    ],
+    "advancedStep": [
+      {
+        "type": "quiz",
+        "label": "Quick quiz: which is a CSS preprocessor?",
+        "name": "quizAnswer",
+        "choices": [
+          { "label": "SASS", "value": "sass" },
+          { "label": "Django", "value": "django" },
+          { "label": "Redis", "value": "redis" }
+        ]
+      },
+      {
+        "type": "signature",
+        "label": "Signature",
+        "name": "signature",
+        "choices": null
+      },
+      {
+        "type": "rich-editor",
+        "label": "Cover letter (rich editor)",
+        "name": "coverLetter",
+        "placeholder": "Write your cover letter…",
+        "choices": null
+      },
+      {
+        "type": "repeater",
+        "label": "Previous roles (repeater)",
+        "name": "previousRoles",
+        "minNumOfChoices": 1,
+        "maxNumOfChoices": 5,
+        "fields": [
+          {
+            "type": "text",
+            "label": "Company",
+            "name": "company",
+            "required": true,
+            "choices": null
+          },
+          {
+            "type": "select-one",
+            "label": "Role",
+            "name": "role",
+            "choices": [
+              { "label": "Engineer", "value": "engineer" },
+              { "label": "Designer", "value": "designer" },
+              { "label": "Manager", "value": "manager" }
+            ]
+          }
+        ]
       }
     ],
     "reviewStep": [
@@ -231,8 +363,9 @@
         "type": "textarea",
         "label": "Additional notes",
         "name": "additionalNotes",
-        "minLen": 20,
+        "minLen": 0,
         "maxLen": 1000,
+        "placeholder": "Anything else we should know?",
         "choices": null
       }
     ],
@@ -266,7 +399,7 @@
     "metadata": {
       "projectId": "validation-playground-starter",
       "projectSlug": "validation-playground",
-      "projectConfigVersion": "validation-playground-starter:2026-03-29T00:00:00+00:00"
+      "projectConfigVersion": "validation-playground-starter:2026-06-09T00:00:00+00:00"
     }
   },
   "submitFeedback": {
