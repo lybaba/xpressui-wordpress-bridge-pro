@@ -334,19 +334,20 @@
     ],
     "captureStep": [
       {
-        "type": "qr-scan",
-        "label": "QR code scan",
-        "name": "qrScan",
+        "type": "camera-photo",
+        "label": "Selfie (camera photo)",
+        "name": "selfie",
         "accept": "image/*",
-        "capture": "environment",
+        "capture": "user",
+        "required": true,
         "choices": null
       },
       {
-        "type": "document-scan",
-        "label": "ID document scan",
-        "name": "idDocumentScan",
-        "documentScanMode": "single",
-        "enableDocumentOcr": false,
+        "type": "camera-photo-list",
+        "label": "Gallery photos (camera photo list)",
+        "name": "galleryPhotos",
+        "minFiles": 2,
+        "maxFiles": 5,
         "accept": "image/*",
         "capture": "environment",
         "choices": null

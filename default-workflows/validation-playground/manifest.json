@@ -30,11 +30,12 @@
   },
   "capabilities": {
     "components": [
+      "camera-photo",
+      "camera-photo-list",
       "checkbox",
       "checkboxes",
       "date",
       "datetime",
-      "document-scan",
       "email",
       "file",
       "integer",
@@ -42,7 +43,6 @@
       "password",
       "payment-proof",
       "price",
-      "qr-scan",
       "quiz",
       "radio-buttons",
       "rich-editor",
