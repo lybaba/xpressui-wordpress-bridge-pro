@@ -37,7 +37,7 @@ function xpressui_pro_register_cloud_link_page(): void {
 function xpressui_pro_get_cloud_link_settings(): array {
 	$defaults = [
 		'enabled'       => false,
-		'api_base_url'  => 'https://xpressui.iakpress.com',
+		'api_base_url'  => 'https://app.intakeflow.dev',
 		'workspace_id'  => '',
 		'api_token'     => '',
 		'site_id'       => '',

@@ -12,8 +12,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-bridge-pro/update-check' );
-define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://xpressui.iakpress.com/api/v1/plugins/xpressui-bridge-pro/download' );
+define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-bridge-pro/update-check' );
+define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-bridge-pro/download' );
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
 define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-bridge-pro/xpressui-bridge-pro.php' );
 define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-XPressUI-License-Key' );
@@ -50,7 +50,7 @@ function xpressui_pro_inject_update_info( $transient ) {
 			'slug'        => 'xpressui-bridge-pro',
 			'plugin'      => XPRESSUI_PRO_PLUGIN_FILE,
 			'new_version' => $update_info['version'],
-			'url'         => 'https://xpressui.iakpress.com/',
+			'url'         => 'https://app.intakeflow.dev/',
 			'package'     => $update_info['download_url'],
 			'requires'    => $update_info['requires'] ?? '6.0',
 			'tested'      => $update_info['tested'] ?? '6.9',
