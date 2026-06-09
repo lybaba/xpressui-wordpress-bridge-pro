@@ -3,13 +3,11 @@ defined( 'ABSPATH' ) || exit;
 
 require_once XPRESSUI_PRO_DIR . 'includes/license-handler.php';
 require_once XPRESSUI_PRO_DIR . 'includes/license-form.php';
-require_once XPRESSUI_PRO_DIR . 'includes/autonomy.php';
 require_once XPRESSUI_PRO_DIR . 'includes/console-sync.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay.php';
 require_once XPRESSUI_PRO_DIR . 'includes/overlay-admin.php';
 require_once XPRESSUI_PRO_DIR . 'includes/status-page.php';
 require_once XPRESSUI_PRO_DIR . 'includes/mobile-capture.php';
-require_once XPRESSUI_PRO_DIR . 'includes/cloud-link.php';
 require_once XPRESSUI_PRO_DIR . 'includes/catalog-embed.php';
 require_once XPRESSUI_PRO_DIR . 'includes/resubmission.php';
 require_once XPRESSUI_PRO_DIR . 'includes/status-notifications.php';
