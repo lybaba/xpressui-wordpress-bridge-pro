@@ -12,11 +12,11 @@
  * function of the free plugin (wordpress.org forbids dormant code in the free
  * that is only activated by a paid add-on). Reading post_meta is data, not code.
  *
- * Active only in "local" autonomy mode (autonomy.php); in cloud mode the
- * IntakeFlow SaaS sends these notifications.
+ * Sent at end of request (shutdown) for any local submission whose status the
+ * operator changes — no WP-Cron, no autonomy-mode gate (the cloud never emails
+ * WordPress-stored submissions). Controlled by a single on/off option.
  *
- * NOTE: code-complete + lint-clean, but requires testing on a WordPress staging
- * site (wp_mail delivery, WP-Cron dispatch, status transitions) before release.
+ * NOTE: requires a WordPress staging test (wp_mail delivery, status transitions).
  *
  * @package XPressUI_Bridge_Pro
  */
@@ -38,10 +38,7 @@ function xpressui_pro_status_notify_statuses(): array {
 
 /**
  * Whether submitter status-change notifications are enabled (toggle, default on).
- *
- * These fire for LOCAL submissions managed in the WordPress inbox regardless of
- * autonomy mode: the cloud never emails WordPress-stored submissions, so this
- * must not depend on "local" mode.
+ * Always available in PRO — the plugin owns the local submission inbox.
  */
 function xpressui_pro_status_notifications_enabled(): bool {
 	return (bool) get_option( XPRESSUI_PRO_NOTIFY_STATUS_OPTION_KEY, '1' );
