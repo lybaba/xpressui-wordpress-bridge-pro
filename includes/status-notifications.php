@@ -26,9 +26,6 @@ defined( 'ABSPATH' ) || exit;
 if ( ! defined( 'XPRESSUI_PRO_NOTIFY_STATUS_OPTION_KEY' ) ) {
 	define( 'XPRESSUI_PRO_NOTIFY_STATUS_OPTION_KEY', 'xpressui_pro_notify_submitter_on_status_change' );
 }
-if ( ! defined( 'XPRESSUI_PRO_STATUS_NOTIFY_HOOK' ) ) {
-	define( 'XPRESSUI_PRO_STATUS_NOTIFY_HOOK', 'xpressui_pro_dispatch_status_notification' );
-}
 
 /**
  * Statuses that trigger a submitter notification.
@@ -40,21 +37,34 @@ function xpressui_pro_status_notify_statuses(): array {
 }
 
 /**
- * Whether submitter status-change notifications are enabled: only in local
- * autonomy mode, and when the toggle is on (default on).
+ * Whether submitter status-change notifications are enabled (toggle, default on).
+ *
+ * These fire for LOCAL submissions managed in the WordPress inbox regardless of
+ * autonomy mode: the cloud never emails WordPress-stored submissions, so this
+ * must not depend on "local" mode.
  */
 function xpressui_pro_status_notifications_enabled(): bool {
-	if ( ! function_exists( 'xpressui_pro_is_autonomous' ) || ! xpressui_pro_is_autonomous() ) {
-		return false;
-	}
 	return (bool) get_option( XPRESSUI_PRO_NOTIFY_STATUS_OPTION_KEY, '1' );
 }
 
 add_action( 'updated_postmeta', 'xpressui_pro_on_submission_status_meta', 10, 4 );
 add_action( 'added_postmeta', 'xpressui_pro_on_submission_status_meta', 10, 4 );
+add_action( 'shutdown', 'xpressui_pro_flush_status_notifications', 20 );
 
 /**
- * Schedules an async notification when a submission's status meta changes.
+ * Per-request queue of submissions whose status changed (post_id => status).
+ *
+ * @return array<int,string>
+ */
+function &xpressui_pro_status_notify_queue(): array {
+	static $queue = array();
+	return $queue;
+}
+
+/**
+ * Queues a submitter notification when a submission's status meta changes.
+ * Delivered at end of request (shutdown) — reliable without WP-Cron, and after
+ * the free plugin has written the resume token / timestamps.
  *
  * @param int    $meta_id    Unused.
  * @param int    $post_id    Submission post ID.
@@ -77,22 +87,30 @@ function xpressui_pro_on_submission_status_meta( $meta_id, $post_id, $meta_key, 
 		return;
 	}
 
-	// Defer: the free plugin writes additional meta (resume token, timestamps)
-	// right after the status; running after the request keeps the data settled
-	// and never blocks the admin action on e-mail delivery.
-	$args = array( (int) $post_id, $status );
-	if ( ! wp_next_scheduled( XPRESSUI_PRO_STATUS_NOTIFY_HOOK, $args ) ) {
-		wp_schedule_single_event( time() + 5, XPRESSUI_PRO_STATUS_NOTIFY_HOOK, $args );
-	}
+	$queue                   = &xpressui_pro_status_notify_queue();
+	$queue[ (int) $post_id ] = $status;
 }
 
-add_action( XPRESSUI_PRO_STATUS_NOTIFY_HOOK, 'xpressui_pro_send_status_notification', 10, 2 );
+/**
+ * Sends all queued status notifications at end of request.
+ */
+function xpressui_pro_flush_status_notifications(): void {
+	$queue = &xpressui_pro_status_notify_queue();
+	if ( empty( $queue ) ) {
+		return;
+	}
+	$pending = $queue;
+	$queue   = array(); // prevent double-send within the request
+	foreach ( $pending as $post_id => $status ) {
+		xpressui_pro_send_status_notification( (int) $post_id, (string) $status );
+	}
+}
 
 /**
  * Sends the submitter notification e-mail for a submission + status.
  *
  * @param int    $post_id Submission post ID.
- * @param string $status  Status the notification was scheduled for.
+ * @param string $status  Status the notification was queued for.
  */
 function xpressui_pro_send_status_notification( $post_id, $status ): void {
 	$post_id = (int) $post_id;

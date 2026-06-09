@@ -96,15 +96,30 @@ function xpressui_pro_submission_field_names( int $post_id ): array {
 	if ( ! is_array( $payload ) ) {
 		return array();
 	}
-	$names = array();
+	$system = array( 'projectId', 'projectSlug', 'projectConfigVersion', 'submissionId', 'projectConfigSnapshotJson', 'rest_route' );
+	$names  = array();
 	foreach ( array_keys( $payload ) as $key ) {
 		$key = (string) $key;
-		if ( '' === $key || str_starts_with( $key, '_' ) ) {
+		if ( '' === $key || str_starts_with( $key, '_' ) || in_array( $key, $system, true ) ) {
 			continue;
 		}
 		$names[] = $key;
 	}
 	return $names;
+}
+
+/**
+ * Field types that are display/structural only (not submitter-correctable) and
+ * are therefore hidden from the resubmission selector.
+ *
+ * @return array<int,string>
+ */
+function xpressui_pro_non_input_field_types(): array {
+	return array(
+		'section', 'title', 'html', 'output', 'form', 'content-block', 'rich-editor',
+		'image', 'media', 'logo', 'hero', 'media-display', 'range-display',
+		'link', 'btn', 'call2action', 'setting', 'approval-state', 'grid-size', 'slider',
+	);
 }
 
 /**
@@ -159,9 +174,10 @@ function xpressui_pro_grouped_submission_fields( int $post_id ): array {
 	$payload_fields = xpressui_pro_submission_field_names( $post_id );
 	$payload_set    = array_fill_keys( $payload_fields, true );
 
-	$config   = xpressui_pro_read_config_snapshot( $post_id );
-	$sections = is_array( $config['sections'] ?? null ) ? $config['sections'] : array();
-	$steps    = is_array( $sections['custom'] ?? null ) ? array_values( $sections['custom'] ) : array();
+	$config     = xpressui_pro_read_config_snapshot( $post_id );
+	$sections   = is_array( $config['sections'] ?? null ) ? $config['sections'] : array();
+	$steps      = is_array( $sections['custom'] ?? null ) ? array_values( $sections['custom'] ) : array();
+	$skip_types = xpressui_pro_non_input_field_types();
 
 	$groups  = array();
 	$covered = array();
@@ -179,6 +195,11 @@ function xpressui_pro_grouped_submission_fields( int $post_id ): array {
 			}
 			$fname = (string) ( $field['name'] ?? '' );
 			if ( '' === $fname || ! isset( $payload_set[ $fname ] ) ) {
+				continue;
+			}
+			// Hide display/structural fields — they are not submitter-correctable.
+			if ( in_array( (string) ( $field['type'] ?? '' ), $skip_types, true ) ) {
+				$covered[ $fname ] = true;
 				continue;
 			}
 			$items[]           = array(
