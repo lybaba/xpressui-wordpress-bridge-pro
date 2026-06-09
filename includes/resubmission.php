@@ -118,6 +118,62 @@ function xpressui_pro_get_flagged_fields( int $post_id ): array {
 	return is_array( $decoded ) ? array_values( array_filter( $decoded, 'is_string' ) ) : array();
 }
 
+/**
+ * Maps field name -> human label from the submission's stored config snapshot
+ * (data only: post_meta `_xpressui_project_config_json`, then the shared config
+ * registry option). Missing fields fall back to their key.
+ *
+ * @return array<string,string>
+ */
+function xpressui_pro_field_label_map( int $post_id ): array {
+	$config = array();
+
+	$json = (string) get_post_meta( $post_id, '_xpressui_project_config_json', true );
+	if ( '' !== trim( $json ) ) {
+		$decoded = json_decode( $json, true );
+		if ( is_array( $decoded ) ) {
+			$config = $decoded;
+		}
+	}
+
+	if ( empty( $config ) ) {
+		$registry = get_option( 'xpressui_project_config_registry', array() );
+		if ( is_array( $registry ) ) {
+			$version = (string) get_post_meta( $post_id, '_xpressui_project_config_version', true );
+			$pid     = (string) get_post_meta( $post_id, '_xpressui_project_id', true );
+			$slug    = (string) get_post_meta( $post_id, '_xpressui_project_slug', true );
+			$key     = '' !== $version ? 'config:' . $version : ( '' !== $pid ? 'project:' . $pid : 'slug:' . $slug );
+			$entry   = $registry[ $key ] ?? null;
+			if ( is_array( $entry ) && is_array( $entry['config'] ?? null ) ) {
+				$config = $entry['config'];
+			}
+		}
+	}
+
+	$map      = array();
+	$sections = is_array( $config['sections'] ?? null ) ? $config['sections'] : array();
+	$steps    = is_array( $sections['custom'] ?? null ) ? array_values( $sections['custom'] ) : array();
+	foreach ( $steps as $section ) {
+		$section_name = is_array( $section ) ? (string) ( $section['name'] ?? '' ) : '';
+		if ( '' === $section_name ) {
+			continue;
+		}
+		$fields = is_array( $sections[ $section_name ] ?? null ) ? $sections[ $section_name ] : array();
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$fname = (string) ( $field['name'] ?? '' );
+			if ( '' === $fname ) {
+				continue;
+			}
+			$map[ $fname ] = (string) ( $field['label'] ?? $field['adminLabel'] ?? $field['title'] ?? $fname );
+		}
+	}
+
+	return $map;
+}
+
 add_action( 'add_meta_boxes', 'xpressui_pro_register_resubmission_metabox' );
 
 /**
@@ -142,9 +198,10 @@ function xpressui_pro_register_resubmission_metabox(): void {
  * @param WP_Post|object $post
  */
 function xpressui_pro_render_resubmission_metabox( $post ): void {
-	$post_id = (int) ( is_object( $post ) ? ( $post->ID ?? 0 ) : 0 );
-	$fields  = xpressui_pro_submission_field_names( $post_id );
-	$flagged = xpressui_pro_get_flagged_fields( $post_id );
+	$post_id   = (int) ( is_object( $post ) ? ( $post->ID ?? 0 ) : 0 );
+	$fields    = xpressui_pro_submission_field_names( $post_id );
+	$flagged   = xpressui_pro_get_flagged_fields( $post_id );
+	$label_map = xpressui_pro_field_label_map( $post_id );
 
 	echo '<p class="description">'
 		. esc_html__( 'Tick the fields the submitter must correct, set status to “Pending info”, then click Update. The submitter gets a resume link to fix only those fields.', 'xpressui-bridge-pro' )
@@ -158,9 +215,10 @@ function xpressui_pro_render_resubmission_metabox( $post ): void {
 	echo '<div class="xpressui-pro-flagged-fields" style="max-height:240px;overflow:auto;">';
 	foreach ( $fields as $name ) {
 		$checked = in_array( $name, $flagged, true );
+		$label   = isset( $label_map[ $name ] ) && '' !== $label_map[ $name ] ? $label_map[ $name ] : $name;
 		echo '<label style="display:block;margin:4px 0;">';
 		echo '<input type="checkbox" name="xpressui_flagged_fields[]" value="' . esc_attr( $name ) . '" ' . checked( $checked, true, false ) . ' /> ';
-		echo esc_html( $name );
+		echo esc_html( $label );
 		echo '</label>';
 	}
 	echo '</div>';
