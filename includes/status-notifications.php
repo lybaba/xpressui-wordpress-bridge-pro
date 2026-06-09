@@ -177,7 +177,7 @@ function xpressui_pro_build_status_body( int $post_id, string $status, string $p
 			$header_label = __( 'Additional information required', 'xpressui-bridge-pro' );
 			/* translators: %s: workflow slug */
 			$intro   = sprintf( __( 'Thank you for your submission for %s. After review, our team needs some additional information before we can proceed.', 'xpressui-bridge-pro' ), $project_slug );
-			$closing = __( 'Please reply to this email or contact us directly to provide the required information.', 'xpressui-bridge-pro' );
+			$closing = __( 'Use the button below to complete the requested corrections, or reply to this email.', 'xpressui-bridge-pro' );
 			break;
 	}
 
@@ -205,6 +205,18 @@ function xpressui_pro_build_status_body( int $post_id, string $status, string $p
 		}
 	}
 
+	// Resume link for pending_info: lets the submitter re-open the form
+	// pre-filled and correct only the flagged fields (see resubmission.php).
+	$cta_html = '';
+	if ( 'pending_info' === $status && function_exists( 'xpressui_pro_build_resume_url' ) ) {
+		$resume_url = xpressui_pro_build_resume_url( $post_id );
+		if ( '' !== $resume_url ) {
+			$cta_html = '<p style="margin:20px 0 0;"><a href="' . esc_url( $resume_url )
+				. '" style="display:inline-block;padding:11px 20px;background:#c2562a;color:#ffffff;border-radius:6px;font-size:14px;font-weight:600;text-decoration:none;">'
+				. esc_html__( 'Complete my submission', 'xpressui-bridge-pro' ) . '</a></p>';
+		}
+	}
+
 	/* translators: %s: site name */
 	$footer_note = esc_html( sprintf( __( 'Sent by %s.', 'xpressui-bridge-pro' ), get_bloginfo( 'name' ) ) );
 
@@ -218,6 +230,7 @@ function xpressui_pro_build_status_body( int $post_id, string $status, string $p
 		. '<p style="margin:0;font-size:14px;color:#374151;line-height:1.6;">' . $intro_html . '</p>'
 		. $note_html
 		. $file_html
+		. $cta_html
 		. '<p style="margin:20px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">' . $closing_html . '</p>'
 		. '</td></tr>'
 		. '<tr><td style="padding:16px 28px;background:#f9fafb;border-top:1px solid #f0f0f0;">'
