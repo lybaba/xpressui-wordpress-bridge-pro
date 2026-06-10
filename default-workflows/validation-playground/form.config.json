@@ -385,6 +385,97 @@
         "name": "coverLetter",
         "placeholder": "Write your cover letter…",
         "choices": null
+      },
+      {
+        "type": "smart-catalog",
+        "renderAs": "checkboxes",
+        "name": "availabilityDays",
+        "label": "Availability (date range)",
+        "required": false,
+        "choiceCatalogSnapshot": {
+          "kind": "date_range"
+        },
+        "choices": [
+          {
+            "value": "2026-07-06",
+            "label": "Mon 6",
+            "date": "2026-07-06",
+            "monthName": "July",
+            "year": "2026"
+          },
+          {
+            "value": "2026-07-07",
+            "label": "Tue 7",
+            "date": "2026-07-07",
+            "monthName": "July",
+            "year": "2026"
+          },
+          {
+            "value": "2026-07-08",
+            "label": "Wed 8",
+            "date": "2026-07-08",
+            "monthName": "July",
+            "year": "2026",
+            "disabled": true
+          },
+          {
+            "value": "2026-08-03",
+            "label": "Mon 3",
+            "date": "2026-08-03",
+            "monthName": "August",
+            "year": "2026"
+          },
+          {
+            "value": "2026-08-04",
+            "label": "Tue 4",
+            "date": "2026-08-04",
+            "monthName": "August",
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "type": "smart-catalog",
+        "renderAs": "checkboxes",
+        "name": "membershipMonths",
+        "label": "Membership period (month range)",
+        "required": false,
+        "choiceCatalogSnapshot": {
+          "kind": "month_range"
+        },
+        "choices": [
+          {
+            "value": "2026-01",
+            "label": "January 2026",
+            "month": "2026-01",
+            "monthName": "January",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR"
+          },
+          {
+            "value": "2026-02",
+            "label": "February 2026",
+            "month": "2026-02",
+            "monthName": "February",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR"
+          },
+          {
+            "value": "2026-03",
+            "label": "March 2026",
+            "month": "2026-03",
+            "monthName": "March",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR",
+            "disabled": true
+          }
+        ]
       }
     ],
     "reviewStep": [
