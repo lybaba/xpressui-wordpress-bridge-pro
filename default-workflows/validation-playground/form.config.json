@@ -71,7 +71,7 @@
         "type": "text",
         "label": "Full name (text, 4-40 chars)",
         "name": "fullName",
-        "required": true,
+        "required": false,
         "minLen": 4,
         "maxLen": 40,
         "placeholder": "Ada Lovelace",
@@ -81,7 +81,7 @@
         "type": "text",
         "label": "Username (pattern: letters only, 4-8)",
         "name": "username",
-        "required": true,
+        "required": false,
         "minLen": 4,
         "maxLen": 8,
         "pattern": "^[A-Za-z]{4,8}$",
@@ -179,7 +179,7 @@
         "type": "date",
         "label": "Available from (date)",
         "name": "availableFrom",
-        "required": true,
+        "required": false,
         "choices": null
       },
       {
@@ -200,7 +200,7 @@
         "type": "select-one",
         "label": "Experience level (single select)",
         "name": "experienceLevel",
-        "required": true,
+        "required": false,
         "choices": [
           {
             "label": "Junior",
@@ -249,7 +249,7 @@
         "type": "radio-buttons",
         "label": "Remote only (radio)",
         "name": "remoteOnly",
-        "required": true,
+        "required": false,
         "choices": [
           {
             "label": "No",
@@ -294,7 +294,7 @@
         "type": "checkbox",
         "label": "I accept the terms (single checkbox)",
         "name": "acceptTerms",
-        "required": true,
+        "required": false,
         "checkedLabel": "Accepted",
         "uncheckedLabel": "Not accepted"
       },
@@ -339,7 +339,7 @@
         "name": "selfie",
         "accept": "image/*",
         "capture": "user",
-        "required": true,
+        "required": false,
         "choices": null
       },
       {
