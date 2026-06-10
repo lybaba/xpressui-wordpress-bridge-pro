@@ -365,10 +365,16 @@ function xpressui_pro_base64url_decode( $data ) {
  * @return string
  */
 function xpressui_pro_normalize_site_url( $url ) {
-	$url = trim( (string) $url );
-	$url = untrailingslashit( $url );
+	// Canonicalize so http/https, leading www., and trailing slashes do not
+	// cause spurious activation mismatches. Must match the backend's
+	// normalize_site_url() exactly.
+	$url = strtolower( trim( (string) $url ) );
+	$url = preg_replace( '#^https?://#', '', $url );
+	if ( strpos( $url, 'www.' ) === 0 ) {
+		$url = substr( $url, 4 );
+	}
 
-	return strtolower( $url );
+	return untrailingslashit( $url );
 }
 
 /**
