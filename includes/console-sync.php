@@ -12,9 +12,11 @@ defined( 'ABSPATH' ) || exit;
 // ---------------------------------------------------------------------------
 
 function xpressui_get_console_connection(): array {
-	$defaults = [ 'apiUrl' => '', 'apiToken' => '' ];
+	$defaults = [ 'apiUrl' => 'https://app.intakeflow.dev', 'apiToken' => '' ];
 	$stored   = get_option( 'xpressui_console_connection', [] );
-	return is_array( $stored ) ? array_merge( $defaults, $stored ) : $defaults;
+	$conn     = is_array( $stored ) ? array_merge( $defaults, $stored ) : $defaults;
+	$conn['apiUrl'] = 'https://app.intakeflow.dev';
+	return $conn;
 }
 
 function xpressui_render_console_connection_form(): void {
@@ -28,9 +30,9 @@ function xpressui_render_console_connection_form(): void {
 				<th><label for="xpressui_console_api_url"><?php esc_html_e( 'Console API URL', 'xpressui-bridge-pro' ); ?></label></th>
 				<td>
 					<input type="url" id="xpressui_console_api_url" name="xpressui_console_api_url"
-						value="<?php echo esc_attr( $conn['apiUrl'] ); ?>"
-						class="regular-text" placeholder="https://your-console.example.com">
-					<p class="description"><?php esc_html_e( 'Base URL of your IntakeFlow Console instance (no trailing slash).', 'xpressui-bridge-pro' ); ?></p>
+						value="https://app.intakeflow.dev"
+						class="regular-text" readonly>
+					<p class="description"><?php esc_html_e( 'Base URL of your IntakeFlow Console instance.', 'xpressui-bridge-pro' ); ?></p>
 				</td>
 			</tr>
 			<tr>
