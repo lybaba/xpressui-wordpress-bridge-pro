@@ -4,7 +4,7 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.67
+Stable tag: 1.0.68
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,11 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 4. Upload your workflow pack ZIP via XPressUI > Workflows.
 
 == Changelog ==
+
+= 1.0.68 =
+* Frame style override in the workflow Appearance overlay (Card / Plain) to match the console option.
+* Align the short description with the free plugin.
+* Packaging: exclude .gitattributes from the distributed ZIP (hidden files are not permitted on WordPress.org).
 
 = 1.0.64 =
 * Remove dead Pro modules (AI document verification, automated reminders, Stripe payment) and fix an orphaned reminder cron.
