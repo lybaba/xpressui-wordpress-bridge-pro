@@ -324,6 +324,9 @@ function xpressui_pro_patch_theme( array $theme, array $overlay_theme ): array {
 	if ( ! empty( $overlay_theme['background_style'] ) ) {
 		$theme['background_style'] = $overlay_theme['background_style'];
 	}
+	if ( ! empty( $overlay_theme['frame_style'] ) ) {
+		$theme['frame_style'] = $overlay_theme['frame_style'];
+	}
 	if ( ! empty( $overlay_theme['font_family'] ) ) {
 		$theme['font_family'] = $overlay_theme['font_family'];
 	}
