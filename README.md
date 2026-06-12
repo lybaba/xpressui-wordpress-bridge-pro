@@ -129,14 +129,14 @@ If you prefer not to export and upload ZIP files manually, the Pro plugin can co
 
 This plugin is distributed manually to clients. It is not published on WordPress.org.
 
-To request access, contact [hello@iakpress.com](mailto:hello@iakpress.com).
+To request access, contact [hello@intakeflow.dev](mailto:hello@intakeflow.dev).
 
 ---
 
 ## Links
 
 - Base plugin: [XPressUI WordPress Bridge](https://github.com/lybaba/xpressui-wordpress-bridge)
-- Product page: [XpressUI](https://iakpress.com/document-intake/xpressui)
-- Demo : [Document-Intake](https://iakpress.com/document-intake/)
+- Product page: [XpressUI](https://intakeflow.dev/document-intake/xpressui)
+- Demo : [Document-Intake](https://intakeflow.dev/document-intake/)
 - Pro add-on: [XPressUI WordPress Bridge PRO](https://github.com/lybaba/xpressui-wordpress-bridge-pro)
-- Support: [Contact](https://iakpress.com/document-intake/contact)
+- Support: [Contact](https://intakeflow.dev/document-intake/contact)

@@ -43,7 +43,7 @@ function xpressui_pro_patch_console_menu_link(): void {
 }
 
 function xpressui_pro_get_console_url(): string {
-	return 'https://xpressui.iakpress.com/console';
+	return 'https://app.intakeflow.dev';
 }
 
 function xpressui_pro_redirect_to_console(): void {
@@ -253,6 +253,22 @@ function xpressui_pro_render_card_appearance( array $ov_theme, array $pack_theme
 	}
 	$html .= '</select>';
 	xpressui_pro_row( '', __( 'Background Style', 'xpressui-bridge-pro' ), $html );
+
+	$frame_styles = [
+		'card'  => __( 'Card (framed)', 'xpressui-bridge-pro' ),
+		'plain' => __( 'Plain (transparent)', 'xpressui-bridge-pro' ),
+	];
+	$pack_frame_style = (string) ( $pack_theme['frame_style'] ?? 'card' );
+	$ov_frame_style   = (string) ( $ov_theme['frame_style'] ?? '' );
+
+	$html  = '<select name="xpressui_overlay_theme[frame_style]">';
+	$html .= '<option value="">' . esc_html__( 'Pack default', 'xpressui-bridge-pro' ) . ' (' . esc_html( $frame_styles[ $pack_frame_style ] ?? $pack_frame_style ) . ')</option>';
+	foreach ( $frame_styles as $val => $label ) {
+		$html .= '<option value="' . esc_attr( $val ) . '"' . selected( $ov_frame_style, $val, false ) . '>' . esc_html( $label ) . '</option>';
+	}
+	$html .= '</select>';
+	$html .= '<p class="description">' . esc_html__( 'Use “Plain” when your theme already wraps content in a card, to avoid a double frame.', 'xpressui-bridge-pro' ) . '</p>';
+	xpressui_pro_row( '', __( 'Frame Style', 'xpressui-bridge-pro' ), $html );
 
 	$html  = '<input type="url" name="xpressui_overlay_project_background_image_url" class="large-text" value="' . esc_attr( $ov_project_bg ) . '" placeholder="' . esc_attr( $pack_project_bg ) . '" />';
 	$html .= '<p class="description">' . esc_html__( 'Enter an image URL from your WordPress Media Library.', 'xpressui-bridge-pro' ) . '</p>';
@@ -737,6 +753,12 @@ function xpressui_pro_render_extra_workflow_sections( string $slug, array $s, ar
 		$theme_overlay['background_style'] = $bg_style;
 	} else {
 		unset( $theme_overlay['background_style'] );
+	}
+	$frame_style = sanitize_key( wp_unslash( $_POST['xpressui_overlay_theme']['frame_style'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	if ( in_array( $frame_style, [ 'card', 'plain' ], true ) ) {
+		$theme_overlay['frame_style'] = $frame_style;
+	} else {
+		unset( $theme_overlay['frame_style'] );
 	}
 	$font_family = sanitize_text_field( wp_unslash( $_POST['xpressui_overlay_theme']['font_family'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	if ( $font_family !== '' ) {

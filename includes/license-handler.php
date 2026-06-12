@@ -17,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * The API endpoint for license verification.
  */
-defined( 'XPRESSUI_PRO_LICENSE_API_URL' )             || define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://xpressui.iakpress.com/api/v1/licenses/verify' );
+defined( 'XPRESSUI_PRO_LICENSE_API_URL' )             || define( 'XPRESSUI_PRO_LICENSE_API_URL', 'https://app.intakeflow.dev/api/v1/licenses/verify' );
 defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' )          || define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
-defined( 'XPRESSUI_PRO_PRODUCT_ID' )                  || define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-bridge-pro' );
+defined( 'XPRESSUI_PRO_PRODUCT_ID' )                  || define( 'XPRESSUI_PRO_PRODUCT_ID', 'xpressui-wordpress-bridge-pro' );
 defined( 'XPRESSUI_PRO_PUBLIC_KEY_PATH' )             || define( 'XPRESSUI_PRO_PUBLIC_KEY_PATH', dirname( __DIR__ ) . '/keys/license_signing_public.pem' );
 defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT' )    || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT', 'xpressui_pro_license_status' );
 defined( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL' ) || define( 'XPRESSUI_PRO_LICENSE_STATUS_TRANSIENT_TTL', 6 * HOUR_IN_SECONDS );
@@ -365,10 +365,16 @@ function xpressui_pro_base64url_decode( $data ) {
  * @return string
  */
 function xpressui_pro_normalize_site_url( $url ) {
-	$url = trim( (string) $url );
-	$url = untrailingslashit( $url );
+	// Canonicalize so http/https, leading www., and trailing slashes do not
+	// cause spurious activation mismatches. Must match the backend's
+	// normalize_site_url() exactly.
+	$url = strtolower( trim( (string) $url ) );
+	$url = preg_replace( '#^https?://#', '', $url );
+	if ( strpos( $url, 'www.' ) === 0 ) {
+		$url = substr( $url, 4 );
+	}
 
-	return strtolower( $url );
+	return untrailingslashit( $url );
 }
 
 /**

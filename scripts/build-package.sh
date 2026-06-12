@@ -27,6 +27,7 @@ rm -rf "${STAGE_DIR:?}/${DIST_SLUG}/.git" \
        "${STAGE_DIR:?}/${DIST_SLUG}/node_modules" \
        "${STAGE_DIR:?}/${DIST_SLUG}/xpressui-src"
 rm -f "${STAGE_DIR:?}/${DIST_SLUG}/.gitignore" \
+      "${STAGE_DIR:?}/${DIST_SLUG}/.gitattributes" \
       "${STAGE_DIR:?}/${DIST_SLUG}/.distignore" \
       "${STAGE_DIR:?}/${DIST_SLUG}/.gitkeep" \
       "${STAGE_DIR:?}/${DIST_SLUG}/.gitmodules" \

@@ -4,11 +4,11 @@ Tags: form, workflow, document intake, pro, multi-step
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.64
+Stable tag: 1.0.68
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Pro extension for XPressUI Bridge. Adds the full runtime, advanced field types, workflow customization, and Console Sync.
+Collect files, documents, and client intake form submissions directly in WordPress. Inline rendering, team inbox, and workflow tracking included. PRO
 
 == Description ==
 
@@ -32,9 +32,14 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 
 == Changelog ==
 
+= 1.0.68 =
+* Frame style override in the workflow Appearance overlay (Card / Plain) to match the console option.
+* Align the short description with the free plugin.
+* Packaging: exclude .gitattributes from the distributed ZIP (hidden files are not permitted on WordPress.org).
+
 = 1.0.64 =
 * Remove dead Pro modules (AI document verification, automated reminders, Stripe payment) and fix an orphaned reminder cron.
-* Rename the product from XPressUI to IntakeFlow in metadata and the admin UI.
+* Harmonize the PRO plugin name to "XPressUI Bridge PRO" to match the free XPressUI Bridge connector (the SaaS product remains IntakeFlow).
 
 = 1.0.63 =
 * Update the bundled XPressUI runtime pin to 1.0.16 for print/download-only workflow support.
@@ -48,7 +53,7 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 * Update author to IAKPress.
 
 = 1.0.60 =
-* Update plugin site URL to https://iakpress.com/.
+* Update plugin site URL to https://intakeflow.dev/.
 
 = 1.0.59 =
 * Rename .xpressui-version to xpressui-version.txt for consistency with the free plugin.

@@ -11,7 +11,7 @@
     "resumeSupport": "disabled",
     "documentHandling": "basic-upload",
     "submissionEndpoint": "/wp-json/xpressui/v1/submit",
-    "successMessage": "Your validation test submission was sent successfully.",
+    "successMessage": "Thanks! Your details are in — our team will reach out shortly.",
     "errorMessage": "Unable to send this validation test to WordPress right now. Please try again."
   },
   "sections": {
@@ -19,41 +19,73 @@
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 1: Contact",
-        "adminLabel": "Step 1: Contact",
-        "name": "contactStep"
+        "label": "Contact details",
+        "adminLabel": "Contact details",
+        "name": "textStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 2: Validation",
-        "adminLabel": "Step 2: Validation",
-        "name": "validationStep"
+        "label": "Numbers & dates",
+        "adminLabel": "Numbers & dates",
+        "name": "numbersStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 3: Documents",
-        "adminLabel": "Step 3: Documents",
-        "name": "documentsStep"
+        "label": "Choices & toggles",
+        "adminLabel": "Choices & toggles",
+        "name": "choicesStep"
       },
       {
         "type": "section",
         "subType": "section",
-        "label": "Step 4: Review",
-        "adminLabel": "Step 4: Review",
+        "label": "File uploads",
+        "adminLabel": "File uploads",
+        "name": "filesStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Camera capture",
+        "adminLabel": "Camera capture",
+        "name": "captureStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Advanced fields",
+        "adminLabel": "Advanced fields",
+        "name": "advancedStep"
+      },
+      {
+        "type": "section",
+        "subType": "section",
+        "label": "Review & submit",
+        "adminLabel": "Review & submit",
         "name": "reviewStep"
       }
     ],
-    "contactStep": [
+    "textStep": [
       {
         "type": "text",
-        "label": "First name",
-        "name": "firstName",
-        "required": true,
+        "label": "Full name (text, 4-40 chars)",
+        "name": "fullName",
+        "required": false,
+        "minLen": 4,
+        "maxLen": 40,
+        "placeholder": "Ada Lovelace",
+        "choices": null
+      },
+      {
+        "type": "text",
+        "label": "Username (pattern: letters only, 4-8)",
+        "name": "username",
+        "required": false,
         "minLen": 4,
         "maxLen": 8,
         "pattern": "^[A-Za-z]{4,8}$",
+        "placeholder": "ada",
         "choices": null
       },
       {
@@ -62,22 +94,113 @@
         "name": "email",
         "required": true,
         "maxLen": 120,
+        "placeholder": "you@example.com",
+        "choices": null
+      },
+      {
+        "type": "password",
+        "label": "Password",
+        "name": "password",
+        "minLen": 8,
+        "maxLen": 64,
+        "placeholder": "••••••••",
         "choices": null
       },
       {
         "type": "tel",
         "label": "Phone number",
         "name": "phoneNumber",
-        "required": true,
         "minLen": 7,
         "maxLen": 20,
+        "placeholder": "+33 6 12 34 56 78",
         "choices": null
       },
       {
-        "type": "radio-buttons",
-        "label": "Experience level",
+        "type": "url",
+        "label": "Website / portfolio URL",
+        "name": "portfolioUrl",
+        "placeholder": "https://example.com",
+        "choices": null
+      },
+      {
+        "type": "slug",
+        "label": "Project slug",
+        "name": "projectSlug",
+        "maxLen": 60,
+        "placeholder": "my-project",
+        "choices": null
+      },
+      {
+        "type": "textarea",
+        "label": "Short bio (textarea, 20-500 chars)",
+        "name": "shortBio",
+        "minLen": 20,
+        "maxLen": 500,
+        "placeholder": "Tell us about yourself…",
+        "choices": null
+      }
+    ],
+    "numbersStep": [
+      {
+        "type": "number",
+        "label": "Years of experience (number 0-40)",
+        "name": "yearsExperience",
+        "min": 0,
+        "max": 40,
+        "choices": null
+      },
+      {
+        "type": "integer",
+        "label": "Team size (positive integer)",
+        "name": "teamSize",
+        "min": 1,
+        "max": 500,
+        "choices": null
+      },
+      {
+        "type": "price",
+        "label": "Daily rate (price, step 25)",
+        "name": "dailyRate",
+        "min": 50,
+        "max": 5000,
+        "step": 25,
+        "choices": null
+      },
+      {
+        "type": "tax",
+        "label": "Tax rate (0 to 1)",
+        "name": "taxRate",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "choices": null
+      },
+      {
+        "type": "date",
+        "label": "Available from (date)",
+        "name": "availableFrom",
+        "required": false,
+        "choices": null
+      },
+      {
+        "type": "time",
+        "label": "Preferred call time (time)",
+        "name": "preferredCallTime",
+        "choices": null
+      },
+      {
+        "type": "datetime",
+        "label": "Kick-off date & time (datetime)",
+        "name": "kickoffAt",
+        "choices": null
+      }
+    ],
+    "choicesStep": [
+      {
+        "type": "select-one",
+        "label": "Experience level (single select)",
         "name": "experienceLevel",
-        "required": true,
+        "required": false,
         "choices": [
           {
             "label": "Junior",
@@ -94,86 +217,8 @@
         ]
       },
       {
-        "type": "radio-buttons",
-        "label": "Remote only",
-        "name": "remoteOnly",
-        "choices": [
-          {
-            "label": "No",
-            "value": "no"
-          },
-          {
-            "label": "Yes",
-            "value": "yes"
-          }
-        ]
-      }
-    ],
-    "validationStep": [
-      {
-        "type": "number",
-        "label": "Years of experience",
-        "name": "yearsExperience",
-        "min": 0,
-        "max": 40,
-        "choices": null
-      },
-      {
-        "type": "price",
-        "label": "Daily rate",
-        "name": "dailyRate",
-        "min": 50,
-        "max": 5000,
-        "step": 25,
-        "choices": null
-      },
-      {
-        "type": "date",
-        "label": "Available from",
-        "name": "availableFrom",
-        "required": true,
-        "choices": null
-      },
-      {
-        "type": "time",
-        "label": "Preferred call time",
-        "name": "preferredCallTime",
-        "required": true,
-        "choices": null
-      },
-      {
-        "type": "checkboxes",
-        "label": "Available days",
-        "name": "availableDays",
-        "required": true,
-        "minNumOfChoices": 2,
-        "maxNumOfChoices": 4,
-        "choices": [
-          {
-            "label": "Monday",
-            "value": "monday"
-          },
-          {
-            "label": "Tuesday",
-            "value": "tuesday"
-          },
-          {
-            "label": "Wednesday",
-            "value": "wednesday"
-          },
-          {
-            "label": "Thursday",
-            "value": "thursday"
-          },
-          {
-            "label": "Friday",
-            "value": "friday"
-          }
-        ]
-      },
-      {
         "type": "select-multiple",
-        "label": "Skills",
+        "label": "Skills (multi select, 1-3)",
         "name": "skills",
         "minNumOfChoices": 1,
         "maxNumOfChoices": 3,
@@ -201,29 +246,236 @@
         ]
       },
       {
-        "type": "url",
-        "label": "Portfolio URL",
-        "name": "portfolioUrl",
-        "choices": null
+        "type": "radio-buttons",
+        "label": "Remote only (radio)",
+        "name": "remoteOnly",
+        "required": false,
+        "choices": [
+          {
+            "label": "No",
+            "value": "no"
+          },
+          {
+            "label": "Yes",
+            "value": "yes"
+          }
+        ]
+      },
+      {
+        "type": "checkboxes",
+        "label": "Available days (checkboxes, 2-4)",
+        "name": "availableDays",
+        "minNumOfChoices": 2,
+        "maxNumOfChoices": 4,
+        "choices": [
+          {
+            "label": "Monday",
+            "value": "monday"
+          },
+          {
+            "label": "Tuesday",
+            "value": "tuesday"
+          },
+          {
+            "label": "Wednesday",
+            "value": "wednesday"
+          },
+          {
+            "label": "Thursday",
+            "value": "thursday"
+          },
+          {
+            "label": "Friday",
+            "value": "friday"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "label": "I accept the terms (single checkbox)",
+        "name": "acceptTerms",
+        "required": false,
+        "checkedLabel": "Accepted",
+        "uncheckedLabel": "Not accepted"
+      },
+      {
+        "type": "switch",
+        "label": "Subscribe to the newsletter (switch)",
+        "name": "newsletter",
+        "checkedStatusLabel": "On",
+        "uncheckedStatusLabel": "Off"
       }
     ],
-    "documentsStep": [
+    "filesStep": [
       {
         "type": "upload-image",
-        "label": "Profile photo",
+        "label": "Profile photo (image upload)",
         "name": "profilePhoto",
-        "required": true,
         "accept": "image/*",
-        "maxFileSizeMb": 2,
+        "maxFileSizeMb": 5,
         "choices": null
       },
       {
         "type": "file",
-        "label": "Resume / CV",
+        "label": "Resume / CV (file upload)",
         "name": "resumeFile",
         "accept": ".pdf,.doc,.docx,.odt,.rtf,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,text/plain,application/rtf",
-        "maxFileSizeMb": 5,
+        "maxFileSizeMb": 10,
         "choices": null
+      },
+      {
+        "type": "payment-proof",
+        "label": "Payment proof (PDF / image)",
+        "name": "paymentProof",
+        "accept": ".pdf,application/pdf,.jpg,.jpeg,image/jpeg,.png,image/png",
+        "maxFileSizeMb": 10,
+        "choices": null
+      }
+    ],
+    "captureStep": [
+      {
+        "type": "camera-photo",
+        "label": "Selfie (camera photo)",
+        "name": "selfie",
+        "accept": "image/*",
+        "capture": "user",
+        "required": false,
+        "choices": null
+      },
+      {
+        "type": "camera-photo-list",
+        "label": "Gallery photos (camera photo list)",
+        "name": "galleryPhotos",
+        "minFiles": 2,
+        "maxFiles": 5,
+        "accept": "image/*",
+        "capture": "environment",
+        "choices": null
+      }
+    ],
+    "advancedStep": [
+      {
+        "type": "quiz",
+        "label": "Quick quiz: which is a CSS preprocessor?",
+        "name": "quizAnswer",
+        "choices": [
+          {
+            "label": "SASS",
+            "value": "sass"
+          },
+          {
+            "label": "Django",
+            "value": "django"
+          },
+          {
+            "label": "Redis",
+            "value": "redis"
+          }
+        ]
+      },
+      {
+        "type": "signature",
+        "label": "Signature",
+        "name": "signature",
+        "choices": null
+      },
+      {
+        "type": "rich-editor",
+        "label": "Cover letter (rich editor)",
+        "name": "coverLetter",
+        "placeholder": "Write your cover letter…",
+        "choices": null
+      },
+      {
+        "type": "smart-catalog",
+        "renderAs": "checkboxes",
+        "name": "availabilityDays",
+        "label": "Availability (date range)",
+        "required": false,
+        "choiceCatalogSnapshot": {
+          "kind": "date_range"
+        },
+        "choices": [
+          {
+            "value": "2026-07-06",
+            "label": "Mon 6",
+            "date": "2026-07-06",
+            "monthName": "July",
+            "year": "2026"
+          },
+          {
+            "value": "2026-07-07",
+            "label": "Tue 7",
+            "date": "2026-07-07",
+            "monthName": "July",
+            "year": "2026"
+          },
+          {
+            "value": "2026-07-08",
+            "label": "Wed 8",
+            "date": "2026-07-08",
+            "monthName": "July",
+            "year": "2026",
+            "disabled": true
+          },
+          {
+            "value": "2026-08-03",
+            "label": "Mon 3",
+            "date": "2026-08-03",
+            "monthName": "August",
+            "year": "2026"
+          },
+          {
+            "value": "2026-08-04",
+            "label": "Tue 4",
+            "date": "2026-08-04",
+            "monthName": "August",
+            "year": "2026"
+          }
+        ]
+      },
+      {
+        "type": "smart-catalog",
+        "renderAs": "checkboxes",
+        "name": "membershipMonths",
+        "label": "Membership period (month range)",
+        "required": false,
+        "choiceCatalogSnapshot": {
+          "kind": "month_range"
+        },
+        "choices": [
+          {
+            "value": "2026-01",
+            "label": "January 2026",
+            "month": "2026-01",
+            "monthName": "January",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR"
+          },
+          {
+            "value": "2026-02",
+            "label": "February 2026",
+            "month": "2026-02",
+            "monthName": "February",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR"
+          },
+          {
+            "value": "2026-03",
+            "label": "March 2026",
+            "month": "2026-03",
+            "monthName": "March",
+            "year": "2026",
+            "amount": "39",
+            "amountDisplay": "39 EUR",
+            "currency": "EUR",
+            "disabled": true
+          }
+        ]
       }
     ],
     "reviewStep": [
@@ -231,9 +483,17 @@
         "type": "textarea",
         "label": "Additional notes",
         "name": "additionalNotes",
-        "minLen": 20,
+        "minLen": 0,
         "maxLen": 1000,
+        "placeholder": "Anything else we should know?",
         "choices": null
+      },
+      {
+        "type": "checkbox",
+        "label": "Email me a copy of this submission (exactly as the team receives it)",
+        "name": "emailMeCopy",
+        "checkedLabel": "Yes, send me the notification email",
+        "uncheckedLabel": "No thanks"
       }
     ],
     "btngroup": [
@@ -266,16 +526,19 @@
     "metadata": {
       "projectId": "validation-playground-starter",
       "projectSlug": "validation-playground",
-      "projectConfigVersion": "validation-playground-starter:2026-03-29T00:00:00+00:00"
+      "projectConfigVersion": "validation-playground-starter:2026-06-09T00:00:00+00:00"
     }
   },
   "submitFeedback": {
     "title": "Submission status",
     "idle_message": "Submission feedback will appear here after the runtime handles the form.",
     "loading_message": "Submitting...",
-    "success_title": "Validation test received",
-    "success_message": "Your validation test submission was sent successfully.",
+    "success_title": "Thanks — we got your details",
+    "success_message": "We've received your submission. Want a form like this on your own site? Our team will be in touch shortly.",
     "error_title": "Submission failed",
     "error_message": "Unable to send this validation test to WordPress right now. Please try again."
+  },
+  "themeConfig": {
+    "stepLayout": "timeline"
   }
 }

@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'admin_menu', 'xpressui_pro_register_license_page' );
 
 /**
- * Registers the dedicated Pro license page under the IntakeFlow menu.
+ * Registers the dedicated Pro license page under the XPressUI menu.
  */
 function xpressui_pro_register_license_page(): void {
 	add_submenu_page(
