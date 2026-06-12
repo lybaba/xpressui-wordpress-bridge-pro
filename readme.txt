@@ -53,7 +53,7 @@ Requires the free XPressUI Bridge plugin (v1.0.26+) to be installed and active.
 * Update author to IAKPress.
 
 = 1.0.60 =
-* Update plugin site URL to https://iakpress.com/.
+* Update plugin site URL to https://intakeflow.dev/.
 
 = 1.0.59 =
 * Rename .xpressui-version to xpressui-version.txt for consistency with the free plugin.

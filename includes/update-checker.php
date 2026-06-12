@@ -89,7 +89,7 @@ function xpressui_pro_plugin_info( $result, $action, $args ) {
 		'name'          => 'XPressUI Bridge PRO',
 		'slug'          => 'xpressui-bridge-pro',
 		'version'       => $update_info['version'],
-		'author'        => '<a href="https://iakpress.com">IAKPress</a>',
+		'author'        => '<a href="https://intakeflow.dev">IAKPress</a>',
 		'requires'      => $update_info['requires'] ?? '6.0',
 		'tested'        => $wp_ver, // always match the running WP version to avoid the "not tested" warning
 		'download_link' => $update_info['download_url'],

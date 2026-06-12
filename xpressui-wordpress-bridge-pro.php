@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: XPressUI Bridge PRO
- * Plugin URI:  https://iakpress.com/
+ * Plugin URI:  https://intakeflow.dev/
  * Description: PRO extension for XPressUI Bridge — full runtime and advanced field types.
  * Version:     1.0.68
  * Author:      IAKPress
