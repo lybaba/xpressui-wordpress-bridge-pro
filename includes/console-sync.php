@@ -15,7 +15,11 @@ function xpressui_get_console_connection(): array {
 	$defaults = [ 'apiUrl' => 'https://app.intakeflow.dev', 'apiToken' => '' ];
 	$stored   = get_option( 'xpressui_console_connection', [] );
 	$conn     = is_array( $stored ) ? array_merge( $defaults, $stored ) : $defaults;
-	$conn['apiUrl'] = 'https://app.intakeflow.dev';
+	if ( defined( 'XPRESSUI_CONSOLE_API_URL' ) ) {
+		$conn['apiUrl'] = XPRESSUI_CONSOLE_API_URL;
+	} else {
+		$conn['apiUrl'] = 'https://app.intakeflow.dev';
+	}
 	return $conn;
 }
 
@@ -30,7 +34,7 @@ function xpressui_render_console_connection_form(): void {
 				<th><label for="xpressui_console_api_url"><?php esc_html_e( 'Console API URL', 'xpressui-bridge-pro' ); ?></label></th>
 				<td>
 					<input type="url" id="xpressui_console_api_url" name="xpressui_console_api_url"
-						value="https://app.intakeflow.dev"
+						value="<?php echo esc_url( $conn['apiUrl'] ); ?>"
 						class="regular-text" readonly>
 					<p class="description"><?php esc_html_e( 'Base URL of your IntakeFlow Console instance.', 'xpressui-bridge-pro' ); ?></p>
 				</td>
