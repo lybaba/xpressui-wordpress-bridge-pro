@@ -93,18 +93,18 @@ function xpressui_pro_has_pro_usage() {
 }
 
 /**
- * Admin notice nudging the operator to activate their Pro license. Shown only
- * when the license is inactive AND there is evidence of Pro usage. Submissions
- * keep working regardless — this is purely a reminder.
+ * Admin notice nudging the operator to configure their SaaS Console connection.
+ * Shown only when the connection is inactive AND there is evidence of Pro usage.
+ * Submissions keep working regardless — this is purely a reminder.
  */
 function xpressui_pro_license_soft_notice() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
 
-	// Don't nag on the license screen itself.
+	// Don't nag on the connection screen itself.
 	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-	if ( $screen && false !== strpos( (string) $screen->id, 'xpressui-pro-license' ) ) {
+	if ( $screen && false !== strpos( (string) $screen->id, 'xpressui-bridge' ) ) {
 		return;
 	}
 
@@ -116,14 +116,14 @@ function xpressui_pro_license_soft_notice() {
 		return;
 	}
 
-	$license_url = admin_url( 'edit.php?post_type=xpressui_submission&page=xpressui-pro-license' );
+	$connect_url = admin_url( 'edit.php?post_type=xpressui_submission&page=xpressui-bridge' );
 
 	printf(
 		'<div class="notice notice-warning is-dismissible"><p><strong>%1$s</strong> %2$s <a href="%3$s">%4$s</a></p></div>',
 		esc_html__( 'XPressUI Bridge PRO:', 'xpressui-bridge-pro' ),
-		esc_html__( 'Your Pro license is not active. Pro forms keep accepting submissions, but please activate your license to stay supported and receive updates.', 'xpressui-bridge-pro' ),
-		esc_url( $license_url ),
-		esc_html__( 'Activate license', 'xpressui-bridge-pro' )
+		esc_html__( 'To use Pro workflows, please configure your Console Connection (API Token). Pro forms keep accepting submissions, but connecting ensures you stay supported and receive updates.', 'xpressui-bridge-pro' ),
+		esc_url( $connect_url ),
+		esc_html__( 'Configure Console Connection', 'xpressui-bridge-pro' )
 	);
 }
 add_action( 'admin_notices', 'xpressui_pro_license_soft_notice' );

@@ -16,12 +16,11 @@ define( 'XPRESSUI_PRO_UPDATE_API_URL', 'https://app.intakeflow.dev/api/v1/plugin
 define( 'XPRESSUI_PRO_UPDATE_DOWNLOAD_API_URL', 'https://app.intakeflow.dev/api/v1/plugins/xpressui-wordpress-bridge-pro/download' );
 define( 'XPRESSUI_PRO_UPDATE_TRANSIENT', 'xpressui_pro_update_info' );
 define( 'XPRESSUI_PRO_PLUGIN_FILE', 'xpressui-bridge-pro/xpressui-bridge-pro.php' );
-define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-XPressUI-License-Key' );
+define( 'XPRESSUI_PRO_LICENSE_HEADER', 'X-Api-Token' );
 
-// The license option key is also defined in license-handler.php; guard against double-define
-// so this file can be loaded independently of pro-runtime.php.
+// Option key for the console connection (replaces the old license data option)
 if ( ! defined( 'XPRESSUI_PRO_LICENSE_OPTION_KEY' ) ) {
-	define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_pro_license_data' );
+	define( 'XPRESSUI_PRO_LICENSE_OPTION_KEY', 'xpressui_console_connection' );
 }
 
 // ---------------------------------------------------------------------------
@@ -230,11 +229,11 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
 		return is_array( $cached ) ? $cached : null;
 	}
 
-	$license_data = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
-	$license_key  = $license_data['license_key'] ?? '';
+	$conn      = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
+	$api_token = is_array( $conn ) ? ( $conn['apiToken'] ?? '' ) : '';
 
-	if ( empty( $license_key ) ) {
-		// No license — don't cache, so activation is detected on the next check.
+	if ( empty( $api_token ) ) {
+		// No connection token — don't cache, so connection is detected on the next check.
 		return null;
 	}
 
@@ -281,10 +280,10 @@ function xpressui_pro_fetch_update_info( string $current_version ): ?array {
  * @return array
  */
 function xpressui_pro_attach_update_request_auth( array $args, string $url ): array {
-	$license_data = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
-	$license_key  = is_array( $license_data ) ? ( $license_data['license_key'] ?? '' ) : '';
+	$conn      = get_option( XPRESSUI_PRO_LICENSE_OPTION_KEY, [] );
+	$api_token = is_array( $conn ) ? ( $conn['apiToken'] ?? '' ) : '';
 
-	if ( ! is_string( $license_key ) || '' === $license_key ) {
+	if ( ! is_string( $api_token ) || '' === $api_token ) {
 		return $args;
 	}
 
@@ -296,7 +295,7 @@ function xpressui_pro_attach_update_request_auth( array $args, string $url ): ar
 	foreach ( $protected_urls as $protected_url ) {
 		if ( 0 === strpos( $url, $protected_url ) ) {
 			$args['headers']                               = isset( $args['headers'] ) && is_array( $args['headers'] ) ? $args['headers'] : [];
-			$args['headers'][ XPRESSUI_PRO_LICENSE_HEADER ] = $license_key;
+			$args['headers'][ XPRESSUI_PRO_LICENSE_HEADER ] = $api_token;
 			break;
 		}
 	}
